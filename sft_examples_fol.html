@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Verified SFT Training Examples (First-Order Logic)</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+    .summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .summary h2 { font-size: 1.1rem; color: #16213e; margin-bottom: 0.8rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; }
+    .stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+    .stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+    .stat-green .stat-value { color: #16a34a; }
+    .pipeline { margin-top: 1.2rem; font-size: 0.85rem; color: #555; }
+    .pipeline code { background: #e8ecf1; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; }
+    .quality { margin-top: 1rem; }
+    .quality h3 { font-size: 0.9rem; color: #16213e; margin-bottom: 0.5rem; }
+    .quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.82rem; }
+    .quality-item { display: flex; justify-content: space-between; padding: 0.3rem 0.6rem; background: #f9fafb; border-radius: 4px; }
+    .quality-pass { color: #16a34a; font-weight: 600; }
+    .theory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem; margin-top: 0.8rem; font-size: 0.8rem; }
+    .theory-item { display: flex; justify-content: space-between; padding: 0.25rem 0.5rem; background: #f9fafb; border-radius: 4px; }
+    .theory-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 0.2rem; }
+    .theory-bar-fill { height: 100%; background: #3b82f6; border-radius: 2px; }
+
+    .example { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .example-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid #eee; }
+    .example-header h3 { font-size: 1rem; color: #16213e; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-yes { background: #dcfce7; color: #166534; }
+    .badge-no { background: #fef3c7; color: #92400e; }
+    .badge-theory { background: #e0e7ff; color: #3730a3; margin-left: 0.4rem; }
+    .badge-score { background: #f0fdf4; color: #166534; margin-left: 0.4rem; }
+
+    .context { background: #fafafa; border-left: 3px solid #94a3b8; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; }
+    .context-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+    .question { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 0.8rem 1rem; margin-bottom: 1.2rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; font-weight: 500; }
+
+    .completion-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.6rem; }
+
+    .step { border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; }
+    .step.premise { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .step.derived { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .step-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .step-num { font-weight: 700; font-size: 0.8rem; color: #374151; }
+    .step-type { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 600; }
+    .premise .step-type { background: #dbeafe; color: #1e40af; }
+    .derived .step-type { background: #dcfce7; color: #166534; }
+    .from { font-size: 0.75rem; color: #6b7280; font-style: italic; }
+    .step-text { font-size: 0.88rem; color: #374151; margin-bottom: 0.3rem; }
+    .step-logic code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; background: rgba(0,0,0,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem; color: #7c3aed; display: inline-block; }
+
+    .free-text { font-size: 0.85rem; color: #6b7280; padding: 0.4rem 0; font-style: italic; margin: 0.3rem 0; }
+
+    .answer { margin-top: 1rem; padding: 0.6rem 1rem; background: #16213e; color: white; border-radius: 8px; font-weight: 600; display: inline-block; }
+
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+
+<h1>RAILS — Verified SFT Training Examples (First-Order Logic)</h1>
+<p class="subtitle">Structured reasoning traces generated by DeepSeek, verified by NSFR (Neural-Symbolic Forward Reasoner) &middot; First-Order Logic</p>
+
+<div class="summary">
+    <h2>Generation Complete</h2>
+    <div class="stats">
+        <div class="stat stat-green"><div class="stat-value">863</div><div class="stat-label">Verified Examples</div></div>
+        <div class="stat"><div class="stat-value">443</div><div class="stat-label">Yes (51%)</div></div>
+        <div class="stat"><div class="stat-value">420</div><div class="stat-label">No (49%)</div></div>
+        <div class="stat"><div class="stat-value">4</div><div class="stat-label">Theories</div></div>
+        <div class="stat stat-green"><div class="stat-value">99.9%</div><div class="stat-label">Pass Rate</div></div>
+    </div>
+
+    <div class="quality">
+        <h3>Quality Gates (all enforced)</h3>
+        <div class="quality-grid">
+            <div class="quality-item"><span>Format score</span><span class="quality-pass">= 1.0 (100%)</span></div>
+            <div class="quality-item"><span>NSFR consistency</span><span class="quality-pass">&ge; 1.0 (99.9%)</span></div>
+            <div class="quality-item"><span>Restated premises</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Duplicate derivations</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Contains &perp;</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Contains rule=</span><span class="quality-pass">0 found</span></div>
+        </div>
+    </div>
+
+    <div class="quality" style="margin-top:1rem;">
+        <h3>Theory Coverage</h3>
+        <div class="theory-grid">
+            <div class="theory-item">
+                <span>Modus Ponens</span>
+                <span style="color:#6b7280">299</span>
+            </div>
+            <div class="theory-item">
+                <span>Hypothetical Syllogism</span>
+                <span style="color:#6b7280">294</span>
+            </div>
+            <div class="theory-item">
+                <span>Universal Instantiation</span>
+                <span style="color:#6b7280">222</span>
+            </div>
+            <div class="theory-item">
+                <span>Disjunctive Syllogism</span>
+                <span style="color:#6b7280">48</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pipeline">
+        <strong>Pipeline:</strong> DeepSeek API &rarr; Parse &lt;step&gt; tags &rarr;
+        Format check (<code>1.0</code>) &rarr;
+        NSFR verification (<code>forward chaining entailment</code>) &rarr;
+        Structural filters (<code>no restated premises, no duplicates</code>) &rarr;
+        Answer match
+    </div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 1</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Universal Instantiation</span>
+            <span class="badge badge-score">3 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        All cats are carnivores. Tom is a cat.
+    </div>
+
+    <div class="question">Is Tom a carnivore?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; NSFR Verified)</div>
+    <div class="free-text">I need to formalize the premises and derive the conclusion.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">All cats are carnivores. This is a universal statement.</div>
+                <div class="step-logic"><code>carnivore(X) :- cat(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Tom is a cat. This is a given fact.</div>
+                <div class="step-logic"><code>cat(tom).</code></div>
+            </div>
+<div class="free-text">Now I can apply universal instantiation from Step 1 with X = tom, and then modus ponens using Step 2.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,2</span>
+                </div>
+                <div class="step-text">Since Tom is a cat and all cats are carnivores, Tom is a carnivore.</div>
+                <div class="step-logic"><code>carnivore(tom).</code></div>
+            </div>
+<div class="free-text">The conclusion &quot;Tom is a carnivore&quot; follows from the premises.</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 2</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Modus Ponens</span>
+            <span class="badge badge-score">3 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If someone is unwell, then they have a cough.
+    </div>
+
+    <div class="question">If Nina is unwell, does this mean that she doesn&#x27;t have a cough?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; NSFR Verified)</div>
+    <div class="free-text">I need to analyze the premises and the conclusion. The question asks: from &quot;if unwell then cough&quot; and &quot;Nina is unwell&quot;, can we derive &quot;Nina does not have a cough&quot;? Clearly not; modus ponens would give the opposite.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If someone is unwell, then they have a cough. This is a universally quantified premise.</div>
+                <div class="step-logic"><code>hasCough(X) :- unwell(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Nina is unwell. This is given as a premise.</div>
+                <div class="step-logic"><code>unwell(nina).</code></div>
+            </div>
+<div class="free-text">From these, we can derive:</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,2</span>
+                </div>
+                <div class="step-text">Since Nina is unwell and if someone is unwell they have a cough, Nina has a cough.</div>
+                <div class="step-logic"><code>hasCough(nina).</code></div>
+            </div>
+<div class="free-text">The conclusion asked is &quot;she doesn&#x27;t have a cough&quot;, i.e., ~hasCough(nina). That contradicts the derived statement. There is no premise that allows deriving ~hasCough(nina). So the conclusion does not follow.
+
+Thus, the answer is No.</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 3</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Hypothetical Syllogism</span>
+            <span class="badge badge-score">5 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If they do not practice regularly, then they will not improve their skills. If they will not improve their skills, then they will not be successful.
+    </div>
+
+    <div class="question">If Jill does not practice regularly, does this entail that she will not be successful?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; NSFR Verified)</div>
+    <div class="free-text">First, I need to formalize the premises.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If someone does not practice regularly, then they will not improve their skills.</div>
+                <div class="step-logic"><code>~improveSkills(X) :- ~practiceRegularly(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If someone does not improve their skills, then they will not be successful.</div>
+                <div class="step-logic"><code>~successful(X) :- ~improveSkills(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Jill does not practice regularly.</div>
+                <div class="step-logic"><code>~practiceRegularly(jill).</code></div>
+            </div>
+<div class="free-text">From Step 1, instantiate X = jill:</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,3</span>
+                </div>
+                <div class="step-text">Since Jill does not practice regularly, and if someone does not practice regularly then they will not improve their skills, Jill will not improve her skills.</div>
+                <div class="step-logic"><code>~improveSkills(jill).</code></div>
+            </div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 5</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 2,4</span>
+                </div>
+                <div class="step-text">Since Jill will not improve her skills, and if someone does not improve their skills then they will not be successful, Jill will not be successful.</div>
+                <div class="step-logic"><code>~successful(jill).</code></div>
+            </div>
+<div class="free-text">Thus, the conclusion follows from the premises via hypothetical syllogism and modus ponens.</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 4</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Disjunctive Syllogism</span>
+            <span class="badge badge-score">3 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        We know that atleast one of the following is true (1) they can watch a movie and (2) they can play a game. Note that we do not know which ones of (1) and (2) are true. It might be the case that only (1) is true, or only (2) is true or both are true.
+    </div>
+
+    <div class="question">If Jill can&#x27;t watch a movie, does this entail that she can play a game?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; NSFR Verified)</div>
+    <div class="free-text">This is a disjunctive syllogism problem. We have a disjunction and the negation of one disjunct.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">At least one of the following is true for Jill: she can watch a movie or she can play a game.</div>
+                <div class="step-logic"><code>canWatchMovie(jill) &or; canPlayGame(jill).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Jill can&#x27;t watch a movie.</div>
+                <div class="step-logic"><code>~canWatchMovie(jill).</code></div>
+            </div>
+<div class="free-text">Now, from step 1 and step 2, we can derive that Jill can play a game via disjunctive syllogism.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,2</span>
+                </div>
+                <div class="step-text">Since either Jill can watch a movie or she can play a game, and she cannot watch a movie, she must be able to play a game.</div>
+                <div class="step-logic"><code>canPlayGame(jill).</code></div>
+            </div>
+<div class="free-text">Thus, the conclusion follows.</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 5</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Universal Instantiation</span>
+            <span class="badge badge-score">3 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        All cats are carnivores. Tom is a cat.
+    </div>
+
+    <div class="question">Is Tom not a carnivore?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; NSFR Verified)</div>
+    <div class="free-text">First, I need to formalize the premises.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">All cats are carnivores. This is a universal statement.</div>
+                <div class="step-logic"><code>carnivore(X) :- cat(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Tom is a cat. This is a given fact.</div>
+                <div class="step-logic"><code>cat(tom).</code></div>
+            </div>
+<div class="free-text">From Step 1, by universal instantiation with X = tom, we get: carnivore(tom) :- cat(tom). Since Step 2 says cat(tom), we can derive carnivore(tom) by modus ponens.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,2</span>
+                </div>
+                <div class="step-text">Since Tom is a cat and all cats are carnivores, Tom is a carnivore.</div>
+                <div class="step-logic"><code>carnivore(tom).</code></div>
+            </div>
+<div class="free-text">The question asks: &quot;Is Tom not a carnivore?&quot; From Step 3, we have derived carnivore(tom). Therefore, ~carnivore(tom) does not follow; it contradicts the derived conclusion. So the answer is No.</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 6</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Hypothetical Syllogism</span>
+            <span class="badge badge-score">5 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If they do not practice regularly, then they will not improve their skills. If they will not improve their skills, then they will not be successful.
+    </div>
+
+    <div class="question">If Jill does not practice regularly, does this mean that she will be successful?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; NSFR Verified)</div>
+    <div class="free-text">The premises involve chaining implications via hypothetical syllogism.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If someone does not practice regularly, then they will not improve their skills. This is a universally quantified premise.</div>
+                <div class="step-logic"><code>~improveSkills(X) :- ~practiceRegularly(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If someone does not improve their skills, then they will not be successful. This is a universally quantified premise.</div>
+                <div class="step-logic"><code>~successful(X) :- ~improveSkills(X).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Jill does not practice regularly. This is given as a premise.</div>
+                <div class="step-logic"><code>~practiceRegularly(jill).</code></div>
+            </div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,3</span>
+                </div>
+                <div class="step-text">Since Jill does not practice regularly, and if someone does not practice regularly then they will not improve their skills, Jill will not improve her skills.</div>
+                <div class="step-logic"><code>~improveSkills(jill).</code></div>
+            </div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 5</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 2,4</span>
+                </div>
+                <div class="step-text">Since Jill does not improve her skills, and if someone does not improve their skills then they will not be successful, Jill will not be successful.</div>
+                <div class="step-logic"><code>~successful(jill).</code></div>
+            </div>
+<div class="free-text">The question asks: &quot;does this mean that she will be successful?&quot; From step 5, we have derived ~successful(jill). So we cannot conclude successful(jill); the premises imply the opposite. Therefore, the answer is No.</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="footer">
+    Generated February 20, 2026 &middot;
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    ProofContinuity
+</div>
+
+</body>
+</html>

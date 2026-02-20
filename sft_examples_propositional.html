@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Verified SFT Training Examples</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+    .summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .summary h2 { font-size: 1.1rem; color: #16213e; margin-bottom: 0.8rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; }
+    .stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+    .stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+    .stat-green .stat-value { color: #16a34a; }
+    .pipeline { margin-top: 1.2rem; font-size: 0.85rem; color: #555; }
+    .pipeline code { background: #e8ecf1; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; }
+    .quality { margin-top: 1rem; }
+    .quality h3 { font-size: 0.9rem; color: #16213e; margin-bottom: 0.5rem; }
+    .quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.82rem; }
+    .quality-item { display: flex; justify-content: space-between; padding: 0.3rem 0.6rem; background: #f9fafb; border-radius: 4px; }
+    .quality-pass { color: #16a34a; font-weight: 600; }
+    .theory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem; margin-top: 0.8rem; font-size: 0.8rem; }
+    .theory-item { display: flex; justify-content: space-between; padding: 0.25rem 0.5rem; background: #f9fafb; border-radius: 4px; }
+    .theory-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 0.2rem; }
+    .theory-bar-fill { height: 100%; background: #3b82f6; border-radius: 2px; }
+
+    .example { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .example-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid #eee; }
+    .example-header h3 { font-size: 1rem; color: #16213e; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-yes { background: #dcfce7; color: #166534; }
+    .badge-no { background: #fef3c7; color: #92400e; }
+    .badge-theory { background: #e0e7ff; color: #3730a3; margin-left: 0.4rem; }
+    .badge-score { background: #f0fdf4; color: #166534; margin-left: 0.4rem; }
+
+    .context { background: #fafafa; border-left: 3px solid #94a3b8; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; }
+    .context-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+    .question { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 0.8rem 1rem; margin-bottom: 1.2rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; font-weight: 500; }
+
+    .completion-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.6rem; }
+
+    .step { border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; }
+    .step.premise { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .step.derived { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .step-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .step-num { font-weight: 700; font-size: 0.8rem; color: #374151; }
+    .step-type { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 600; }
+    .premise .step-type { background: #dbeafe; color: #1e40af; }
+    .derived .step-type { background: #dcfce7; color: #166534; }
+    .from { font-size: 0.75rem; color: #6b7280; font-style: italic; }
+    .step-text { font-size: 0.88rem; color: #374151; margin-bottom: 0.3rem; }
+    .step-logic code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; background: rgba(0,0,0,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem; color: #7c3aed; display: inline-block; }
+
+    .free-text { font-size: 0.85rem; color: #6b7280; padding: 0.4rem 0; font-style: italic; margin: 0.3rem 0; }
+
+    .answer { margin-top: 1rem; padding: 0.6rem 1rem; background: #16213e; color: white; border-radius: 8px; font-weight: 600; display: inline-block; }
+
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+
+<h1>RAILS — Verified SFT Training Examples</h1>
+<p class="subtitle">Structured reasoning traces generated by DeepSeek, verified by SAT solver &middot; Propositional Logic</p>
+
+<div class="summary">
+    <h2>Generation Complete</h2>
+    <div class="stats">
+        <div class="stat stat-green"><div class="stat-value">1,808</div><div class="stat-label">Verified Examples</div></div>
+        <div class="stat"><div class="stat-value">1,100</div><div class="stat-label">Yes (61%)</div></div>
+        <div class="stat"><div class="stat-value">708</div><div class="stat-label">No (39%)</div></div>
+        <div class="stat"><div class="stat-value">8</div><div class="stat-label">Theories</div></div>
+        <div class="stat stat-green"><div class="stat-value">75%</div><div class="stat-label">Pass Rate</div></div>
+    </div>
+
+    <div class="quality">
+        <h3>Quality Gates (all enforced)</h3>
+        <div class="quality-grid">
+            <div class="quality-item"><span>Format score</span><span class="quality-pass">= 1.0 (100%)</span></div>
+            <div class="quality-item"><span>SAT consistency</span><span class="quality-pass">= 1.0 (100%)</span></div>
+            <div class="quality-item"><span>Restated premises</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Duplicate derivations</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Contains &perp;</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Contains rule=</span><span class="quality-pass">0 found</span></div>
+        </div>
+    </div>
+
+    <div class="quality" style="margin-top:1rem;">
+        <h3>Theory Coverage</h3>
+        <div class="theory-grid">
+            <div class="theory-item">
+                <span>Material Implication</span>
+                <span style="color:#6b7280">294</span>
+            </div>
+            <div class="theory-item">
+                <span>Hypothetical Syllogism</span>
+                <span style="color:#6b7280">284</span>
+            </div>
+            <div class="theory-item">
+                <span>Destructive Dilemma</span>
+                <span style="color:#6b7280">279</span>
+            </div>
+            <div class="theory-item">
+                <span>Constructive Dilemma</span>
+                <span style="color:#6b7280">272</span>
+            </div>
+            <div class="theory-item">
+                <span>Modus Tollens</span>
+                <span style="color:#6b7280">201</span>
+            </div>
+            <div class="theory-item">
+                <span>Disjunctive Syllogism</span>
+                <span style="color:#6b7280">186</span>
+            </div>
+            <div class="theory-item">
+                <span>Bidirectional Dilemma</span>
+                <span style="color:#6b7280">149</span>
+            </div>
+            <div class="theory-item">
+                <span>Commutation</span>
+                <span style="color:#6b7280">143</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pipeline">
+        <strong>Pipeline:</strong> DeepSeek API &rarr; Parse &lt;step&gt; tags &rarr;
+        Format check (<code>1.0</code>) &rarr;
+        SAT verification (<code>all steps entailed</code>) &rarr;
+        Structural filters (<code>no restated premises, no duplicates</code>) &rarr;
+        Answer match &rarr; Balanced sampling
+    </div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 1</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Material Implication</span>
+            <span class="badge badge-score">2 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If she is a teacher, then she will assign homework.
+    </div>
+
+    <div class="question">Based on context, can we say, at least one of the following must always be true? (a) she isn&#x27;t a teacher and (b) she will assign homework</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; SAT Verified)</div>
+    <div class="free-text">First, I&#x27;ll identify the premise given in the context.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If she is a teacher, then she will assign homework. This is given as a premise.</div>
+                <div class="step-logic"><code>assignsHomework(she) :- isTeacher(she).</code></div>
+            </div>
+<div class="free-text">The question asks: can we say that at least one of the following must always be true? (a) she isn&#x27;t a teacher and (b) she will assign homework. Wait, careful: &quot;at least one of the following must always be true&quot; means we are looking for a disjunction: either (a) she isn&#x27;t a teacher OR (b) she will assign homework. But the phrasing says &quot;(a) she isn&#x27;t a teacher and (b) she will assign homework&quot; — the &quot;and&quot; here is part of the list item labels, not a logical conjunction. The intended meaning is: (a) she isn&#x27;t a teacher, OR (b) she will assign homework. So we want to check if ~isTeacher(she) ∨ assignsHomework(she) is a logical consequence of the premise.
+
+From step 1, we have a conditional: assignsHomework(she) if isTeacher(she). In propositional logic, &quot;if P then Q&quot; (P → Q) is logically equivalent to &quot;¬P ∨ Q&quot; by material implication. So we can derive that.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1</span>
+                </div>
+                <div class="step-text">By material implication, the conditional &quot;if she is a teacher then she assigns homework&quot; is equivalent to &quot;she is not a teacher or she assigns homework&quot;.</div>
+                <div class="step-logic"><code>~isTeacher(she) ∨ assignsHomework(she).</code></div>
+            </div>
+<div class="free-text">This matches exactly the disjunction we need: either she isn&#x27;t a teacher, or she will assign homework. Therefore, the statement &quot;at least one of (a) she isn&#x27;t a teacher and (b) she will assign homework&quot; (interpreted as a disjunction) must always be true given the premise.
+
+Thus, the answer is Yes.
+
+
+Answer: Yes</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 2</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Constructive Dilemma</span>
+            <span class="badge badge-score">4 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If i went to the beach, then i will swim in the ocean. If i went to the park, then i will play frisbee with my friends. We know that atleast one of the following is true (1) i went to the beach and (2) i went to the park. Note that we do not know which ones of (1) and (2) are true. It might be the case that only (1) is true, or only (2) is true or both are true.
+    </div>
+
+    <div class="question">If at least one of (1) and (2) is true, can we say, at least one of the following must always be true? (a) i will swim in the ocean and (b) i won&#x27;t play frisbee with my friends</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; SAT Verified)</div>
+    <div class="free-text">Let me start by formalizing the premises.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If I went to the beach, then I will swim in the ocean. This is given as a premise.</div>
+                <div class="step-logic"><code>swimInOcean(i) :- wentToBeach(i).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If I went to the park, then I will play frisbee with my friends. This is given as a premise.</div>
+                <div class="step-logic"><code>playFrisbee(i) :- wentToPark(i).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">At least one of the following is true: I went to the beach or I went to the park. This is given as a premise.</div>
+                <div class="step-logic"><code>wentToBeach(i) ∨ wentToPark(i).</code></div>
+            </div>
+<div class="free-text">Now, the question asks: can we conclude that at least one of the following must always be true? (a) I will swim in the ocean, and (b) I won&#x27;t play frisbee with my friends.
+
+Wait, careful: The conclusion is &quot;at least one of (a) and (b) must always be true&quot;. That is: (swimInOcean(i)) ∨ (~playFrisbee(i)).
+
+Let&#x27;s see if we can derive that from the premises.
+
+From Step 1 and Step 2, we have two conditionals. From Step 3, we have a disjunction. Using constructive dilemma, we can conclude: swimInOcean(i) ∨ playFrisbee(i). That is, at least one of swimming or playing frisbee must be true.
+
+But the conclusion we need is: swimInOcean(i) ∨ ~playFrisbee(i). That is logically equivalent to: playFrisbee(i) → swimInOcean(i) (material implication). But we don&#x27;t have that.
+
+Let&#x27;s check if we can derive it.
+
+Suppose I went to the beach. Then by Step 1, I swim in the ocean, so (a) is true, making the disjunction (a) ∨ (b) true.
+
+Suppose I went to the park. Then by Step 2, I play frisbee, so (b) is false. But (a) is not necessarily true because we don&#x27;t know if I went to the beach. So in this case, (a) is false and (b) is false, making the disjunction false.
+
+Thus, if I went to the park but not to the beach, then swimInOcean(i) is false and ~playFrisbee(i) is false (since playFrisbee(i) is true). So the disjunction is false.
+
+But wait, is that scenario possible given the premises? Yes, because Step 3 says at least one is true, so it&#x27;s possible that only wentToPark(i) is true and wentToBeach(i) is false. In that case, from Step 2, playFrisbee(i) is true, and from Step 1, we cannot conclude swimInOcean(i) because the antecedent is false. So swimInOcean(i) could be false. Therefore, both (a) and (b) are false, so the disjunction is false.
+
+Thus, the conclusion does not logically follow.
+
+Let me formalize the constructive dilemma result for clarity:</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,2,3</span>
+                </div>
+                <div class="step-text">By constructive dilemma, since at least one of going to the beach or going to the park is true, and each leads to its respective consequence, at least one of swimming in the ocean or playing frisbee must be true.</div>
+                <div class="step-logic"><code>swimInOcean(i) ∨ playFrisbee(i).</code></div>
+            </div>
+<div class="free-text">But the desired conclusion is swimInOcean(i) ∨ ~playFrisbee(i). This is not equivalent to Step 4. In fact, Step 4 is logically equivalent to ~playFrisbee(i) → swimInOcean(i), while the desired conclusion is playFrisbee(i) → swimInOcean(i). These are different.
+
+Since there exists a possible world consistent with the premises where the desired conclusion is false (e.g., wentToPark(i) true, wentToBeach(i) false), the conclusion cannot be validly derived.
+
+
+Answer: No</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 3</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Bidirectional Dilemma</span>
+            <span class="badge badge-score">6 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If i exercise regularly , then i stay fit and healthy . If i don&#x27;t exercise regularly , then i will gain weight. We know that atleast one of the following is true (1) i exercise regularly  and (2) i won&#x27;t gain weight. Note that we do not know which ones of (1) and (2) are true. It might be the case that only (1) is true, or only (2) is true or both are true.
+    </div>
+
+    <div class="question">If at least one of (1) and (2) is true, can we say, at least one of the following must always be true? (a) i stay fit and healthy  or (b) i exercise regularly</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; SAT Verified)</div>
+    <div class="free-text">First, let&#x27;s formalize the premises.
+
+We have three main premises:
+
+1. If I exercise regularly, then I stay fit and healthy.
+2. If I don&#x27;t exercise regularly, then I will gain weight.
+3. At least one of the following is true: (1) I exercise regularly, and (2) I won&#x27;t gain weight.
+
+We need to determine whether, given these premises, at least one of the following must always be true: (a) I stay fit and healthy, or (b) I exercise regularly.
+
+Let&#x27;s define predicates:
+- exercise: I exercise regularly.
+- fit: I stay fit and healthy.
+- gainWeight: I will gain weight.
+
+Now, step by step.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If I exercise regularly, then I stay fit and healthy.</div>
+                <div class="step-logic"><code>fit :- exercise.</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If I don&#x27;t exercise regularly, then I will gain weight.</div>
+                <div class="step-logic"><code>gainWeight :- ~exercise.</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">At least one of the following is true: (1) I exercise regularly, and (2) I won&#x27;t gain weight.</div>
+                <div class="step-logic"><code>exercise ∨ ~gainWeight.</code></div>
+            </div>
+<div class="free-text">We need to see if from these we can derive that (fit ∨ exercise) must always be true. That is, we want to show that (fit ∨ exercise) is a logical consequence of the premises.
+
+Let&#x27;s analyze: The disjunction in step 3 gives us two cases.
+
+Case 1: exercise is true.
+If exercise is true, then by step 1, fit is true. So (fit ∨ exercise) is true because both are true (or at least fit is true).
+
+Case 2: ~gainWeight is true.
+If ~gainWeight is true, then from step 2: gainWeight :- ~exercise. Since we have ~gainWeight, by modus tollens we can infer ~~exercise, i.e., exercise is true. Let&#x27;s do that formally.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 2</span>
+                </div>
+                <div class="step-text">From step 2, we have gainWeight :- ~exercise. This is logically equivalent to ~gainWeight → exercise (contrapositive).</div>
+                <div class="step-logic"><code>exercise :- ~gainWeight.</code></div>
+            </div>
+<div class="free-text">Wait, careful: The contrapositive of &quot;gainWeight :- ~exercise&quot; is &quot;exercise :- ~gainWeight&quot;. Yes, because if gainWeight is implied by ~exercise, then if gainWeight is false, ~exercise must be false, so exercise is true.
+
+So if we have ~gainWeight, we can derive exercise.
+
+Now, from step 3, we have either exercise or ~gainWeight (or both). In either subcase, we can derive exercise.
+
+Let&#x27;s formalize:</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 5</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 3,4</span>
+                </div>
+                <div class="step-text">From step 3, we have exercise ∨ ~gainWeight. If exercise holds, then exercise is true. If ~gainWeight holds, then by step 4, exercise is true. Therefore, in both cases, exercise is true.</div>
+                <div class="step-logic"><code>exercise.</code></div>
+            </div>
+<div class="free-text">Actually, that&#x27;s a bit too strong: step 3 says at least one is true, but we don&#x27;t know which. However, we can reason by cases:
+
+Suppose exercise is true. Then exercise is true.
+Suppose ~gainWeight is true. Then from step 4, exercise is true.
+Thus, in all possibilities consistent with step 3, exercise is true. Therefore, exercise is logically entailed by the premises.
+
+Now, if exercise is true, then fit ∨ exercise is true (since exercise is true). So the conclusion (fit ∨ exercise) is true.
+
+But wait, is step 5 correct? Let&#x27;s double-check: step 4 is derived from step 2. Step 2 is &quot;gainWeight :- ~exercise&quot;. The contrapositive is indeed &quot;exercise :- ~gainWeight&quot;. So if ~gainWeight, then exercise. So from exercise ∨ ~gainWeight, we can conclude exercise? Yes, because if exercise is true, then exercise is true; if ~gainWeight is true, then exercise is true. So exercise is true in both cases. So exercise is a logical consequence.
+
+Thus, we have:</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 6</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 5</span>
+                </div>
+                <div class="step-text">Since exercise is true, the disjunction (fit ∨ exercise) is true.</div>
+                <div class="step-logic"><code>fit ∨ exercise.</code></div>
+            </div>
+<div class="free-text">Therefore, the conclusion follows.
+
+But let&#x27;s be thorough: Could there be any model where the premises are true but (fit ∨ exercise) is false? That would require both fit false and exercise false. If exercise false, then from step 1, fit could be false? Actually step 1 says if exercise then fit, so if exercise false, fit could be false without violating step 1. But step 2: if ~exercise then gainWeight. So if exercise false, gainWeight true. Then step 3: exercise ∨ ~gainWeight. With exercise false and gainWeight true, ~gainWeight false, so the disjunction is false. So that model violates step 3. So indeed, no model satisfies premises and has exercise false. So exercise must be true.
+
+Thus, the answer is Yes.
+
+
+
+Answer: Yes</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 4</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Hypothetical Syllogism</span>
+            <span class="badge badge-score">5 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If john studies for four hours, then he will be tired. If he will be tired, then he will take a nap.
+    </div>
+
+    <div class="question">If john studies for four hours, does this mean that he won&#x27;t take a nap?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; SAT Verified)</div>
+    <div class="free-text">First, I&#x27;ll identify the premises from the theory.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If John studies for four hours, then he will be tired. This is given as a premise.</div>
+                <div class="step-logic"><code>tired(john) :- studiesFourHours(john).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If he will be tired, then he will take a nap. This is given as a premise.</div>
+                <div class="step-logic"><code>takeNap(john) :- tired(john).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">John studies for four hours. This is given as a premise.</div>
+                <div class="step-logic"><code>studiesFourHours(john).</code></div>
+            </div>
+<div class="free-text">Now, from step 1 and step 3, I can derive that John will be tired.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1,3</span>
+                </div>
+                <div class="step-text">Since John studies for four hours, and studying for four hours leads to being tired, John will be tired.</div>
+                <div class="step-logic"><code>tired(john).</code></div>
+            </div>
+<div class="free-text">From step 2 and step 4, I can derive that John will take a nap.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 5</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 2,4</span>
+                </div>
+                <div class="step-text">Since John is tired, and being tired leads to taking a nap, John will take a nap.</div>
+                <div class="step-logic"><code>takeNap(john).</code></div>
+            </div>
+<div class="free-text">The question asks: &quot;If John studies for four hours, does this mean that he won&#x27;t take a nap?&quot; From the premises, we derived that he will take a nap. The conclusion &quot;he won&#x27;t take a nap&quot; is the negation of what we derived. There&#x27;s no valid inference that leads to ~takeNap(john) from these premises. In fact, the premises imply the opposite.
+
+Thus, the conclusion does not follow.
+
+
+Answer: No</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 5</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Destructive Dilemma</span>
+            <span class="badge badge-score">6 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If Noah cooks dinner, then he will have enough food for everyone. If Noah orders takeout, then he will have to pay for the meal. We know that atleast one of the following is true (1) he won&#x27;t have enough food for everyone and (2) he won&#x27;t have to pay for the meal. Note that we do not know which ones of (1) and (2) are true. It might be the case that only (1) is true, or only (2) is true or both are true.
+    </div>
+
+    <div class="question">If at least one of (1) and (2) is true, can we say, at least one of the following must always be true? (a) noah doesn&#x27;t cook dinner or (b) noah doesn&#x27;t order takeout</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; SAT Verified)</div>
+    <div class="free-text">Let me start by formalizing the premises.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If Noah cooks dinner, then he will have enough food for everyone. This is given as a premise.</div>
+                <div class="step-logic"><code>enoughFood(noah) :- cooksDinner(noah).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If Noah orders takeout, then he will have to pay for the meal. This is given as a premise.</div>
+                <div class="step-logic"><code>paysForMeal(noah) :- ordersTakeout(noah).</code></div>
+            </div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">At least one of the following is true: he won&#x27;t have enough food for everyone or he won&#x27;t have to pay for the meal. This is given as a premise.</div>
+                <div class="step-logic"><code>~enoughFood(noah) ∨ ~paysForMeal(noah).</code></div>
+            </div>
+<div class="free-text">Now, we need to determine whether from these premises we can validly conclude: at least one of (a) Noah doesn&#x27;t cook dinner or (b) Noah doesn&#x27;t order takeout must always be true. That is: ~cooksDinner(noah) ∨ ~ordersTakeout(noah).
+
+This is a classic destructive dilemma pattern. Let me recall: destructive dilemma has the form:
+(P → Q) ∧ (R → S) together with (~Q ∨ ~S) yields (~P ∨ ~R).
+
+Here we have:
+P = cooksDinner(noah)
+Q = enoughFood(noah)
+R = ordersTakeout(noah)
+S = paysForMeal(noah)
+
+We have P → Q (step 1), R → S (step 2), and ~Q ∨ ~S (step 3). Therefore, by destructive dilemma, we can derive ~P ∨ ~R.
+
+Let me derive it step by step.
+
+First, note that from step 1, by contrapositive, we have: ~enoughFood(noah) → ~cooksDinner(noah). Similarly, from step 2, by contrapositive: ~paysForMeal(noah) → ~ordersTakeout(noah).</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1</span>
+                </div>
+                <div class="step-text">If Noah does not have enough food for everyone, then he does not cook dinner. This is the contrapositive of step 1.</div>
+                <div class="step-logic"><code>~cooksDinner(noah) :- ~enoughFood(noah).</code></div>
+            </div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 5</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 2</span>
+                </div>
+                <div class="step-text">If Noah does not have to pay for the meal, then he does not order takeout. This is the contrapositive of step 2.</div>
+                <div class="step-logic"><code>~ordersTakeout(noah) :- ~paysForMeal(noah).</code></div>
+            </div>
+<div class="free-text">Now, from step 3, we have a disjunction: either ~enoughFood(noah) is true, or ~paysForMeal(noah) is true (or both). Consider each case.
+
+Case 1: ~enoughFood(noah) is true. Then by step 4, ~cooksDinner(noah) is true. Therefore, ~cooksDinner(noah) ∨ ~ordersTakeout(noah) is true.
+
+Case 2: ~paysForMeal(noah) is true. Then by step 5, ~ordersTakeout(noah) is true. Therefore, ~cooksDinner(noah) ∨ ~ordersTakeout(noah) is true.
+
+Since in both cases the conclusion holds, and at least one case must be true (by step 3), the conclusion follows.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 6</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 3,4,5</span>
+                </div>
+                <div class="step-text">Since at least one of &quot;he won&#x27;t have enough food&quot; or &quot;he won&#x27;t have to pay&quot; is true, and each implies respectively &quot;he doesn&#x27;t cook dinner&quot; or &quot;he doesn&#x27;t order takeout&quot;, we conclude that at least one of &quot;he doesn&#x27;t cook dinner&quot; or &quot;he doesn&#x27;t order takeout&quot; must be true.</div>
+                <div class="step-logic"><code>~cooksDinner(noah) ∨ ~ordersTakeout(noah).</code></div>
+            </div>
+<div class="free-text">Thus, the conclusion is validly derived.
+
+
+Answer: Yes</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<div class="example">
+    <div class="example-header">
+        <h3>Example 6</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Modus Tollens</span>
+            <span class="badge badge-score">4 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        If Mason left his job, then he will not receive any salary.
+    </div>
+
+    <div class="question">If he will receive any salary, does this mean that Mason left his job?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; SAT Verified)</div>
+    <div class="free-text">Let me identify the premises and the conclusion we need to evaluate.
+
+First, the given statement: &quot;If Mason left his job, then he will not receive any salary.&quot; This is a conditional.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">If Mason left his job, then he will not receive any salary. This is given as a premise.</div>
+                <div class="step-logic"><code>~receivesSalary(mason) :- leftJob(mason).</code></div>
+            </div>
+<div class="free-text">Second, we are told: &quot;If he will receive any salary, does this mean that Mason left his job?&quot; So we are given that he will receive a salary, and we need to see if that implies he left his job.</div>
+<div class="step premise">
+                <div class="step-header">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-type">premise</span>
+                </div>
+                <div class="step-text">Mason will receive any salary. This is given as a premise for the question.</div>
+                <div class="step-logic"><code>receivesSalary(mason).</code></div>
+            </div>
+<div class="free-text">Now, from step 1, we have: leftJob(mason) → ~receivesSalary(mason). Equivalently, in logic: ~receivesSalary(mason) :- leftJob(mason). That means if leftJob(mason) is true, then ~receivesSalary(mason) is true.
+
+We have receivesSalary(mason) true (step 2). That is the negation of the consequent: ~receivesSalary(mason) is false.
+
+We want to conclude leftJob(mason). But from receivesSalary(mason) and the implication, can we derive leftJob(mason)? Let&#x27;s check.
+
+The implication is: ~receivesSalary(mason) if leftJob(mason). In classical logic, this is equivalent to: receivesSalary(mason) → ~leftJob(mason)? Not directly. Actually, the contrapositive of &quot;if A then B&quot; is &quot;if not B then not A&quot;. Here A = leftJob(mason), B = ~receivesSalary(mason). Contrapositive: if ~~receivesSalary(mason) then ~leftJob(mason). That is: if receivesSalary(mason) then ~leftJob(mason).
+
+So from receivesSalary(mason) we can derive ~leftJob(mason), not leftJob(mason). That would mean Mason did NOT leave his job.
+
+But the question asks: &quot;does this mean that Mason left his job?&quot; That would be leftJob(mason). That is the opposite of what we can derive. So we cannot conclude leftJob(mason); we can conclude ~leftJob(mason) if we apply contrapositive.
+
+Let&#x27;s formalize the contrapositive deduction.</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 1</span>
+                </div>
+                <div class="step-text">From the implication, we can form its contrapositive: If Mason receives any salary, then he did not leave his job.</div>
+                <div class="step-logic"><code>~leftJob(mason) :- receivesSalary(mason).</code></div>
+            </div>
+<div class="free-text">Now from step 2 (receivesSalary(mason)) and step 3, we can derive:</div>
+<div class="step derived">
+                <div class="step-header">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-type">derived</span> <span class="from">from steps 2,3</span>
+                </div>
+                <div class="step-text">Since Mason will receive a salary, by the contrapositive, he did not leave his job.</div>
+                <div class="step-logic"><code>~leftJob(mason).</code></div>
+            </div>
+<div class="free-text">Thus, from the premises, we can validly conclude that Mason did NOT leave his job. The question asks whether we can conclude that Mason left his job. That is the opposite: leftJob(mason). Since we derived ~leftJob(mason), we cannot derive leftJob(mason). In fact, the premises entail that leftJob(mason) is false.
+
+Therefore, the answer is No: the conclusion &quot;Mason left his job&quot; does not follow from the premises.
+
+
+Answer: No</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="footer">
+    Generated February 19, 2026 &middot;
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    ProofContinuity
+</div>
+
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS &mdash; Verified SFT Training Examples (Non-Monotonic Logic)</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+    .summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .summary h2 { font-size: 1.1rem; color: #16213e; margin-bottom: 0.8rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; }
+    .stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+    .stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+    .stat-green .stat-value { color: #16a34a; }
+    .pipeline { margin-top: 1.2rem; font-size: 0.85rem; color: #555; }
+    .pipeline code { background: #e8ecf1; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; }
+    .quality { margin-top: 1rem; }
+    .quality h3 { font-size: 0.9rem; color: #16213e; margin-bottom: 0.5rem; }
+    .quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.82rem; }
+    .quality-item { display: flex; justify-content: space-between; padding: 0.3rem 0.6rem; background: #f9fafb; border-radius: 4px; }
+    .quality-pass { color: #16a34a; font-weight: 600; }
+    .theory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem; margin-top: 0.8rem; font-size: 0.8rem; }
+    .theory-item { display: flex; justify-content: space-between; padding: 0.25rem 0.5rem; background: #f9fafb; border-radius: 4px; }
+
+    .example { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .example-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid #eee; }
+    .example-header h3 { font-size: 1rem; color: #16213e; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-yes { background: #dcfce7; color: #166534; }
+    .badge-no { background: #fef3c7; color: #92400e; }
+    .badge-theory { background: #e0e7ff; color: #3730a3; margin-left: 0.4rem; }
+    .badge-score { background: #f0fdf4; color: #166534; margin-left: 0.4rem; }
+
+    .context { background: #fafafa; border-left: 3px solid #94a3b8; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; }
+    .context-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+    .question { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 0.8rem 1rem; margin-bottom: 1.2rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; font-weight: 500; }
+
+    .completion-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.6rem; }
+
+    .step { border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; }
+    .step.premise { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .step.derived { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .step-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .step-num { font-weight: 700; font-size: 0.8rem; color: #374151; }
+    .step-type { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 600; }
+    .premise .step-type { background: #dbeafe; color: #1e40af; }
+    .derived .step-type { background: #dcfce7; color: #166534; }
+    .from { font-size: 0.75rem; color: #6b7280; font-style: italic; }
+    .step-text { font-size: 0.88rem; color: #374151; margin-bottom: 0.3rem; }
+    .step-logic code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; background: rgba(0,0,0,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem; color: #7c3aed; display: inline-block; }
+
+    .free-text { font-size: 0.85rem; color: #6b7280; padding: 0.4rem 0; font-style: italic; margin: 0.3rem 0; }
+
+    .answer { margin-top: 1rem; padding: 0.6rem 1rem; background: #16213e; color: white; border-radius: 8px; font-weight: 600; display: inline-block; }
+
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+
+<h1>RAILS &mdash; Verified SFT Training Examples</h1>
+<p class="subtitle">Structured reasoning traces generated by DeepSeek, verified by ASP solver (Clingo) &middot; Non-Monotonic Logic</p>
+
+<div class="summary">
+    <h2>Generation Complete</h2>
+    <div class="stats">
+        <div class="stat stat-green"><div class="stat-value">1,628</div><div class="stat-label">Verified Examples</div></div>
+        <div class="stat"><div class="stat-value">904</div><div class="stat-label">Yes (56%)</div></div>
+        <div class="stat"><div class="stat-value">724</div><div class="stat-label">No (44%)</div></div>
+        <div class="stat"><div class="stat-value">8</div><div class="stat-label">Theories</div></div>
+        <div class="stat stat-green"><div class="stat-value">97.9%</div><div class="stat-label">ASP Pass Rate</div></div>
+    </div>
+
+    <div class="quality">
+        <h3>Quality Gates (all enforced)</h3>
+        <div class="quality-grid">
+            <div class="quality-item"><span>Format score</span><span class="quality-pass">&ge; 0.875</span></div>
+            <div class="quality-item"><span>ASP consistency</span><span class="quality-pass">= 1.0 (97.9%)</span></div>
+            <div class="quality-item"><span>Verification backend</span><span class="quality-pass">Clingo (stable models)</span></div>
+            <div class="quality-item"><span>Reasoning type</span><span class="quality-pass">Cautious (all models)</span></div>
+            <div class="quality-item"><span>Contains &perp;</span><span class="quality-pass">0 found</span></div>
+            <div class="quality-item"><span>Contains rule=</span><span class="quality-pass">0 found</span></div>
+        </div>
+    </div>
+
+    <div class="quality" style="margin-top:1rem;">
+        <h3>Theory Coverage</h3>
+        <div class="theory-grid">
+            <div class="theory-item">
+                <span>Reasoning about Priority</span>
+                <span style="color:#6b7280">408</span>
+            </div>
+            <div class="theory-item">
+                <span>Default Reasoning (Default)</span>
+                <span style="color:#6b7280">298</span>
+            </div>
+            <div class="theory-item">
+                <span>Default Reasoning (Several)</span>
+                <span style="color:#6b7280">252</span>
+            </div>
+            <div class="theory-item">
+                <span>Default Reasoning (Irrelevant)</span>
+                <span style="color:#6b7280">228</span>
+            </div>
+            <div class="theory-item">
+                <span>Exceptions (Type 3)</span>
+                <span style="color:#6b7280">169</span>
+            </div>
+            <div class="theory-item">
+                <span>Exceptions (Type 1)</span>
+                <span style="color:#6b7280">137</span>
+            </div>
+            <div class="theory-item">
+                <span>Exceptions (Type 2)</span>
+                <span style="color:#6b7280">93</span>
+            </div>
+            <div class="theory-item">
+                <span>Default Reasoning (Open)</span>
+                <span style="color:#6b7280">43</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pipeline">
+        <strong>Pipeline:</strong> DeepSeek API &rarr; Parse &lt;step&gt; tags &rarr;
+        Format check (<code>&ge; 0.875</code>) &rarr;
+        ASP verification (<code>stable model entailment via Clingo</code>) &rarr;
+        Structural filters (<code>no restated premises, no duplicates</code>) &rarr;
+        Answer match
+    </div>
+</div>
+
+<!-- Example 1: Default Reasoning (YES) -->
+<div class="example">
+    <div class="example-header">
+        <h3>Example 1</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Default Reasoning</span>
+            <span class="badge badge-score">4 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        John and James are tall. Tall people usually play basketball. John is possibly an exception to this rule.
+    </div>
+
+    <div class="question">Does this imply that James plays basketball?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; ASP Verified)</div>
+    <div class="free-text">First, I need to identify the premises and formalize them.</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">John and James are tall. This is given as a premise.</div>
+    <div class="step-logic"><code>isTall(john). isTall(james).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Tall people usually play basketball. This is a default rule.</div>
+    <div class="step-logic"><code>playsBasketball(X) :- isTall(X).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">John is possibly an exception to this rule. The default may not apply to John.</div>
+    <div class="step-logic"><code>exception(john, playsBasketball).</code></div>
+</div>
+<div class="free-text">Now, we need to determine if this implies that James plays basketball. The default rule applies to tall people generally, but there is an exception for John. James is tall and is not listed as an exception. Therefore, by default reasoning, we can conclude that James plays basketball.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 2</span>
+    </div>
+    <div class="step-text">James is tall, and the default rule says tall people usually play basketball. Since no exception is stated for James, we can conclude by default that James plays basketball.</div>
+    <div class="step-logic"><code>playsBasketball(james).</code></div>
+</div>
+<div class="free-text">The conclusion follows from the premises using default reasoning.</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<!-- Example 2: Reasoning about Exceptions (NO) -->
+<div class="example">
+    <div class="example-header">
+        <h3>Example 2</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Exceptions (Type 1)</span>
+            <span class="badge badge-score">5 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        Apples, oranges, and bananas are fruits. Fruits are typically rich in vitamins. At least one of apples or oranges does not contain vitamins.
+    </div>
+
+    <div class="question">Does this imply that bananas aren&#x27;t rich in vitamins and exactly one of apples or oranges contains vitamins?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; ASP Verified)</div>
+    <div class="free-text">First, I need to identify the premises and formalize them.</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Apples, oranges, and bananas are fruits. This is given as a premise.</div>
+    <div class="step-logic"><code>isFruit(apple). isFruit(orange). isFruit(banana).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Fruits are typically rich in vitamins. This is a default rule.</div>
+    <div class="step-logic"><code>richInVitamins(X) :- isFruit(X).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">At least one of apples or oranges does not contain vitamins. This means there is an exception for at least one of them.</div>
+    <div class="step-logic"><code>exception(apple, richInVitamins) &or; exception(orange, richInVitamins).</code></div>
+</div>
+<div class="free-text">The question asks two parts: (1) bananas aren&#x27;t rich in vitamins, and (2) exactly one of apples or oranges contains vitamins. Since bananas are fruits and no exception is stated for bananas, the default applies.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 2</span>
+    </div>
+    <div class="step-text">Bananas are fruits, so by default they are rich in vitamins.</div>
+    <div class="step-logic"><code>richInVitamins(banana).</code></div>
+</div>
+<div class="free-text">This directly contradicts part (1) of the conclusion. Furthermore, the premise only states at least one exception among apples/oranges&mdash;it could be both. So &quot;exactly one&quot; is not forced either.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 5</span>
+        <span class="step-type">derived</span> <span class="from">from steps 3</span>
+    </div>
+    <div class="step-text">The premise only states at least one exception, so it is possible that both apples and oranges are exceptions. We cannot conclude exactly one contains vitamins.</div>
+    <div class="step-logic"><code>~( (exception(apple, richInVitamins) &and; ~exception(orange, richInVitamins)) &or; (~exception(apple, richInVitamins) &and; exception(orange, richInVitamins)) ) is not forced.</code></div>
+</div>
+<div class="free-text">Neither part of the conclusion follows. The answer is No.</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<!-- Example 3: Reasoning about Priority (YES) -->
+<div class="example">
+    <div class="example-header">
+        <h3>Example 3</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Priority</span>
+            <span class="badge badge-score">4 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        John asserts that the cat is in the park. Jane asserts that the cat is not in the park.
+    </div>
+
+    <div class="question">If Jane&#x27;s evidence is more reliable than John&#x27;s, does this imply that the cat is not in the park?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; ASP Verified)</div>
+    <div class="free-text">We have two conflicting assertions and a priority relation. John says the cat is in the park, Jane says it is not. Jane has higher priority.</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">John asserts that the cat is in the park.</div>
+    <div class="step-logic"><code>asserts(john, inPark(cat)).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Jane asserts that the cat is not in the park.</div>
+    <div class="step-logic"><code>asserts(jane, ~inPark(cat)).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Jane&#x27;s evidence is more reliable than John&#x27;s. This means Jane has higher priority.</div>
+    <div class="step-logic"><code>priority(jane, john).</code></div>
+</div>
+<div class="free-text">When there are conflicting assertions, the assertion from the higher-priority source is accepted. Since Jane has higher priority and asserts that the cat is not in the park, we accept her assertion.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 2, 3</span>
+    </div>
+    <div class="step-text">Since Jane has higher priority than John and they make conflicting assertions, we accept Jane&#x27;s assertion that the cat is not in the park.</div>
+    <div class="step-logic"><code>~inPark(cat).</code></div>
+</div>
+<div class="free-text">Thus, the conclusion that the cat is not in the park follows from the premises.</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<!-- Example 4: Default Reasoning with Several Defaults (NO) -->
+<div class="example">
+    <div class="example-header">
+        <h3>Example 4</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Default (Several)</span>
+            <span class="badge badge-score">7 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        Cats and dogs are pets. Pets are usually affectionate. Pets are normally loyal. Cats are not affectionate. Dogs are not loyal.
+    </div>
+
+    <div class="question">Does this entail that dogs aren&#x27;t affectionate and cats aren&#x27;t loyal?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; ASP Verified)</div>
+    <div class="free-text">Let me start by identifying the premises and formalizing them.</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Cats and dogs are pets. This is given as a premise.</div>
+    <div class="step-logic"><code>isPet(cat). isPet(dog).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Pets are usually affectionate. This is a default rule.</div>
+    <div class="step-logic"><code>isAffectionate(X) :- isPet(X).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Pets are normally loyal. This is a second default rule.</div>
+    <div class="step-logic"><code>isLoyal(X) :- isPet(X).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Cats are not affectionate. This is an exception to the affectionate default.</div>
+    <div class="step-logic"><code>exception(cat, isAffectionate).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 5</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Dogs are not loyal. This is an exception to the loyal default.</div>
+    <div class="step-logic"><code>exception(dog, isLoyal).</code></div>
+</div>
+<div class="free-text">The question asks: does this entail that dogs aren&#x27;t affectionate AND cats aren&#x27;t loyal? Dogs are pets with no exception for affection, so the default applies. Cats are pets with no exception for loyalty, so the default applies.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 6</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 2</span>
+    </div>
+    <div class="step-text">Dogs are pets, and there is no exception for dogs regarding affection, so by default, dogs are affectionate.</div>
+    <div class="step-logic"><code>isAffectionate(dog).</code></div>
+</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 7</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 3</span>
+    </div>
+    <div class="step-text">Cats are pets, and there is no exception for cats regarding loyalty, so by default, cats are loyal.</div>
+    <div class="step-logic"><code>isLoyal(cat).</code></div>
+</div>
+<div class="free-text">From the premises, we derive isAffectionate(dog) and isLoyal(cat). The conclusion claims the opposite: ~isAffectionate(dog) and ~isLoyal(cat). Therefore, the conclusion does not follow; the premises imply its negation.</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<!-- Example 5: Default Reasoning with Irrelevant Info (YES) -->
+<div class="example">
+    <div class="example-header">
+        <h3>Example 5</h3>
+        <div>
+            <span class="badge badge-yes">YES</span>
+            <span class="badge badge-theory">Default (Irrelevant)</span>
+            <span class="badge badge-score">4 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        Dogs and cats are animals. Animals typically live in homes. Dogs are not living in homes. Dogs are loyal companions.
+    </div>
+
+    <div class="question">Does this imply that cats are living in homes?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; ASP Verified)</div>
+    <div class="free-text">First, I need to identify the premises. Note that &quot;dogs are loyal companions&quot; is irrelevant to the question about living in homes.</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Dogs and cats are animals. This is given as a premise.</div>
+    <div class="step-logic"><code>animal(dog). animal(cat).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Animals typically live in homes. This is a default rule.</div>
+    <div class="step-logic"><code>livesInHome(X) :- animal(X).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Dogs are not living in homes. This is an explicit exception to the default rule.</div>
+    <div class="step-logic"><code>~livesInHome(dog).</code></div>
+</div>
+<div class="free-text">Cats are animals, and the default rule applies to animals. Since no exception is stated for cats (the exception for dogs does not affect cats), we can conclude by default that cats live in homes.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 2</span>
+    </div>
+    <div class="step-text">Cats are animals, and by the default rule, animals typically live in homes. Since no exception is stated for cats, we can conclude that cats live in homes.</div>
+    <div class="step-logic"><code>livesInHome(cat).</code></div>
+</div>
+<div class="free-text">Thus, the conclusion follows. The irrelevant premise about dogs being loyal companions does not affect the derivation.</div>
+
+    <div class="answer">Answer: Yes</div>
+</div>
+
+<!-- Example 6: Reasoning about Exceptions Type 3 (NO) -->
+<div class="example">
+    <div class="example-header">
+        <h3>Example 6</h3>
+        <div>
+            <span class="badge badge-no">NO</span>
+            <span class="badge badge-theory">Exceptions (Type 3)</span>
+            <span class="badge badge-score">4 steps</span>
+        </div>
+    </div>
+
+    <div class="context">
+        <div class="context-label">Context (Premises)</div>
+        Cats are carnivores. Carnivores normally eat meat. At least one carnivore does not eat meat.
+    </div>
+
+    <div class="question">Does this entail that cats usually don&#x27;t eat meat?</div>
+
+    <div class="completion-label">Model Reasoning (DeepSeek &rarr; ASP Verified)</div>
+    <div class="free-text">Let&#x27;s identify the premises.</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Cats are carnivores. This is given as a premise.</div>
+    <div class="step-logic"><code>carnivore(cat).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">Carnivores normally eat meat. This is a default rule.</div>
+    <div class="step-logic"><code>eatsMeat(X) :- carnivore(X).</code></div>
+</div>
+<div class="step premise">
+    <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-type">premise</span>
+    </div>
+    <div class="step-text">At least one carnivore does not eat meat. This is an exception to the default rule.</div>
+    <div class="step-logic"><code>exception(someCarnivore, eatsMeat).</code></div>
+</div>
+<div class="free-text">The exception is about &quot;at least one carnivore,&quot; not specifically cats. Since cats are carnivores, the default rule applies to them unless they are the exception. The exception does not specify that cats are the exception.</div>
+<div class="step derived">
+    <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-type">derived</span> <span class="from">from steps 1, 2</span>
+    </div>
+    <div class="step-text">Since cats are carnivores and carnivores normally eat meat, by default we can infer that cats eat meat.</div>
+    <div class="step-logic"><code>eatsMeat(cat).</code></div>
+</div>
+<div class="free-text">The conclusion &quot;cats usually don&#x27;t eat meat&quot; is the opposite of what we derived. Therefore, the premises do not entail that cats usually don&#x27;t eat meat.</div>
+
+    <div class="answer">Answer: No</div>
+</div>
+
+<div class="footer">
+    Generated February 20, 2026 &middot;
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    ProofContinuity
+</div>
+
+</body>
+</html>
