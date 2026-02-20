@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAILS — Verified SFT Training Examples</title>
+<title>RAILS — Project Hub</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
@@ -54,8 +54,8 @@
 </head>
 <body>
 
-<h1>RAILS &mdash; Verified SFT Training Examples</h1>
-<p class="subtitle">Safety dataset for training reasoning models with proof continuity &middot; Multi-domain symbolic verification</p>
+<h1>RAILS &mdash; Project Hub</h1>
+<p class="subtitle">Reasoning with Automatically Integrated Logical Supervision &middot; Multi-domain symbolic verification</p>
 
 <div class="summary">
     <h2>Safety Dataset Overview</h2>
@@ -70,7 +70,35 @@
     </div>
 </div>
 
-<h2 class="section-title">Example Showcases</h2>
+<!-- Evaluation Results Cards -->
+<h2 class="section-title">Evaluation Results</h2>
+
+<div class="card-grid">
+    <a class="card" href="eval_results.html">
+        <div class="card-icon">&#x1F4CA;</div>
+        <h3>Performance Comparison</h3>
+        <p>Accuracy across 5 benchmarks (LogicBench, FOLIO, ProntoQA, ProofWriter, ACPBench) for all models and training conditions. Includes detailed consistency, faithfulness, and format metrics.</p>
+        <div class="card-stats">
+            <span class="card-badge badge-green">5 benchmarks</span>
+            <span class="card-badge badge-blue">5 models</span>
+            <span class="card-badge badge-purple">4 conditions</span>
+        </div>
+    </a>
+
+    <a class="card" href="qualitative_comparison.html">
+        <div class="card-icon">&#x1F50D;</div>
+        <h3>Qualitative Analysis</h3>
+        <p>Side-by-side comparison of reasoning traces from base vs RAILS-trained models on the same questions. Shows how proof-continuity reward changes intermediate reasoning steps.</p>
+        <div class="card-stats">
+            <span class="card-badge badge-green">16 examples</span>
+            <span class="card-badge badge-blue">4 theories</span>
+            <span class="card-badge badge-amber">base vs SAT</span>
+        </div>
+    </a>
+</div>
+
+<!-- SFT Showcases -->
+<h2 class="section-title">Safety Dataset Showcases</h2>
 
 <div class="card-grid">
     <a class="card" href="sft_examples_propositional.html">

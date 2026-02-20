@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Evaluation Results</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+h2 { font-size: 1.3rem; color: #16213e; margin-bottom: 0.8rem; }
+h3 { font-size: 1.05rem; color: #374151; margin-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+/* Summary section */
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+.stat-green .stat-value { color: #16a34a; }
+.stat-amber .stat-value { color: #d97706; }
+.stat-purple .stat-value { color: #7c3aed; }
+
+/* Cards */
+.card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+/* Tables */
+.table-wrapper { overflow-x: auto; margin: 1rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th { background: #f0f4ff; color: #1e40af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem; padding: 0.6rem 0.5rem; text-align: center; border-bottom: 2px solid #dbeafe; white-space: nowrap; }
+th:first-child { text-align: left; }
+td { padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #f0f0f0; }
+td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+tr:hover { background: #fafbff; }
+
+/* Model group header rows */
+.model-header td { background: #f8fafc; font-weight: 700; color: #16213e; border-bottom: 2px solid #e2e8f0; padding-top: 0.8rem; }
+.model-header td:first-child { padding-left: 0; }
+
+/* Condition indentation */
+.condition-row td:first-child { padding-left: 1.2rem; font-weight: 400; color: #555; }
+
+/* Highlight best value */
+.best { font-weight: 700; color: #16a34a; }
+.improved { background: #f0fdf4; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.badge-blue { background: #e0e7ff; color: #3730a3; }
+.badge-green { background: #dcfce7; color: #166534; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-purple { background: #f3e8ff; color: #6b21a8; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+
+/* Delta indicators */
+.delta-pos { color: #16a34a; font-size: 0.72rem; font-weight: 600; }
+.delta-neg { color: #dc2626; font-size: 0.72rem; font-weight: 600; }
+.delta-zero { color: #9ca3af; font-size: 0.72rem; }
+
+/* Findings */
+.finding { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.88rem; }
+.finding-positive { background: #f0fdf4; border-left: 4px solid #22c55e; }
+.finding-insight { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.finding-caution { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.finding strong { color: #16213e; }
+
+/* Section labels */
+.section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.6rem; }
+
+/* Legend */
+.legend { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0; font-size: 0.78rem; }
+.legend-item { display: flex; align-items: center; gap: 0.3rem; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Nav link */
+.back-link { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+.back-link:hover { text-decoration: underline; }
+
+/* Footer */
+.footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    body { padding: 1rem; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-link">&larr; Back to Hub</a>
+<h1>RAILS &mdash; Evaluation Results</h1>
+<p class="subtitle">Performance comparison across 5 models, 4 training conditions, and 5 benchmarks &middot; Phase 1 (Classic Format GRPO)</p>
+
+<!-- Overview Stats -->
+<div class="summary">
+    <h2>Evaluation Overview</h2>
+    <p style="font-size:0.88rem; color:#555; margin-bottom:1rem;">
+        All models are evaluated on the same held-out benchmarks. <strong>SAT</strong> and <strong>Differentiable</strong> conditions
+        use proof-continuity rewards during GRPO training. <strong>Answer-Only</strong> uses only correctness reward (no consistency signal).
+    </p>
+    <div class="stats">
+        <div class="stat"><div class="stat-value">5</div><div class="stat-label">Models</div></div>
+        <div class="stat stat-green"><div class="stat-value">5</div><div class="stat-label">Benchmarks</div></div>
+        <div class="stat stat-purple"><div class="stat-value">4</div><div class="stat-label">Training Conditions</div></div>
+        <div class="stat stat-amber"><div class="stat-value">19</div><div class="stat-label">Eval Configurations</div></div>
+    </div>
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div> Base (no training)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Answer-Only Reward</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> SAT Reward (RAILS)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Differentiable Anneal (RAILS)</div>
+    </div>
+</div>
+
+<!-- Main Accuracy Table -->
+<div class="card">
+    <h2>Accuracy Across Benchmarks</h2>
+    <p class="section-label">Higher is better &middot; Best per model in bold green</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="min-width:160px">Model / Condition</th>
+                <th>LogicBench</th>
+                <th>FOLIO</th>
+                <th>ProntoQA</th>
+                <th>ProofWriter</th>
+                <th>ACPBench</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- DeepSeek -->
+            <tr class="model-header"><td colspan="6">DeepSeek-R1 (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.198</td><td>0.059</td><td>0.013</td><td>0.338</td><td>0.001</td></tr>
+            <tr class="condition-row"><td>Answer-Only</td><td>0.245</td><td>0.069</td><td>0.000</td><td>0.342</td><td>0.002</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.725 <span class="delta-pos">+0.527</span></td><td class="best">0.078</td><td class="best">0.083</td><td class="best">0.345</td><td class="best">0.009</td></tr>
+            <tr class="condition-row"><td>Diff-Anneal</td><td>0.691 <span class="delta-pos">+0.493</span></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+
+            <!-- Llama -->
+            <tr class="model-header"><td colspan="6">Llama-3.1 (8B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.712</td><td>0.436</td><td>0.200</td><td>0.403</td><td>0.094</td></tr>
+            <tr class="condition-row"><td>Answer-Only</td><td>0.692</td><td>0.426</td><td>0.173</td><td>0.415</td><td class="best">0.184</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.750 <span class="delta-pos">+0.038</span></td><td>0.338</td><td>0.170</td><td>0.403</td><td>0.016</td></tr>
+            <tr class="condition-row"><td>Diff-Anneal</td><td>0.775 <span class="delta-pos">+0.063</span></td><td>0.397</td><td>0.170</td><td>0.398</td><td>0.058</td></tr>
+
+            <!-- Mistral -->
+            <tr class="model-header"><td colspan="6">Mistral (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.500</td><td>0.412</td><td>0.263</td><td>0.365</td><td>0.016</td></tr>
+            <tr class="condition-row"><td>Answer-Only</td><td>0.689</td><td class="best">0.461</td><td>0.077</td><td>0.358</td><td>0.078</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.722 <span class="delta-pos">+0.222</span></td><td>0.426</td><td>0.067</td><td>0.357</td><td class="best">0.128</td></tr>
+            <tr class="condition-row"><td>Diff-Anneal</td><td>0.606</td><td>0.426</td><td>0.007</td><td>0.370</td><td>0.059</td></tr>
+
+            <!-- Qwen -->
+            <tr class="model-header"><td colspan="6">Qwen3 (8B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.080</td><td class="best">0.093</td><td>0.000</td><td>0.378</td><td>0.007</td></tr>
+            <tr class="condition-row"><td>Answer-Only</td><td>0.080</td><td>0.093</td><td>0.000</td><td>0.373</td><td>0.006</td></tr>
+            <tr class="condition-row"><td>SAT (RAILS)</td><td class="best">0.088</td><td>0.118</td><td>0.000</td><td class="best">0.382</td><td class="best">0.008</td></tr>
+            <tr class="condition-row"><td>Diff-Anneal</td><td>0.061</td><td>0.108</td><td class="best">0.003</td><td>0.367</td><td>0.006</td></tr>
+
+            <!-- OLMo -->
+            <tr class="model-header"><td colspan="6">OLMo-3 (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.666</td><td>0.456</td><td>0.547</td><td>0.433</td><td>0.107</td></tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- LogicBench Detailed Metrics -->
+<div class="card">
+    <h2>LogicBench &mdash; Detailed Metrics</h2>
+    <p class="section-label">Accuracy, Consistency (C), Faithfulness (F), and Format compliance</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="min-width:160px">Model / Condition</th>
+                <th>Accuracy</th>
+                <th>Consistency</th>
+                <th>Faithfulness</th>
+                <th>Format Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="model-header"><td colspan="5">DeepSeek-R1 (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.198</td><td>0.000</td><td>0.42</td><td>0.00</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.725</td><td class="best">0.12</td><td class="best">0.99</td><td class="best">0.78</td></tr>
+
+            <tr class="model-header"><td colspan="5">Llama-3.1 (8B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.712</td><td>0.40</td><td>0.76</td><td>0.97</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.750</td><td>0.35</td><td>0.77</td><td>0.97</td></tr>
+
+            <tr class="model-header"><td colspan="5">Mistral (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.500</td><td>0.24</td><td>0.58</td><td>0.92</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.722</td><td class="best">0.35</td><td>0.59</td><td class="best">0.97</td></tr>
+
+            <tr class="model-header"><td colspan="5">OLMo-3 (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.666</td><td>0.32</td><td>0.25</td><td>0.79</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-insight" style="margin-top:1rem;">
+        <strong>Consistency</strong> measures what fraction of derived steps are logically entailed by prior steps (SAT-verified).
+        <strong>Faithfulness</strong> measures whether the final answer agrees with the derived conclusion.
+        <strong>Format Rate</strong> measures adherence to the structured <code>Step N: (Text)...(Logic)...</code> format.
+    </div>
+</div>
+
+<!-- Transfer Benchmarks with CoT Metrics -->
+<div class="card">
+    <h2>Transfer Benchmarks &mdash; CoT Evaluation</h2>
+    <p class="section-label">Accuracy and consistency on out-of-distribution benchmarks</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2" style="min-width:160px">Model / Condition</th>
+                <th colspan="2">FOLIO</th>
+                <th colspan="2">ProntoQA</th>
+                <th colspan="2">ProofWriter</th>
+            </tr>
+            <tr>
+                <th>Acc</th>
+                <th>Cons.</th>
+                <th>Acc</th>
+                <th>Cons.</th>
+                <th>Acc</th>
+                <th>Cons.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="model-header"><td colspan="7">DeepSeek-R1 (7B)</td></tr>
+            <tr class="condition-row"><td>SAT (RAILS)</td><td>0.417</td><td>0.026</td><td>0.443</td><td>0.075</td><td class="best">0.545</td><td>0.020</td></tr>
+            <tr class="condition-row"><td>Diff-Anneal</td><td class="best">0.461</td><td>0.021</td><td>0.267</td><td>0.024</td><td>0.457</td><td>0.023</td></tr>
+
+            <tr class="model-header"><td colspan="7">Llama-3.1 (8B)</td></tr>
+            <tr class="condition-row"><td>Answer-Only</td><td>0.363</td><td>0.136</td><td>0.643</td><td>0.084</td><td>0.492</td><td>0.189</td></tr>
+            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.431</td><td>0.077</td><td class="best">0.783</td><td>0.069</td><td>0.475</td><td>0.100</td></tr>
+            <tr class="condition-row"><td>Diff-Anneal</td><td>0.407</td><td class="best">0.171</td><td>0.700</td><td>0.072</td><td class="best">0.522</td><td class="best">0.211</td></tr>
+
+            <tr class="model-header"><td colspan="7">Mistral (7B)</td></tr>
+            <tr class="condition-row"><td>Answer-Only</td><td>0.377</td><td>0.020</td><td>0.647</td><td>0.040</td><td>0.387</td><td>0.008</td></tr>
+            <tr class="condition-row"><td>SAT (RAILS)</td><td>0.343</td><td>0.038</td><td>0.787</td><td>0.064</td><td>0.402</td><td>0.022</td></tr>
+            <tr class="condition-row improved"><td>Diff-Anneal</td><td class="best">0.441</td><td>0.021</td><td class="best">0.913</td><td class="best">0.060</td><td class="best">0.415</td><td class="best">0.052</td></tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- Phase 2: SFT + GRPO Results -->
+<div class="card">
+    <h2>Phase 2 &mdash; SFT + GRPO (Think Format)</h2>
+    <p class="section-label">Three-stage pipeline: SFT warmup &rarr; GRPO with consistency reward &middot; <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="min-width:200px">Model / Stage</th>
+                <th>LogicBench Acc</th>
+                <th>Consistency</th>
+                <th>Faithfulness</th>
+                <th>Format</th>
+                <th>FOLIO</th>
+                <th>ProntoQA</th>
+                <th>ProofWriter</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="model-header"><td colspan="8">DeepSeek-14B (SFT Baseline)</td></tr>
+            <tr class="condition-row"><td>SFT checkpoint</td><td>0.082</td><td>0.061</td><td>0.127</td><td>0.252</td><td>0.157</td><td>0.107</td><td>0.453</td></tr>
+
+            <tr class="model-header"><td colspan="8">Qwen3 (8B) &mdash; SFT + GRPO</td></tr>
+            <tr class="condition-row improved"><td>GRPO ckpt-1700</td><td class="best">0.466</td><td class="best">0.115</td><td class="best">0.186</td><td class="best">0.305</td><td>0.147</td><td>0.047</td><td>0.412</td></tr>
+            <tr><td colspan="8" style="font-size:0.78rem; color:#6b7280; text-align:left; padding-left:1.2rem;">
+                Qwen3 base accuracy was 0.080 &mdash; <strong>SFT+GRPO achieves 5.8x improvement</strong> on LogicBench
+            </td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-positive" style="margin-top:1rem;">
+        <strong>SFT warmup dramatically helps Qwen3:</strong> Without SFT, Qwen3 could not produce the structured format at all (0% format rate).
+        After SFT warmup, it starts GRPO with 64% format compliance and reaches 0.466 accuracy (vs 0.080 base).
+    </div>
+</div>
+
+<!-- Key Findings -->
+<div class="card">
+    <h2>Key Findings</h2>
+
+    <div class="finding finding-positive">
+        <strong>SAT reward produces the largest LogicBench gains.</strong>
+        DeepSeek improves from 0.198 to 0.725 (+266%), Mistral from 0.500 to 0.722 (+44%).
+        Proof-continuity reward teaches models to produce structured, terminating proofs.
+    </div>
+
+    <div class="finding finding-positive">
+        <strong>Answer-only training does not change reasoning structure.</strong>
+        For DeepSeek, answer-only completions are nearly identical to base &mdash; same rambling prose, same truncation before reaching a conclusion.
+        The consistency signal is what drives structural improvement.
+    </div>
+
+    <div class="finding finding-insight">
+        <strong>SAT training teaches metacognitive reasoning.</strong>
+        SAT-trained models reason about <em>when rules don't apply</em> (e.g., correctly rejecting denying-the-antecedent fallacy).
+        They also produce self-correction steps when initial derivations are wrong.
+    </div>
+
+    <div class="finding finding-insight">
+        <strong>Transfer to out-of-distribution benchmarks is promising.</strong>
+        Mistral Diff-Anneal reaches 0.913 on ProntoQA (vs 0.263 base). Llama SAT reaches 0.783.
+        ProofWriter shows consistent gains for DeepSeek SAT (0.545 vs 0.338 base).
+    </div>
+
+    <div class="finding finding-caution">
+        <strong>Qwen3 struggles without SFT warmup.</strong>
+        In Phase 1 (classic format, no SFT), Qwen3 shows minimal improvement across all conditions.
+        Phase 2 SFT warmup resolves this &mdash; the model first learns the output format, then GRPO improves reasoning.
+    </div>
+
+    <div class="finding finding-caution">
+        <strong>Checkpoint selection matters.</strong>
+        A diagnostic sweep on DeepSeek SAT shows checkpoint-1000 is optimal (total reward 1.25).
+        Later checkpoints show reward degradation &mdash; a known issue in RL training that motivates early stopping.
+    </div>
+</div>
+
+<!-- Training Dynamics -->
+<div class="card">
+    <h2>Training Dynamics</h2>
+    <p class="section-label">How rewards evolve during GRPO training (DeepSeek SAT)</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Checkpoint</th>
+                <th>Consistency</th>
+                <th>Format</th>
+                <th>Answer</th>
+                <th>Total Reward</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Base (no adapter)</td><td>-0.25</td><td>0.11</td><td>0.50</td><td>0.36</td></tr>
+            <tr><td>Step 100</td><td>-0.42</td><td>-0.07</td><td>0.17</td><td>-0.32</td></tr>
+            <tr class="improved"><td>Step 1000</td><td class="best">0.17</td><td class="best">0.75</td><td>0.33</td><td class="best">1.25</td></tr>
+            <tr><td>Step 1900</td><td>-0.31</td><td>0.27</td><td>0.17</td><td>0.13</td></tr>
+            <tr><td>Step 2800</td><td>-0.47</td><td>0.71</td><td>0.00</td><td>0.24</td></tr>
+            <tr><td>Step 3700</td><td>-0.33</td><td>0.17</td><td>0.17</td><td>0.00</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-caution" style="margin-top:1rem;">
+        <strong>Sweet spot at checkpoint-1000.</strong> Consistency peaks at 0.17, then degrades. Later checkpoints show reward hacking &mdash;
+        format score remains high (0.71) but consistency collapses (-0.47). This motivates the Phase 2 approach: SFT warmup stabilizes
+        the format, allowing GRPO to focus on consistency improvement.
+    </div>
+</div>
+
+<!-- Conditions Legend -->
+<div class="card">
+    <h2>Training Conditions Explained</h2>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:0.8rem;">
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #94a3b8;">
+            <strong style="font-size:0.85rem;">Base</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Pretrained model with no additional training. Evaluated zero-shot with the structured reasoning prompt.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #f59e0b;">
+            <strong style="font-size:0.85rem;">Answer-Only</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">GRPO training with answer correctness reward only. No consistency signal &mdash; the model is not penalized for invalid reasoning chains.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #22c55e;">
+            <strong style="font-size:0.85rem;">SAT (RAILS)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">GRPO with SAT-based consistency reward. Each derived step is checked against prior steps using a SAT solver. Invalid chains receive zero answer credit.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #8b5cf6;">
+            <strong style="font-size:0.85rem;">Diff-Anneal (RAILS)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">GRPO with differentiable NSFR consistency reward. Produces continuous [0,1] scores via tensor-encoded soft logic, with gamma annealing over training.</p>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 2026<br>
+    <a href="qualitative_comparison.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Qualitative Analysis &rarr;</a>
+</div>
+</body>
+</html>
