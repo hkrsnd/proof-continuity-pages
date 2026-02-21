@@ -131,7 +131,7 @@
             <span class="badge badge-green">Entailment / Contradiction</span>
             <span class="badge badge-amber">US Tax Code</span>
         </div>
-        <p>Reasoning about US tax statutes (IRC Sections 1, 63, 68, 151, 152, 3301, 3306, 7703). Each question provides facts and a statutory conclusion; the model must determine if the conclusion follows (entailment) or contradicts the premises. Statutes are essentially Horn clauses &mdash; the dataset includes Prolog encodings.</p>
+        <p>Reasoning about US tax statutes (IRC Sections 1, 63, 68, 151, 152, 3301, 3306, 7703). Each problem provides statutory facts and a conclusion statement; the model must determine if the conclusion logically follows from the facts (<em>entailment</em>) or contradicts them (<em>contradiction</em>). The prompt asks: &ldquo;Does the following conclusion follow from the facts?&rdquo; Statutes are essentially Horn clauses &mdash; the dataset includes Prolog encodings.</p>
     </div>
     <div class="benchmark-card">
         <h3>LSAT Logic Games (Analytical Reasoning)</h3>
@@ -398,8 +398,10 @@
             <strong>Facts:</strong>
             Alice has a son, Bob, who satisfies section 152(c)(1) for the year 2015.
             <br><br>
-            <strong>Question:</strong>
+            <strong>Conclusion to evaluate:</strong>
             Under section 152(a), Bob is a dependent of Alice for the year 2015.
+            <br><br>
+            <em style="color:#888; font-size:0.8rem;">Prompt: &ldquo;Does the following conclusion follow from the facts? Answer with: Entailment or Contradiction.&rdquo;</em>
         </div>
         <div class="response-grid">
             <div class="response-box response-wrong">
@@ -553,8 +555,10 @@ Answer: C</div>
             <strong>Facts:</strong>
             Alice's income in 2015 was $260,932. For 2015, Alice received one exemption of $2,000 under section 151(c). Alice's applicable percentage under section 151(d)(3)(B) is equal to 10%.
             <br><br>
-            <strong>Question:</strong>
+            <strong>Conclusion to evaluate:</strong>
             Under section 151(d)(3)(A), Alice's exemption amount is reduced to $1,800.
+            <br><br>
+            <em style="color:#888; font-size:0.8rem;">Prompt: &ldquo;Does the following conclusion follow from the facts? Answer with: Entailment or Contradiction.&rdquo;</em>
         </div>
         <div class="response-grid">
             <div class="response-box response-wrong">
