@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Research Notes</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 960px; margin: 0 auto; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back { display: inline-block; margin-bottom: 1.5rem; font-size: 0.9rem; color: #64748b; }
+    .back:hover { color: #2563eb; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+    /* TOC */
+    .toc { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .toc h2 { font-size: 1rem; color: #16213e; margin-bottom: 0.8rem; }
+    .toc-item { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; }
+    .toc-item:last-child { border-bottom: none; }
+    .toc-date { font-size: 0.78rem; color: #94a3b8; white-space: nowrap; min-width: 80px; }
+    .toc-link { font-size: 0.92rem; font-weight: 500; }
+    .toc-desc { font-size: 0.82rem; color: #666; margin-top: 0.15rem; }
+    .toc-tag { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 20px; font-size: 0.68rem; font-weight: 600; margin-left: 0.4rem; }
+    .tag-red { background: #fee2e2; color: #991b1b; }
+    .tag-blue { background: #e0e7ff; color: #3730a3; }
+    .tag-amber { background: #fef3c7; color: #92400e; }
+    .tag-green { background: #dcfce7; color: #166534; }
+
+    /* Note cards */
+    .note { background: white; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+    .note-header { padding: 1.2rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid #f0f0f0; user-select: none; }
+    .note-header:hover { background: #fafbfc; }
+    .note-chevron { font-size: 0.8rem; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; }
+    .note.open .note-chevron { transform: rotate(90deg); }
+    .note-title { font-size: 1.05rem; font-weight: 600; color: #16213e; flex: 1; }
+    .note-date { font-size: 0.78rem; color: #94a3b8; white-space: nowrap; }
+    .note-body { padding: 1.5rem; display: none; }
+    .note.open .note-body { display: block; }
+
+    /* Content styling */
+    .note-body h2 { font-size: 1.1rem; color: #16213e; margin: 1.5rem 0 0.6rem 0; padding-bottom: 0.3rem; border-bottom: 1px solid #e5e7eb; }
+    .note-body h2:first-child { margin-top: 0; }
+    .note-body h3 { font-size: 0.95rem; color: #334155; margin: 1.2rem 0 0.4rem 0; }
+    .note-body p { font-size: 0.88rem; color: #444; margin-bottom: 0.8rem; }
+    .note-body ul, .note-body ol { font-size: 0.88rem; color: #444; margin: 0.4rem 0 0.8rem 1.5rem; }
+    .note-body li { margin-bottom: 0.3rem; }
+    .note-body strong { color: #1a1a2e; }
+    .note-body code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.82rem; font-family: 'SF Mono', 'Fira Code', monospace; color: #e11d48; }
+    .note-body pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 0.6rem 0 1rem 0; font-size: 0.8rem; line-height: 1.5; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .note-body pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    /* Tables */
+    .note-body table { width: 100%; border-collapse: collapse; margin: 0.6rem 0 1rem 0; font-size: 0.82rem; }
+    .note-body th { background: #f8fafc; color: #334155; font-weight: 600; text-align: left; padding: 0.5rem 0.6rem; border-bottom: 2px solid #e2e8f0; }
+    .note-body td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f0f0f0; color: #444; }
+    .note-body tr:hover td { background: #fafbfc; }
+
+    /* Highlight boxes */
+    .finding { background: #eff6ff; border-left: 3px solid #3b82f6; padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; margin: 0.8rem 0; font-size: 0.86rem; }
+    .finding.warn { background: #fef3c7; border-left-color: #f59e0b; }
+    .finding.good { background: #dcfce7; border-left-color: #16a34a; }
+    .finding.bad { background: #fee2e2; border-left-color: #dc2626; }
+    .finding strong { color: #1e3a5f; }
+
+    /* Sample outputs */
+    .sample { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin: 0.6rem 0 1rem 0; font-size: 0.82rem; font-family: 'SF Mono', monospace; white-space: pre-wrap; line-height: 1.5; overflow-x: auto; }
+    .sample .good-tag { color: #16a34a; font-weight: 600; }
+    .sample .bad-tag { color: #dc2626; font-weight: 600; }
+    .sample .garbled { background: #fee2e2; padding: 0.1rem 0.3rem; border-radius: 3px; }
+
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+
+<a class="back" href="index.html">&larr; Back to Hub</a>
+<h1>Research Notes</h1>
+<p class="subtitle">Findings, analyses, and design decisions from the RAILS project</p>
+
+<!-- Table of Contents -->
+<div class="toc">
+    <h2>Contents</h2>
+    <div class="toc-item">
+        <span class="toc-date">2026-02-21</span>
+        <div>
+            <a class="toc-link" href="#think-template">Think Template Divergence: DeepSeek-R1 vs Qwen3/QwQ</a>
+            <span class="toc-tag tag-red">key finding</span>
+            <div class="toc-desc">Why think-stripping models resist structured verification training. Empirical evidence, root cause, and recommendations.</div>
+        </div>
+    </div>
+    <div class="toc-item">
+        <span class="toc-date">2026-02-20</span>
+        <div>
+            <a class="toc-link" href="#nli-vs-sat">NLI vs SAT: Why Formal Verification Beats Soft Approximation</a>
+            <span class="toc-tag tag-blue">motivation</span>
+            <div class="toc-desc">Head-to-head comparison on 5 real invalid reasoning chains. NLI false-accepts 60%, SAT rejects 100%.</div>
+        </div>
+    </div>
+    <div class="toc-item">
+        <span class="toc-date">2026-02-20</span>
+        <div>
+            <a class="toc-link" href="#real-world">Connecting RAILS to Science and Law</a>
+            <span class="toc-tag tag-amber">paper framing</span>
+            <div class="toc-desc">Benchmarks, related work, and motivation for why formal verification matters in high-stakes domains.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- NOTE 1: Think Template Divergence                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="note open" id="think-template">
+    <div class="note-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-chevron">&#x25B6;</span>
+        <span class="note-title">Think Template Divergence: DeepSeek-R1 vs Qwen3/QwQ</span>
+        <span class="note-date">2026-02-21</span>
+    </div>
+    <div class="note-body">
+
+        <div class="finding">
+            <strong>Key finding:</strong> Models with <code>&lt;think&gt;</code> support fall into two camps. DeepSeek-R1 <strong>strips</strong> reasoning content (disposable scratchpad), while Qwen3 and QwQ <strong>preserve</strong> it (real output). This causes DeepSeek to resist learning structured <code>&lt;step&gt;</code> tags, requiring 2x SFT and 5x higher KL penalty.
+        </div>
+
+        <h2>The Two Camps</h2>
+
+        <table>
+            <tr><th></th><th>DeepSeek-R1 (Stripped)</th><th>Qwen3 / QwQ (Preserved)</th></tr>
+            <tr><td><strong>Template has <code>&lt;think&gt;</code>?</strong></td><td>Yes</td><td>Yes</td></tr>
+            <tr><td><strong>What happens to content?</strong></td><td style="color:#dc2626;font-weight:600">Deleted from output</td><td style="color:#16a34a;font-weight:600">Kept in output</td></tr>
+            <tr><td><strong>Pretrained behavior</strong></td><td>Throwaway scratchpad</td><td>Real, structured output</td></tr>
+            <tr><td><strong>Models</strong></td><td>DeepSeek-R1-7B, 14B, all distillations</td><td>Qwen3-8B, QwQ-32B, Qwen family</td></tr>
+        </table>
+
+        <h3>DeepSeek-R1: Stripping Logic</h3>
+        <pre><code>{% if '&lt;/think&gt;' in content %}
+  {% set content = content.split('&lt;/think&gt;')[-1] %}
+{% endif %}</code></pre>
+        <p>Everything between <code>&lt;think&gt;</code> and <code>&lt;/think&gt;</code> is deleted. The model learned: thinking = throwaway.</p>
+
+        <h3>Qwen3 / QwQ: Preserving Logic</h3>
+        <pre><code>&lt;|im_start|&gt;assistant
+&lt;think&gt;
+reasoning here          &larr; PRESERVED in output
+&lt;/think&gt;
+
+Final answer
+&lt;|im_end|&gt;</code></pre>
+        <p>Both reasoning and answer are rendered. The model learned: thinking = real output that matters.</p>
+
+        <h2>Empirical Evidence</h2>
+
+        <p>All four models trained with identical pipelines: SFT warmup (5 epochs) &rarr; GRPO with SAT reward.</p>
+
+        <h3>Format Reward Over Training</h3>
+        <table>
+            <tr><th>Model</th><th>Camp</th><th>Format (start)</th><th>Format (latest)</th><th>Peak</th></tr>
+            <tr><td>Qwen3-8B</td><td style="color:#16a34a">Preserved</td><td>0.45</td><td style="color:#16a34a;font-weight:700">0.93</td><td>0.95</td></tr>
+            <tr><td>QwQ-32B</td><td style="color:#16a34a">Preserved</td><td>-0.83</td><td>0.56</td><td>0.59</td></tr>
+            <tr style="background:#fff5f5"><td>DeepSeek-7B</td><td style="color:#dc2626">Stripped</td><td>0.03</td><td style="color:#b45309">0.72</td><td>0.77</td></tr>
+            <tr style="background:#fff5f5"><td>DeepSeek-14B</td><td style="color:#dc2626">Stripped</td><td>-0.25</td><td style="color:#dc2626;font-weight:700">0.14</td><td>0.14</td></tr>
+        </table>
+
+        <div class="finding warn">
+            Qwen3 starts at <strong>15x</strong> the format reward of DeepSeek-7B and reaches a <strong>30% higher</strong> plateau.
+        </div>
+
+        <h3>KL Divergence (Policy Stability)</h3>
+        <table>
+            <tr><th>Model</th><th>Camp</th><th>Typical KL</th><th>Peak KL</th><th>Stable?</th></tr>
+            <tr><td>Qwen3-8B</td><td style="color:#16a34a">Preserved</td><td>0.4&ndash;0.5</td><td>0.5</td><td style="color:#16a34a">Yes</td></tr>
+            <tr><td>QwQ-32B</td><td style="color:#16a34a">Preserved</td><td>0.02&ndash;0.11</td><td>5.6</td><td style="color:#16a34a">Yes (after step 80)</td></tr>
+            <tr style="background:#fff5f5"><td>DeepSeek-7B</td><td style="color:#dc2626">Stripped</td><td style="color:#dc2626;font-weight:600">15&ndash;30</td><td style="color:#dc2626;font-weight:600">1,385</td><td style="color:#dc2626;font-weight:600">No &mdash; wild oscillations</td></tr>
+            <tr style="background:#fff5f5"><td>DeepSeek-14B</td><td style="color:#dc2626">Stripped</td><td>0.4&ndash;0.7</td><td style="color:#dc2626">51.6</td><td style="color:#dc2626">No &mdash; early instability</td></tr>
+        </table>
+
+        <div class="finding bad">
+            DeepSeek-7B's KL reaches <strong>1,385</strong> at step 20 &mdash; complete policy divergence. It oscillates between 8 and 33 for thousands of steps, causing garbled outputs with broken Unicode and Chinese characters.
+        </div>
+
+        <h3>Output Quality: Qwen3 vs DeepSeek (Step 4000)</h3>
+
+        <p><strong>Qwen3-8B</strong> &mdash; clean, structured, parseable:</p>
+        <div class="sample"><span class="good-tag">&lt;think&gt;</span>
+Let's formalize the premises and analyze the conclusion.
+
+<span class="good-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="good-tag">&lt;text&gt;</span>If John wakes up early, then he will meditate.<span class="good-tag">&lt;/text&gt;</span>
+<span class="good-tag">&lt;logic&gt;</span>meditate :- wakes_up_early.<span class="good-tag">&lt;/logic&gt;</span>
+<span class="good-tag">&lt;/step&gt;</span>
+...
+<span class="good-tag">&lt;/think&gt;</span>
+
+No</div>
+
+        <p><strong>DeepSeek-7B</strong> &mdash; occasional degeneration:</p>
+        <div class="sample">&lt;step n="4" type="derived" from="2"&gt;
+&lt;text&gt;From premise 2: If he goes abroad, it implies he doesn't
+having a nationality.<span class="garbled">&lt;/.text&gt;</span>
+Hold that step, it seem <span class="garbled">problematic&#x5947;&#x7EB3;</span>. Maybe let me think another way.</div>
+
+        <p><strong>DeepSeek-7B</strong> &mdash; worst case (1/10 at step 4000):</p>
+        <div class="sample">&lt;step n="1" type="premise"&gt;
+&lt;text&gt;At least one of the following is true...&lt;/text&gt;
+&lt;logic&gt;<span class="garbled">(producing(&#x699D;)) StudyExam(Michael). \&#x2228;. Heading movies(Mayrlia).</span>&lt;/logic&gt;</div>
+
+        <h2>Root Cause Analysis</h2>
+
+        <h3>1. Pretrained Weight Bias</h3>
+        <p>Even after patching the template to stop stripping, DeepSeek-R1's pretrained weights carry the bias: "content inside <code>&lt;think&gt;</code> is throwaway." This is distributed across billions of parameters &mdash; not just a template string, but a learned behavior about output quality inside vs. outside <code>&lt;think&gt;</code>.</p>
+
+        <h3>2. Conflicting Semantics</h3>
+        <table>
+            <tr><th>What RAILS wants</th><th>What DeepSeek-R1 learned</th></tr>
+            <tr><td>Structured <code>&lt;step&gt;</code> tags</td><td>Free-form monologue</td></tr>
+            <tr><td>Parseable <code>&lt;logic&gt;</code> fields</td><td>Natural language brainstorming</td></tr>
+            <tr><td>Consistent format throughout</td><td>Quality degrades as "thinking" continues</td></tr>
+        </table>
+        <p>This creates a tug-of-war during GRPO: reward pushes toward structure, pretrained distribution pulls toward freeform. The result is KL instability &mdash; the model oscillates between modes.</p>
+
+        <h3>3. GRPO Beta Sensitivity</h3>
+        <p>With <code>beta=0.01</code>, the KL penalty is too weak to prevent DeepSeek from diverging. Qwen handles <code>beta=0.01</code> fine because its reference policy already produces good format. DeepSeek needs <code>beta=0.05&ndash;0.10</code> to stay anchored.</p>
+
+        <h2>Generalized Insight</h2>
+
+        <div class="finding good">
+            <strong>Template architecture matters for verification training.</strong> Before choosing a base model for step-level verification, check how its chat template handles reasoning tokens:
+        </div>
+
+        <ul>
+            <li><strong>Preserved reasoning</strong> (Qwen3, QwQ, likely Llama reasoning variants): Good candidates. Structured formats inside <code>&lt;think&gt;</code> align with pretrained behavior.</li>
+            <li><strong>Stripped reasoning</strong> (DeepSeek-R1, "hidden CoT" models): Requires mitigation &mdash; stronger SFT (2x epochs), higher KL penalty (5x beta), or a different tag to avoid conflict.</li>
+        </ul>
+
+        <p>This extends beyond logic: any system needing structured intermediate reasoning (math proofs, code traces, planning states) will face this compatibility question.</p>
+
+        <h2>Remediation</h2>
+        <table>
+            <tr><th>Change</th><th>Config</th><th>Rationale</th></tr>
+            <tr><td>SFT epochs: 5 &rarr; 10</td><td><code>deepseek_sft_think_v2.yaml</code></td><td>Stronger override of scratchpad bias</td></tr>
+            <tr><td>SFT data: 4,364 &rarr; 6,033</td><td>Rebuilt <code>think_all.jsonl</code></td><td>More diverse format examples</td></tr>
+            <tr><td>SFT LR: 1.5e-4 &rarr; 1.0e-4</td><td>Same config</td><td>Avoid overfitting on longer training</td></tr>
+            <tr><td>GRPO beta: 0.01 &rarr; 0.05</td><td><code>deepseek_sat_think_from_sft_v2.yaml</code></td><td>5x stronger KL anchor</td></tr>
+        </table>
+
+        <p>Expected: format reward 0.72 &rarr; 0.85+, KL 15&ndash;30 &rarr; &lt;5, garbled outputs eliminated.</p>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- NOTE 2: NLI vs SAT                                                     -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="note" id="nli-vs-sat">
+    <div class="note-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-chevron">&#x25B6;</span>
+        <span class="note-title">NLI vs SAT: Why Formal Verification Beats Soft Approximation</span>
+        <span class="note-date">2026-02-20</span>
+    </div>
+    <div class="note-body">
+
+        <div class="finding bad">
+            <strong>Core result:</strong> DeBERTa-large-MNLI (NLI) false-accepts <strong>3 of 5</strong> logically invalid reasoning chains. SAT correctly rejects all 5. NLI gives <strong>+0.84</strong> to a reversed implication.
+        </div>
+
+        <h2>Results</h2>
+        <table>
+            <tr><th>#</th><th>Example</th><th>NLI Score</th><th>SAT Score</th><th>NLI Verdict</th></tr>
+            <tr><td>1</td><td>Reversed Implication (P&rarr;Q, Q &there4; P)</td><td style="color:#dc2626;font-weight:600">+0.840</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
+            <tr><td>2</td><td>Inverse &ne; Contrapositive (~P&rarr;~Q from P&rarr;Q)</td><td style="color:#dc2626;font-weight:600">+0.878</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
+            <tr><td>3</td><td>Denying the Antecedent (~P &there4; ~Q)</td><td>-0.057</td><td>+0.000</td><td style="color:#16a34a">Correct reject</td></tr>
+            <tr><td>4</td><td>Logical Babble (answer-only, 7 steps)</td><td style="color:#dc2626;font-weight:600">+0.021</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
+            <tr><td>5</td><td>Hidden Negation (valid NL, bad formal)</td><td>-0.923</td><td>-1.000</td><td style="color:#16a34a">Correct reject</td></tr>
+        </table>
+
+        <h2>The Three Killer Examples</h2>
+
+        <h3>Example 1: Affirming the Consequent (NLI: +0.84, SAT: -1.0)</h3>
+        <p>Source: Qwen3-8B, GRPO step 1600</p>
+        <div class="sample">Premise:  go_to_party :- gold_medal.     "If gold medal, then party"
+Given:    go_to_party.                    "He's going to a party"
+Derived:  gold_medal :- go_to_party.      "Since party, he has gold medal"  <span class="bad-tag">&larr; INVALID</span></div>
+        <p>The model reverses the implication. DeBERTa gives 88.5% entailment because "gold medal" and "party" co-occur. It treats "A implies B" and "B implies A" as near-paraphrases.</p>
+
+        <h3>Example 2: Inverse Fallacy (NLI: +0.88, SAT: -1.0)</h3>
+        <p>Source: Qwen3-8B, GRPO step 2400</p>
+        <div class="sample">Premise:  weak :- skips.           "If skips breakfast &rarr; feels weak"
+Given:    ~skips.                  "Doesn't skip breakfast"
+Derived:  ~weak :- ~skips.         "Doesn't skip &rarr; doesn't feel weak"  <span class="bad-tag">&larr; INVALID (inverse, not contrapositive)</span></div>
+        <p>The correct contrapositive of <code>skips&rarr;weak</code> is <code>~weak&rarr;~skips</code>, but the model writes <code>~skips&rarr;~weak</code> (the inverse). NLI gives 85.4% because the text sounds perfectly natural. Humans make this same error.</p>
+
+        <h3>Example 4: Logical Babble (NLI: +0.02, SAT: -1.0)</h3>
+        <p>Source: Llama-3.1-8B answer-only baseline, GRPO step 2900</p>
+        <p>No consistency reward during training. Produces 7 steps citing real rule names (Destructive Dilemma, Disjunctive Syllogism, Hypothetical Syllogism) &mdash; creating an <em>illusion</em> of rigorous reasoning. Every derived step fails SAT verification.</p>
+
+        <h2>Why NLI Fails</h2>
+        <ol>
+            <li><strong>Lexical overlap heuristic:</strong> NLI models rely on word overlap. "If gold medal then party" and "if party then gold medal" share the same words &rarr; high score.</li>
+            <li><strong>Human annotation bias:</strong> NLI training data (SNLI, MultiNLI) annotated by crowd workers who make the same fallacies. The model inherits these biases.</li>
+            <li><strong>No structural awareness:</strong> NLI operates on surface text. It cannot distinguish P&rarr;Q from Q&rarr;P, or valid from invalid rule application.</li>
+        </ol>
+
+        <h2>The Answer-Only Baseline Gap</h2>
+
+        <div class="finding warn">
+            Answer-only baseline (no consistency reward): <strong>80% answer accuracy</strong> but <strong>-90% consistency score</strong>. Models learn correct answers through invalid reasoning. NLI would accept most of these chains.
+        </div>
+
+        <h2>Paper Framing</h2>
+        <p>Three-part argument:</p>
+        <ol>
+            <li>Models learn right answers through invalid reasoning (80% accuracy, -90% consistency)</li>
+            <li>NLI cannot catch the errors (60% false acceptance, +0.84 on reversed implications)</li>
+            <li>Formal verification catches every error (100% true rejection rate)</li>
+        </ol>
+
+        <h2>Supporting Literature</h2>
+        <ul>
+            <li><strong>HANS</strong> (McCoy et al., 2019): NLI models rely on lexical overlap, not logical structure</li>
+            <li><strong>LogicNLI</strong> (Tian et al., 2021): NLI accuracy drops to ~50% (chance) on propositional logic</li>
+            <li><strong>Turpin et al.</strong> (NeurIPS 2023): CoT explanations are systematically unfaithful</li>
+            <li><strong>Anthropic</strong> (2025): Claude is only 41% faithful in CoT, DeepSeek-R1 only 19%</li>
+            <li><strong>LINC</strong> (Olausson et al., 2023): Formal logic (Prolog) gives 26% higher accuracy than CoT on ProofWriter</li>
+        </ul>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- NOTE 3: Real-World Motivation                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="note" id="real-world">
+    <div class="note-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-chevron">&#x25B6;</span>
+        <span class="note-title">Connecting RAILS to Science and Law</span>
+        <span class="note-date">2026-02-20</span>
+    </div>
+    <div class="note-body">
+
+        <div class="finding">
+            In domains requiring rigorous reasoning &mdash; science, medicine, law &mdash; plausible-but-invalid chains of inference have real consequences. NLI-style checking fails on exactly the fallacies that matter most.
+        </div>
+
+        <h2>Why These Domains Need Formal Verification</h2>
+
+        <table>
+            <tr><th>Domain</th><th>What goes wrong with NLI</th><th>What formal verification catches</th></tr>
+            <tr><td><strong>Science</strong></td><td>"If temp increases, pressure increases" scored same as reverse by NLI</td><td>SAT catches P&rarr;Q &ne; Q&rarr;P</td></tr>
+            <tr><td><strong>Medicine</strong></td><td>"If symptom A then disease B" confused with "If disease B then symptom A"</td><td>Formal verification preserves conditional direction</td></tr>
+            <tr><td><strong>Law</strong></td><td>"If conditions X,Y,Z met then statute applies" &mdash; NLI can't verify all conditions checked</td><td>SAT/Prolog verifies each condition is established</td></tr>
+            <tr><td><strong>Math</strong></td><td>"Since A implies B, and B is true, therefore A" sounds plausible to NLI</td><td>SAT rejects affirming the consequent</td></tr>
+        </table>
+
+        <h2>Scientific Reasoning Benchmarks</h2>
+
+        <h3>Tier 1: Directly Amenable to Formal Verification</h3>
+        <table>
+            <tr><th>Benchmark</th><th>Domain</th><th>Size</th><th>Verification</th><th>Reference</th></tr>
+            <tr><td><strong>PhysReason</strong></td><td>Physics</td><td>1,200 (avg 8.1 steps)</td><td>SymPy</td><td>ACL 2025</td></tr>
+            <tr><td><strong>EngTrace</strong></td><td>Engineering</td><td>1,350 cases</td><td>Symbolic templates</td><td>arXiv:2511.01650</td></tr>
+            <tr><td><strong>FormalMATH</strong></td><td>Math (Lean4)</td><td>5,560 proofs</td><td>Lean4 proof checker</td><td>arXiv:2505.02735</td></tr>
+            <tr><td><strong>SATBench</strong></td><td>Logic (SAT)</td><td>2,100 puzzles</td><td>SAT solver</td><td>EMNLP 2025</td></tr>
+        </table>
+
+        <h3>Tier 2: Process-Level Evaluation</h3>
+        <table>
+            <tr><th>Benchmark</th><th>Domain</th><th>Key Finding</th></tr>
+            <tr><td><strong>PRM800K</strong></td><td>Math</td><td>Process supervision &gt;&gt; outcome supervision (78% vs 72% on MATH). Foundational justification for step-level rewards.</td></tr>
+            <tr><td><strong>PRMBench</strong></td><td>Math + STEM</td><td>6,216 problems / 83K step labels. 9 error types.</td></tr>
+            <tr><td><strong>RFEval</strong></td><td>Multi-domain</td><td style="color:#dc2626;font-weight:600">49.7% of LLM outputs are unfaithful. Covers code, math, logic, legal.</td></tr>
+            <tr><td><strong>MR-Ben</strong></td><td>Multi-domain</td><td>Meta-reasoning: can models detect errors in reasoning steps?</td></tr>
+        </table>
+
+        <div class="finding bad">
+            <strong>RFEval (Feb 2026)</strong> finds that <strong>49.7% of LLM outputs are unfaithful</strong> &mdash; accuracy is not a reliable proxy for reasoning faithfulness. This directly validates our thesis.
+        </div>
+
+        <h3>Most Related System: LogicReward</h3>
+        <p><strong>LogicReward</strong> (arXiv:2512.18196, Dec 2025): theorem provers for step-level verification during RL. 8B model surpasses GPT-4o by 11.6%.</p>
+        <table>
+            <tr><th></th><th>LogicReward</th><th>RAILS</th></tr>
+            <tr><td>Focus</td><td>NLI tasks</td><td>Broader: propositional, FOL, non-monotonic</td></tr>
+            <tr><td>Verifier</td><td>Generic theorem prover</td><td>Domain-specific (SAT, ASP, NSFR) + clean context</td></tr>
+            <tr><td>Answer gating</td><td>No</td><td>Yes (no credit for right answer + wrong reasoning)</td></tr>
+        </table>
+
+        <h2>Legal Reasoning Benchmarks</h2>
+
+        <h3>Tier 1: Perfect Fit for Formal Verification</h3>
+        <table>
+            <tr><th>Benchmark</th><th>Size</th><th>Why It Fits RAILS</th></tr>
+            <tr><td><strong>SARA</strong></td><td>376 cases</td><td>Tax statutes as Horn clauses. A hand-constructed Prolog system fully solves it. NLI fails.</td></tr>
+            <tr><td><strong>Catala</strong></td><td>Tax law sections</td><td>Uses <strong>prioritized default logic</strong> &mdash; same as our ASP/Clingo backend.</td></tr>
+            <tr><td><strong>LLMs + Prolog</strong></td><td>SARA-based</td><td>Neuro-symbolic: LLM generates Prolog, solver verifies. Validates RAILS paradigm.</td></tr>
+        </table>
+
+        <h3>Example: Legal Reasoning Failure</h3>
+        <div class="sample">Statute: "If gross income &gt; $10K AND not dependent &rarr; must file return"
+
+Facts:   Alice filed a return. Alice has income $15K.
+Model:   "Alice is not claimed as a dependent."  <span class="bad-tag">&larr; INVALID (affirming the consequent)</span>
+
+(A &and; B &rarr; C) &and; C &and; A does NOT entail B
+NLI: "sounds right" (+high score)
+SAT: rejected (invalid inference)</div>
+
+        <h3>Tier 2: Step-Level Legal Reasoning</h3>
+        <table>
+            <tr><th>Benchmark</th><th>Size</th><th>Key Feature</th></tr>
+            <tr><td><strong>MSLR</strong></td><td>1,400 cases / 60K step annotations</td><td>Most granular step-wise legal reasoning. IRAC framework.</td></tr>
+            <tr><td><strong>COLIEE</strong></td><td>7,350+ files</td><td>Japanese Bar exam. Annual competition since 2014.</td></tr>
+            <tr><td><strong>MASLegalBench</strong></td><td>950 MCQs</td><td>GDPR reasoning decomposed into 4 verifiable steps.</td></tr>
+            <tr><td><strong>LAR-ECHR</strong></td><td>403 instances</td><td>Argument chain validity. GPT-4o only 75.8%.</td></tr>
+        </table>
+
+        <h2>Paper Framing</h2>
+        <p>The story in 4 beats:</p>
+        <ol>
+            <li><strong>Models reach correct answers through invalid reasoning</strong> (80% accuracy, -90% consistency)</li>
+            <li><strong>Soft NLI misses the errors</strong> (+0.84 to reversed implications)</li>
+            <li><strong>This matters in high-stakes domains</strong>: confusing P&rarr;Q with Q&rarr;P means confusing correlation with causation in science, misapplying statutes in law, base rate neglect in medicine</li>
+            <li><strong>RAILS solves this</strong> with symbolic verification rewards producing provably valid reasoning</li>
+        </ol>
+
+    </div>
+</div>
+
+<div class="footer">
+    Updated February 21, 2026 &middot;
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    <a href="index.html">Project Hub</a>
+</div>
+
+<script>
+// Allow clicking TOC links to open the corresponding note
+document.querySelectorAll('.toc-link').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const id = link.getAttribute('href').slice(1);
+        const note = document.getElementById(id);
+        if (note && !note.classList.contains('open')) {
+            note.classList.add('open');
+        }
+        note.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+});
+</script>
+
+</body>
+</html>
