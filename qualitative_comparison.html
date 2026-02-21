@@ -55,15 +55,11 @@ h3 { font-size: 1.05rem; color: #374151; margin-bottom: 0.5rem; }
 .trace { border-radius: 8px; padding: 1rem; font-size: 0.82rem; overflow-x: auto; }
 .trace-base { background: #fef2f2; border: 1px solid #fecaca; }
 .trace-sat { background: #f0fdf4; border: 1px solid #bbf7d0; }
-.trace-answer-only { background: #fffbeb; border: 1px solid #fde68a; }
-.trace-diff { background: #f5f3ff; border: 1px solid #ddd6fe; }
 
 .trace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
 .trace-title { font-weight: 700; font-size: 0.85rem; }
 .trace-base .trace-title { color: #dc2626; }
 .trace-sat .trace-title { color: #16a34a; }
-.trace-answer-only .trace-title { color: #d97706; }
-.trace-diff .trace-title { color: #7c3aed; }
 
 .trace-content { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.78rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; color: #374151; }
 .truncated { color: #9ca3af; font-style: italic; }
@@ -105,20 +101,19 @@ td:first-child { text-align: left; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Qualitative Analysis</h1>
-<p class="subtitle">Side-by-side comparison of reasoning traces: Base vs RAILS-trained models &middot; Same question, different training conditions</p>
+<p class="subtitle">Side-by-side comparison of reasoning traces: Base vs GRPO-trained DeepSeek-R1 &middot; Same question, different training conditions</p>
 
 <!-- Overview -->
 <div class="summary">
-    <h2>How Proof-Continuity Reward Changes Reasoning</h2>
+    <h2>How Consistency Reward Changes Reasoning</h2>
     <p style="font-size:0.88rem; color:#555; margin-bottom:1rem;">
-        Each example below shows the <strong>same question</strong> answered by the <strong>same model</strong> under different training conditions.
-        This reveals how the consistency reward shapes intermediate reasoning steps &mdash; not just final answers.
+        Each example below shows the <strong>same question</strong> answered by <strong>DeepSeek-R1 (7B)</strong> under different training conditions.
+        This reveals how the SAT consistency reward shapes intermediate reasoning steps &mdash; not just final answers.
     </p>
     <div class="stats">
-        <div class="stat"><div class="stat-value">16</div><div class="stat-label">Paired Examples</div></div>
-        <div class="stat stat-green"><div class="stat-value">11</div><div class="stat-label">Base Wrong, SAT Correct</div></div>
-        <div class="stat stat-amber"><div class="stat-value">4</div><div class="stat-label">Models Compared</div></div>
-        <div class="stat"><div class="stat-value">4</div><div class="stat-label">Logic Theories</div></div>
+        <div class="stat"><div class="stat-value">3</div><div class="stat-label">Paired Examples</div></div>
+        <div class="stat stat-green"><div class="stat-value">3</div><div class="stat-label">Base Wrong, GRPO Correct</div></div>
+        <div class="stat"><div class="stat-value">3</div><div class="stat-label">Logic Theories</div></div>
     </div>
 </div>
 
@@ -158,7 +153,7 @@ Looking at the rules, I remember that Modus Tollens is the rule that applies her
 
         <div class="trace trace-sat">
             <div class="trace-header">
-                <span class="trace-title">SAT (RAILS)</span>
+                <span class="trace-title">GRPO (RAILS)</span>
                 <span class="badge badge-correct">CORRECT &mdash; yes</span>
             </div>
             <div class="trace-content">Alright, let's break down the problem step by step.
@@ -182,8 +177,8 @@ Answer: Yes.</div>
 
     <div class="observation">
         <strong>Key insight:</strong> The base model <em>identifies</em> Modus Tollens correctly but produces meandering prose that gets <strong>cut off</strong> before reaching a conclusion.
-        The SAT model produces concise, directed reasoning: premises &rarr; rule (contrapositive) &rarr; application &rarr; conclusion. <strong>No wandering, no truncation.</strong>
-        Answer-only training produces nearly identical output to base &mdash; the consistency signal is what drives structural improvement.
+        The GRPO model produces concise, directed reasoning: premises &rarr; rule (contrapositive) &rarr; application &rarr; conclusion. <strong>No wandering, no truncation.</strong>
+        The consistency signal is what drives this structural improvement.
     </div>
 </div>
 
@@ -222,7 +217,7 @@ Looking at the given premises, I have two implications. The first is cleaning_ro
 
         <div class="trace trace-sat">
             <div class="trace-header">
-                <span class="trace-title">SAT (RAILS)</span>
+                <span class="trace-title">GRPO (RAILS)</span>
                 <span class="badge badge-correct">CORRECT &mdash; no</span>
             </div>
             <div class="trace-content">The premises are that if Jim cleans his room, he'll get a reward, and if he gets a reward, he'll buy a new toy.
@@ -243,10 +238,9 @@ Answer: No.</div>
     </div>
 
     <div class="observation">
-        <strong>Key insight:</strong> The SAT model doesn't just follow rules &mdash; it reasons about <strong>when rules don't apply</strong>.
+        <strong>Key insight:</strong> The GRPO model doesn't just follow rules &mdash; it reasons about <strong>when rules don't apply</strong>.
         It chains the implications via Hypothetical Syllogism, then correctly identifies that the negated antecedent cannot yield a conclusion.
         This is <strong>metacognitive reasoning about inference validity</strong>, which prevents the "denying the antecedent" fallacy.
-        The Diff-Anneal model, by contrast, applies Modus Ponens in the <em>wrong direction</em> (assuming Jim cleaned when the question says he didn't).
     </div>
 </div>
 
@@ -284,7 +278,7 @@ Therefore, the answer is no.</div>
 
         <div class="trace trace-sat">
             <div class="trace-header">
-                <span class="trace-title">SAT (RAILS)</span>
+                <span class="trace-title">GRPO (RAILS)</span>
                 <span class="badge badge-correct">CORRECT &mdash; yes</span>
             </div>
             <div class="trace-content">I'll represent the premises in FOL:
@@ -305,149 +299,29 @@ Answer: Yes.</div>
     <div class="observation">
         <strong>Key insight:</strong> Both models perform the <em>same logical derivation</em> correctly (either picnic or swim must happen).
         But the base model <strong>misreads "at least one" as "both"</strong>, leading to the wrong answer.
-        The SAT model correctly interprets the question. The consistency reward may help maintain alignment between logical conclusions and natural language interpretation.
-    </div>
-</div>
-
-<!-- Example 4: Mistral Self-Correction -->
-<div class="example">
-    <div class="example-header">
-        <h3>Example 4: Self-Correction Through Additional Steps</h3>
-        <div>
-            <span class="badge badge-model">Mistral (7B)</span>
-            <span class="badge badge-theory">Constructive Dilemma</span>
-        </div>
-    </div>
-
-    <div class="context">
-        <div class="context-label">Context (Premises)</div>
-        If Ava chooses to go to the hotel, she will be rewarded with a delightful ice-cream. On the other hand, if she decides to go to the movies, she will be able to indulge in some delicious popcorn. We know she will go to one of these places.
-    </div>
-    <div class="question">Can we say at least one of the following must always be true? (a) Ava will have ice-cream and (b) she will have popcorn</div>
-    <div class="ground-truth">Ground Truth: Yes</div>
-
-    <div class="comparison">
-        <div class="trace trace-base">
-            <div class="trace-header">
-                <span class="trace-title">Base Model</span>
-                <span class="badge badge-wrong">WRONG &mdash; unknown</span>
-            </div>
-            <div class="trace-content">Step 1: iceCream(Ava) :- wentToHotel(Ava).
-Step 2: popcorn(Ava) :- wentToMovies(Ava).
-Step 3: wentToHotel(Ava) &or; wentToMovies(Ava).
-
-Step 4: ...by Constructive Dilemma, we cannot conclude that at least one of having an ice-cream and having popcorn must always be true. It is possible that only one of the options is true...
-(Logic) &perp;</div>
-        </div>
-
-        <div class="trace trace-sat">
-            <div class="trace-header">
-                <span class="trace-title">SAT (RAILS)</span>
-                <span class="badge badge-correct">CORRECT &mdash; yes</span>
-            </div>
-            <div class="trace-content">Step 1: iceCream(Ava) :- wentToHotel(Ava).
-Step 2: popcorn(Ava) :- wentToMovies(Ava).
-Step 3: wentToHotel(Ava) &or; wentToMovies(Ava).
-
-Step 4: ...by Constructive Dilemma, we cannot conclude that Ava will have <em>both</em> an ice-cream and popcorn, as it depends on which action she chooses.
-(Logic) &perp;
-
-<strong style="color:#16a34a;">Step 5: However, we can say that at least one of the following must be true: Ava will have an ice-cream or she will have popcorn.
-(Logic) iceCream(Ava) &or; popcorn(Ava).</strong>
-
-Answer: Yes.</div>
-        </div>
-    </div>
-
-    <div class="observation">
-        <strong>Key insight: Self-correction.</strong> The SAT model initially makes the same error as the base (Step 4: &perp;), but then adds
-        <strong>Step 5</strong> as a corrective step. It distinguishes "both must be true" (no) from "at least one must be true" (yes).
-        This additional reasoning step &mdash; producing a valid derived conclusion with FOL &mdash; is exactly what the consistency reward encourages.
-        <strong>This self-correction pattern is unique to consistency-trained models.</strong>
-    </div>
-</div>
-
-<!-- Example 5: Llama Disjunctive Syllogism -->
-<div class="example">
-    <div class="example-header">
-        <h3>Example 5: Reconciling Derivation with Question Negation</h3>
-        <div>
-            <span class="badge badge-model">Llama-3.1 (8B)</span>
-            <span class="badge badge-theory">Disjunctive Syllogism</span>
-        </div>
-    </div>
-
-    <div class="context">
-        <div class="context-label">Context (Premises)</div>
-        We know that John is not at school or Mary is taking a break from her job. It could be that one or both are true. However, we know that John is indeed at school.
-    </div>
-    <div class="question">Does this entail that Mary is not taking a break from her job?</div>
-    <div class="ground-truth">Ground Truth: No (disjunction + John at school &rarr; Mary IS taking a break)</div>
-
-    <div class="comparison">
-        <div class="trace trace-base">
-            <div class="trace-header">
-                <span class="trace-title">Base Model</span>
-                <span class="badge badge-wrong">WRONG &mdash; yes</span>
-            </div>
-            <div class="trace-content">Step 1: &not;atSchool(John) &or; takingBreak(Mary).
-Step 2: atSchool(John).
-
-Step 3: Using Disjunctive Syllogism, since "John is not at school" is false, we can conclude that Mary is taking a break from her job.
-(Logic) takingBreak(Mary).
-
-Answer: Yes.</div>
-        </div>
-
-        <div class="trace trace-sat">
-            <div class="trace-header">
-                <span class="trace-title">SAT (RAILS)</span>
-                <span class="badge badge-correct">CORRECT &mdash; no</span>
-            </div>
-            <div class="trace-content">Step 1: &not;atSchool(John) &or; takingBreak(Mary).
-Step 2: atSchool(John).
-
-Step 3: Using Disjunctive Syllogism, we conclude that Mary is taking a break from her job.
-(Logic) takingBreak(Mary).
-
-<strong style="color:#16a34a;">Step 4: The conclusion is that Mary IS taking a break, so the answer to whether she is NOT taking a break is no.
-(Logic) &not;(&not;takingBreak(Mary)).</strong>
-
-Answer: No.</div>
-        </div>
-    </div>
-
-    <div class="observation">
-        <strong>Key insight:</strong> Both models perform the same correct derivation (Mary IS taking a break).
-        But the base model answers "Yes" to "Is Mary NOT taking a break?" &mdash; <strong>directly contradicting its own derivation</strong>.
-        The SAT model adds <strong>Step 4</strong> to explicitly reconcile the derived conclusion with the question's negation.
-        The extra step prevents the base model's contradiction error.
+        The GRPO model correctly interprets the question. The consistency reward helps maintain alignment between logical conclusions and natural language interpretation.
     </div>
 </div>
 
 <!-- Structural Patterns -->
 <div class="card">
-    <h2>Structural Patterns Across Models</h2>
-    <p class="section-label">How training conditions affect reasoning structure</p>
+    <h2>Structural Patterns: Base vs GRPO</h2>
+    <p class="section-label">How GRPO training affects reasoning structure (DeepSeek-R1 7B)</p>
     <table>
         <thead>
             <tr>
                 <th>Feature</th>
-                <th>DeepSeek Base</th>
-                <th>DeepSeek SAT</th>
-                <th>Llama Base</th>
-                <th>Llama SAT</th>
-                <th>Mistral Base</th>
-                <th>Mistral SAT</th>
+                <th>Base</th>
+                <th>GRPO (RAILS)</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td style="text-align:left; font-weight:500;">Structured Step N: format</td><td>Rare</td><td>Common</td><td>Always</td><td>Always</td><td>Always</td><td>Always</td></tr>
-            <tr><td style="text-align:left; font-weight:500;">FOL annotations</td><td>Rare</td><td>Sometimes</td><td>Always</td><td>Always</td><td>Always</td><td>Always</td></tr>
-            <tr><td style="text-align:left; font-weight:500;">Explicit rule naming</td><td>Sometimes</td><td style="color:#16a34a; font-weight:600;">Often</td><td>Rarely</td><td>Rarely</td><td>Sometimes</td><td style="color:#16a34a; font-weight:600;">Often</td></tr>
-            <tr><td style="text-align:left; font-weight:500;">Self-correction steps</td><td>Never</td><td style="color:#16a34a; font-weight:600;">Sometimes</td><td>Never</td><td style="color:#16a34a; font-weight:600;">Sometimes</td><td>Never</td><td style="color:#16a34a; font-weight:600;">Sometimes</td></tr>
-            <tr><td style="text-align:left; font-weight:500;">Reaches conclusion</td><td>~50%</td><td style="color:#16a34a; font-weight:600;">~90%</td><td>~95%</td><td>~95%</td><td>~85%</td><td style="color:#16a34a; font-weight:600;">~95%</td></tr>
-            <tr><td style="text-align:left; font-weight:500;">Avg reasoning steps</td><td>1.0</td><td>2.7</td><td>4.2</td><td>4.1</td><td>3.5</td><td>4.5</td></tr>
+            <tr><td style="text-align:left; font-weight:500;">Structured output format</td><td>Rare (free-form prose)</td><td style="color:#16a34a; font-weight:600;">Structured steps</td></tr>
+            <tr><td style="text-align:left; font-weight:500;">FOL annotations</td><td>Rare</td><td style="color:#16a34a; font-weight:600;">Common</td></tr>
+            <tr><td style="text-align:left; font-weight:500;">Explicit rule naming</td><td>Sometimes</td><td style="color:#16a34a; font-weight:600;">Often</td></tr>
+            <tr><td style="text-align:left; font-weight:500;">Reaches conclusion</td><td>~50% (often truncated)</td><td style="color:#16a34a; font-weight:600;">~90%</td></tr>
+            <tr><td style="text-align:left; font-weight:500;">Avg reasoning steps</td><td>1.0</td><td style="color:#16a34a; font-weight:600;">2.7</td></tr>
+            <tr><td style="text-align:left; font-weight:500;">Metacognitive reasoning</td><td>Never</td><td style="color:#16a34a; font-weight:600;">Sometimes (identifies invalid inferences)</td></tr>
         </tbody>
     </table>
 </div>
@@ -457,37 +331,19 @@ Answer: No.</div>
     <h2>Summary of Qualitative Findings</h2>
 
     <div class="finding finding-positive">
-        <strong>1. SAT training prevents truncation.</strong>
-        The base and answer-only DeepSeek models produce meandering prose that gets cut off at the token limit.
-        SAT models produce concise, goal-directed reasoning that terminates with an answer.
+        <strong>1. Consistency reward prevents truncation.</strong>
+        The base DeepSeek model produces meandering prose that gets cut off at the token limit.
+        GRPO models produce concise, goal-directed reasoning that terminates with an answer.
     </div>
 
     <div class="finding finding-positive">
-        <strong>2. SAT teaches metacognitive reasoning.</strong>
-        SAT-trained models reason about <em>when rules don't apply</em> (Example 2: "there's no valid inference... so the premises don't support the conclusion").
+        <strong>2. GRPO teaches metacognitive reasoning.</strong>
+        GRPO-trained models reason about <em>when rules don't apply</em> (Example 2: "there's no valid inference... so the premises don't support the conclusion").
         This higher-order reasoning prevents logical fallacies like denying the antecedent.
     </div>
 
-    <div class="finding finding-positive">
-        <strong>3. SAT enables self-correction.</strong>
-        In Examples 4 and 5, SAT models initially produce wrong steps, then add corrective steps that reach the right answer.
-        This pattern &mdash; wrong derivation followed by correct override &mdash; is unique to consistency-trained models.
-    </div>
-
     <div class="finding finding-insight">
-        <strong>4. Answer-only training doesn't change reasoning structure.</strong>
-        For DeepSeek, answer-only completions are nearly identical to base &mdash; same rambling prose, same truncation.
-        The model may learn to guess answers slightly better but doesn't develop structured reasoning.
-    </div>
-
-    <div class="finding finding-caution">
-        <strong>5. Diff-Anneal produces structured format but less reliable reasoning.</strong>
-        Diff models output well-formatted Step N: (Text)...(Logic)... sequences,
-        but sometimes apply rules incorrectly (e.g., Modus Ponens in the wrong direction).
-    </div>
-
-    <div class="finding finding-positive">
-        <strong>6. The consistency reward's main effect is on proof <em>organization</em>.</strong>
+        <strong>3. The consistency reward's main effect is on proof <em>organization</em>.</strong>
         Models learn to structure premises &rarr; derivation &rarr; conclusion, name inference rules explicitly,
         and reconcile derived conclusions with the question being asked.
     </div>

@@ -77,18 +77,18 @@
     <a class="card" href="eval_results.html">
         <div class="card-icon">&#x1F4CA;</div>
         <h3>Performance Comparison</h3>
-        <p>Accuracy across 5 benchmarks (LogicBench, FOLIO, ProntoQA, ProofWriter, ACPBench) for all models and training conditions. Includes detailed consistency, faithfulness, and format metrics.</p>
+        <p>Accuracy across 5 benchmarks (LogicBench, FOLIO, ProntoQA, ProofWriter, ACPBench) for DeepSeek-R1 and Qwen3 with Base, SFT, and GRPO conditions. Includes consistency, faithfulness, and format metrics.</p>
         <div class="card-stats">
-            <span class="card-badge badge-green">5 benchmarks</span>
-            <span class="card-badge badge-blue">5 models</span>
-            <span class="card-badge badge-purple">4 conditions</span>
+            <span class="card-badge badge-green">7 benchmarks</span>
+            <span class="card-badge badge-blue">2 models</span>
+            <span class="card-badge badge-purple">3 conditions</span>
         </div>
     </a>
 
     <a class="card" href="transfer_eval.html">
         <div class="card-icon">&#x2696;</div>
         <h3>Transfer Evaluation: SARA &amp; LSAT</h3>
-        <p>Zero-shot transfer to legal reasoning (SARA) and constraint satisfaction (LSAT Logic Games). GRPO models show 3&ndash;12x improvement over base models on out-of-domain tasks, demonstrating that logic-verified training generalizes.</p>
+        <p>Zero-shot transfer to legal reasoning (SARA) and constraint satisfaction (LSAT Logic Games). GRPO models consistently outperform base and SFT models on out-of-domain tasks, demonstrating that logic-verified training generalizes.</p>
         <div class="card-stats">
             <span class="card-badge badge-green">2 benchmarks</span>
             <span class="card-badge badge-blue">6 models</span>
@@ -99,11 +99,11 @@
     <a class="card" href="qualitative_comparison.html">
         <div class="card-icon">&#x1F50D;</div>
         <h3>Qualitative Analysis</h3>
-        <p>Side-by-side comparison of reasoning traces from base vs RAILS-trained models on the same questions. Shows how proof-continuity reward changes intermediate reasoning steps.</p>
+        <p>Side-by-side comparison of reasoning traces from base vs GRPO-trained DeepSeek-R1 on the same questions. Shows how consistency reward changes intermediate reasoning steps.</p>
         <div class="card-stats">
-            <span class="card-badge badge-green">16 examples</span>
-            <span class="card-badge badge-blue">4 theories</span>
-            <span class="card-badge badge-amber">base vs SAT</span>
+            <span class="card-badge badge-green">3 examples</span>
+            <span class="card-badge badge-blue">3 theories</span>
+            <span class="card-badge badge-amber">base vs GRPO</span>
         </div>
     </a>
 

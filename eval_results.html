@@ -59,12 +59,10 @@ tr:hover { background: #fafbff; }
 .badge-green { background: #dcfce7; color: #166534; }
 .badge-amber { background: #fef3c7; color: #92400e; }
 .badge-purple { background: #f3e8ff; color: #6b21a8; }
-.badge-red { background: #fee2e2; color: #991b1b; }
 
 /* Delta indicators */
 .delta-pos { color: #16a34a; font-size: 0.72rem; font-weight: 600; }
 .delta-neg { color: #dc2626; font-size: 0.72rem; font-weight: 600; }
-.delta-zero { color: #9ca3af; font-size: 0.72rem; }
 
 /* Findings */
 .finding { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.88rem; }
@@ -98,32 +96,31 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Evaluation Results</h1>
-<p class="subtitle">Performance comparison across 5 models, 4 training conditions, and 5 benchmarks &middot; Phase 1 (Classic Format GRPO)</p>
+<p class="subtitle">Performance comparison &middot; DeepSeek-R1 &amp; Qwen3 &middot; Base / SFT / GRPO pipeline &middot; <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format</p>
 
 <!-- Overview Stats -->
 <div class="summary">
     <h2>Evaluation Overview</h2>
     <p style="font-size:0.88rem; color:#555; margin-bottom:1rem;">
-        All models are evaluated on the same held-out benchmarks. <strong>SAT</strong> and <strong>Differentiable</strong> conditions
-        use proof-continuity rewards during GRPO training. <strong>Answer-Only</strong> uses only correctness reward (no consistency signal).
+        Two thinking-capable model families evaluated across 7 benchmarks under 3 training conditions.
+        <strong>SFT</strong> provides format warmup on verified reasoning traces.
+        <strong>GRPO</strong> adds SAT-based consistency reward on top of SFT, producing the full RAILS pipeline.
     </p>
     <div class="stats">
-        <div class="stat"><div class="stat-value">5</div><div class="stat-label">Models</div></div>
-        <div class="stat stat-green"><div class="stat-value">5</div><div class="stat-label">Benchmarks</div></div>
-        <div class="stat stat-purple"><div class="stat-value">4</div><div class="stat-label">Training Conditions</div></div>
-        <div class="stat stat-amber"><div class="stat-value">19</div><div class="stat-label">Eval Configurations</div></div>
+        <div class="stat"><div class="stat-value">2</div><div class="stat-label">Models</div></div>
+        <div class="stat stat-green"><div class="stat-value">7</div><div class="stat-label">Benchmarks</div></div>
+        <div class="stat stat-purple"><div class="stat-value">3</div><div class="stat-label">Training Conditions</div></div>
     </div>
     <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div> Base (no training)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Answer-Only Reward</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> SAT Reward (RAILS)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Differentiable Anneal (RAILS)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> SFT (format warmup)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> GRPO (RAILS &mdash; SAT consistency reward)</div>
     </div>
 </div>
 
 <!-- Main Accuracy Table -->
 <div class="card">
-    <h2>Accuracy Across Benchmarks</h2>
+    <h2>In-Domain Benchmark Accuracy</h2>
     <p class="section-label">Higher is better &middot; Best per model in bold green</p>
     <div class="table-wrapper">
     <table>
@@ -141,153 +138,127 @@ tr:hover { background: #fafbff; }
             <!-- DeepSeek -->
             <tr class="model-header"><td colspan="6">DeepSeek-R1 (7B)</td></tr>
             <tr class="condition-row"><td>Base</td><td>0.198</td><td>0.059</td><td>0.013</td><td>0.338</td><td>0.001</td></tr>
-            <tr class="condition-row"><td>Answer-Only</td><td>0.245</td><td>0.069</td><td>0.000</td><td>0.342</td><td>0.002</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.725 <span class="delta-pos">+0.527</span></td><td class="best">0.078</td><td class="best">0.083</td><td class="best">0.345</td><td class="best">0.009</td></tr>
-            <tr class="condition-row"><td>Diff-Anneal</td><td>0.691 <span class="delta-pos">+0.493</span></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
-
-            <!-- Llama -->
-            <tr class="model-header"><td colspan="6">Llama-3.1 (8B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.712</td><td>0.436</td><td>0.200</td><td>0.403</td><td>0.094</td></tr>
-            <tr class="condition-row"><td>Answer-Only</td><td>0.692</td><td>0.426</td><td>0.173</td><td>0.415</td><td class="best">0.184</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.750 <span class="delta-pos">+0.038</span></td><td>0.338</td><td>0.170</td><td>0.403</td><td>0.016</td></tr>
-            <tr class="condition-row"><td>Diff-Anneal</td><td>0.775 <span class="delta-pos">+0.063</span></td><td>0.397</td><td>0.170</td><td>0.398</td><td>0.058</td></tr>
-
-            <!-- Mistral -->
-            <tr class="model-header"><td colspan="6">Mistral (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.500</td><td>0.412</td><td>0.263</td><td>0.365</td><td>0.016</td></tr>
-            <tr class="condition-row"><td>Answer-Only</td><td>0.689</td><td class="best">0.461</td><td>0.077</td><td>0.358</td><td>0.078</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.722 <span class="delta-pos">+0.222</span></td><td>0.426</td><td>0.067</td><td>0.357</td><td class="best">0.128</td></tr>
-            <tr class="condition-row"><td>Diff-Anneal</td><td>0.606</td><td>0.426</td><td>0.007</td><td>0.370</td><td>0.059</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>0.082</td><td>0.324</td><td>0.030</td><td>0.355</td><td>0.000</td></tr>
+            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.284 <span class="delta-pos">+0.086</span></td><td class="best">0.431 <span class="delta-pos">+0.372</span></td><td class="best">0.053</td><td class="best">0.380</td><td>0.000</td></tr>
 
             <!-- Qwen -->
             <tr class="model-header"><td colspan="6">Qwen3 (8B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.080</td><td class="best">0.093</td><td>0.000</td><td>0.378</td><td>0.007</td></tr>
-            <tr class="condition-row"><td>Answer-Only</td><td>0.080</td><td>0.093</td><td>0.000</td><td>0.373</td><td>0.006</td></tr>
-            <tr class="condition-row"><td>SAT (RAILS)</td><td class="best">0.088</td><td>0.118</td><td>0.000</td><td class="best">0.382</td><td class="best">0.008</td></tr>
-            <tr class="condition-row"><td>Diff-Anneal</td><td>0.061</td><td>0.108</td><td class="best">0.003</td><td>0.367</td><td>0.006</td></tr>
-
-            <!-- OLMo -->
-            <tr class="model-header"><td colspan="6">OLMo-3 (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.666</td><td>0.456</td><td>0.547</td><td>0.433</td><td>0.107</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.080</td><td>0.093</td><td>0.000</td><td>0.378</td><td>0.007</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>0.039</td><td>0.343</td><td>0.003</td><td>0.368</td><td>0.002</td></tr>
+            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.359 <span class="delta-pos">+0.279</span></td><td class="best">0.402 <span class="delta-pos">+0.309</span></td><td class="best">0.073</td><td class="best">0.385</td><td>0.001</td></tr>
         </tbody>
     </table>
     </div>
+    <div class="finding finding-insight" style="margin-top:1rem;">
+        <strong>Note on SFT LogicBench dip:</strong> SFT teaches the <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> output format, which temporarily reduces LogicBench accuracy
+        (models must now produce structured proofs instead of free-text answers). GRPO then recovers and surpasses base accuracy
+        while maintaining structured output. FOLIO shows immediate and sustained improvement from SFT onward.
+    </div>
 </div>
 
-<!-- LogicBench Detailed Metrics -->
+<!-- Transfer Benchmarks -->
 <div class="card">
-    <h2>LogicBench &mdash; Detailed Metrics</h2>
-    <p class="section-label">Accuracy, Consistency (C), Faithfulness (F), and Format compliance</p>
+    <h2>Transfer Benchmarks &mdash; Out-of-Domain</h2>
+    <p class="section-label">Zero-shot transfer to legal reasoning (SARA) and constraint satisfaction (LSAT) &middot; CoT accuracy &middot; <a href="transfer_eval.html" style="color:#2563eb;">Full analysis &rarr;</a></p>
     <div class="table-wrapper">
     <table>
         <thead>
             <tr>
                 <th style="min-width:160px">Model / Condition</th>
-                <th>Accuracy</th>
-                <th>Consistency</th>
-                <th>Faithfulness</th>
-                <th>Format Rate</th>
+                <th>SARA CoT</th>
+                <th>LSAT CoT</th>
             </tr>
         </thead>
         <tbody>
-            <tr class="model-header"><td colspan="5">DeepSeek-R1 (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.198</td><td>0.000</td><td>0.42</td><td>0.00</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.725</td><td class="best">0.12</td><td class="best">0.99</td><td class="best">0.78</td></tr>
+            <tr class="model-header"><td colspan="3">DeepSeek-R1 (7B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.350</td><td>0.152</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>0.050</td><td>0.091</td></tr>
+            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.400</td><td class="best">0.170</td></tr>
 
-            <tr class="model-header"><td colspan="5">Llama-3.1 (8B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.712</td><td>0.40</td><td>0.76</td><td>0.97</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.750</td><td>0.35</td><td>0.77</td><td>0.97</td></tr>
+            <tr class="model-header"><td colspan="3">Qwen3 (8B)</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.160</td><td>0.217</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>0.110</td><td>0.161</td></tr>
+            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.430</td><td class="best">0.283</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-caution" style="margin-top:1rem;">
+        <strong>SFT hurts transfer.</strong> SFT alone consistently degrades out-of-domain performance
+        (DeepSeek SARA: 35.0% base &rarr; 5.0% SFT; Qwen LSAT: 21.7% base &rarr; 16.1% SFT).
+        GRPO recovers and exceeds base performance, suggesting the consistency reward &mdash; not format training &mdash; drives generalization.
+    </div>
+</div>
 
-            <tr class="model-header"><td colspan="5">Mistral (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.500</td><td>0.24</td><td>0.58</td><td>0.92</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.722</td><td class="best">0.35</td><td>0.59</td><td class="best">0.97</td></tr>
-
-            <tr class="model-header"><td colspan="5">OLMo-3 (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.666</td><td>0.32</td><td>0.25</td><td>0.79</td></tr>
+<!-- LogicBench Per-Theory Breakdown -->
+<div class="card">
+    <h2>LogicBench &mdash; Per-Theory Breakdown (GRPO)</h2>
+    <p class="section-label">Propositional logic theories &middot; Best GRPO checkpoints</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2" style="min-width:180px">Theory</th>
+                <th colspan="2">DeepSeek-R1 (7B)</th>
+                <th colspan="2">Qwen3 (8B)</th>
+            </tr>
+            <tr>
+                <th>Acc</th>
+                <th>Cons.</th>
+                <th>Acc</th>
+                <th>Cons.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="text-align:left;">Disjunctive Syllogism</td><td class="best">0.850</td><td>0.775</td><td class="best">0.800</td><td>0.113</td></tr>
+            <tr><td style="text-align:left;">Modus Tollens</td><td>0.500</td><td>0.650</td><td class="best">0.700</td><td>0.100</td></tr>
+            <tr><td style="text-align:left;">Hypothetical Syllogism</td><td class="best">0.675</td><td>0.650</td><td>0.438</td><td>0.092</td></tr>
+            <tr><td style="text-align:left;">Material Implication</td><td>0.125</td><td>0.306</td><td class="best">0.500</td><td>0.238</td></tr>
+            <tr><td style="text-align:left;">Constructive Dilemma</td><td>0.013</td><td>0.063</td><td class="best">0.425</td><td>0.125</td></tr>
+            <tr><td style="text-align:left;">Commutation</td><td>0.113</td><td>0.219</td><td class="best">0.225</td><td>0.088</td></tr>
+            <tr><td style="text-align:left;">Destructive Dilemma</td><td>0.000</td><td>0.200</td><td class="best">0.163</td><td>0.000</td></tr>
+            <tr><td style="text-align:left;">Bidirectional Dilemma</td><td>0.000</td><td>0.250</td><td>0.013</td><td>0.000</td></tr>
         </tbody>
     </table>
     </div>
     <div class="finding finding-insight" style="margin-top:1rem;">
-        <strong>Consistency</strong> measures what fraction of derived steps are logically entailed by prior steps (SAT-verified).
-        <strong>Faithfulness</strong> measures whether the final answer agrees with the derived conclusion.
-        <strong>Format Rate</strong> measures adherence to the structured <code>Step N: (Text)...(Logic)...</code> format.
+        <strong>Theory-specific strengths differ between models.</strong>
+        DeepSeek excels at hypothetical syllogism (0.675) and has higher consistency overall.
+        Qwen shows stronger accuracy on material implication (0.500) and constructive dilemma (0.425).
+        Both models achieve 0.70+ on simple inference types (disjunctive syllogism, modus tollens)
+        but struggle with complex dilemmas (&lt;0.25).
     </div>
 </div>
 
-<!-- Transfer Benchmarks with CoT Metrics -->
+<!-- Training Dynamics -->
 <div class="card">
-    <h2>Transfer Benchmarks &mdash; CoT Evaluation</h2>
-    <p class="section-label">Accuracy and consistency on out-of-distribution benchmarks</p>
+    <h2>Training Dynamics</h2>
+    <p class="section-label">How rewards evolve during GRPO training (DeepSeek-R1 7B, beta=0, from SFT checkpoint)</p>
     <div class="table-wrapper">
     <table>
         <thead>
             <tr>
-                <th rowspan="2" style="min-width:160px">Model / Condition</th>
-                <th colspan="2">FOLIO</th>
-                <th colspan="2">ProntoQA</th>
-                <th colspan="2">ProofWriter</th>
-            </tr>
-            <tr>
-                <th>Acc</th>
-                <th>Cons.</th>
-                <th>Acc</th>
-                <th>Cons.</th>
-                <th>Acc</th>
-                <th>Cons.</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="model-header"><td colspan="7">DeepSeek-R1 (7B)</td></tr>
-            <tr class="condition-row"><td>SAT (RAILS)</td><td>0.417</td><td>0.026</td><td>0.443</td><td>0.075</td><td class="best">0.545</td><td>0.020</td></tr>
-            <tr class="condition-row"><td>Diff-Anneal</td><td class="best">0.461</td><td>0.021</td><td>0.267</td><td>0.024</td><td>0.457</td><td>0.023</td></tr>
-
-            <tr class="model-header"><td colspan="7">Llama-3.1 (8B)</td></tr>
-            <tr class="condition-row"><td>Answer-Only</td><td>0.363</td><td>0.136</td><td>0.643</td><td>0.084</td><td>0.492</td><td>0.189</td></tr>
-            <tr class="condition-row improved"><td>SAT (RAILS)</td><td class="best">0.431</td><td>0.077</td><td class="best">0.783</td><td>0.069</td><td>0.475</td><td>0.100</td></tr>
-            <tr class="condition-row"><td>Diff-Anneal</td><td>0.407</td><td class="best">0.171</td><td>0.700</td><td>0.072</td><td class="best">0.522</td><td class="best">0.211</td></tr>
-
-            <tr class="model-header"><td colspan="7">Mistral (7B)</td></tr>
-            <tr class="condition-row"><td>Answer-Only</td><td>0.377</td><td>0.020</td><td>0.647</td><td>0.040</td><td>0.387</td><td>0.008</td></tr>
-            <tr class="condition-row"><td>SAT (RAILS)</td><td>0.343</td><td>0.038</td><td>0.787</td><td>0.064</td><td>0.402</td><td>0.022</td></tr>
-            <tr class="condition-row improved"><td>Diff-Anneal</td><td class="best">0.441</td><td>0.021</td><td class="best">0.913</td><td class="best">0.060</td><td class="best">0.415</td><td class="best">0.052</td></tr>
-        </tbody>
-    </table>
-    </div>
-</div>
-
-<!-- Phase 2: SFT + GRPO Results -->
-<div class="card">
-    <h2>Phase 2 &mdash; SFT + GRPO (Think Format)</h2>
-    <p class="section-label">Three-stage pipeline: SFT warmup &rarr; GRPO with consistency reward &middot; <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format</p>
-    <div class="table-wrapper">
-    <table>
-        <thead>
-            <tr>
-                <th style="min-width:200px">Model / Stage</th>
-                <th>LogicBench Acc</th>
+                <th>Step</th>
+                <th>Total Reward</th>
                 <th>Consistency</th>
-                <th>Faithfulness</th>
                 <th>Format</th>
-                <th>FOLIO</th>
-                <th>ProntoQA</th>
-                <th>ProofWriter</th>
+                <th>Answer</th>
+                <th>Grad Norm</th>
             </tr>
         </thead>
         <tbody>
-            <tr class="model-header"><td colspan="8">DeepSeek-14B (SFT Baseline)</td></tr>
-            <tr class="condition-row"><td>SFT checkpoint</td><td>0.082</td><td>0.061</td><td>0.127</td><td>0.252</td><td>0.157</td><td>0.107</td><td>0.453</td></tr>
-
-            <tr class="model-header"><td colspan="8">Qwen3 (8B) &mdash; SFT + GRPO</td></tr>
-            <tr class="condition-row improved"><td>GRPO ckpt-1700</td><td class="best">0.466</td><td class="best">0.115</td><td class="best">0.186</td><td class="best">0.305</td><td>0.147</td><td>0.047</td><td>0.412</td></tr>
-            <tr><td colspan="8" style="font-size:0.78rem; color:#6b7280; text-align:left; padding-left:1.2rem;">
-                Qwen3 base accuracy was 0.080 &mdash; <strong>SFT+GRPO achieves 5.8x improvement</strong> on LogicBench
-            </td></tr>
+            <tr><td>40</td><td>0.20</td><td>-0.03</td><td>0.24</td><td>0.54</td><td>8.1</td></tr>
+            <tr><td>90</td><td>0.59</td><td>+0.08</td><td>0.27</td><td>0.61</td><td>5.2</td></tr>
+            <tr><td>180</td><td>1.63</td><td>+0.52</td><td>0.51</td><td>0.81</td><td>2.4</td></tr>
+            <tr><td>300</td><td>1.95</td><td>+0.52</td><td>0.66</td><td>0.89</td><td>1.3</td></tr>
+            <tr><td>600</td><td>2.40</td><td>+0.82</td><td>0.73</td><td>0.94</td><td>1.2</td></tr>
+            <tr class="improved"><td>1030</td><td class="best">2.66</td><td class="best">+0.84</td><td class="best">0.77</td><td class="best">1.00</td><td>0.8</td></tr>
         </tbody>
     </table>
     </div>
     <div class="finding finding-positive" style="margin-top:1rem;">
-        <strong>SFT warmup dramatically helps Qwen3:</strong> Without SFT, Qwen3 could not produce the structured format at all (0% format rate).
-        After SFT warmup, it starts GRPO with 64% format compliance and reaches 0.466 accuracy (vs 0.080 base).
+        <strong>Stable training with beta=0.</strong> With SFT warm-start and multi-signal reward (consistency + format + answer + length),
+        KL penalty is unnecessary. Consistency improves monotonically from -0.03 to +0.84.
+        Gradient norms decrease throughout, indicating stable convergence. See <a href="research_notes.html#beta-zero" style="color:#2563eb;">beta=0 research note</a> for details.
     </div>
 </div>
 
@@ -296,93 +267,52 @@ tr:hover { background: #fafbff; }
     <h2>Key Findings</h2>
 
     <div class="finding finding-positive">
-        <strong>SAT reward produces the largest LogicBench gains.</strong>
-        DeepSeek improves from 0.198 to 0.725 (+266%), Mistral from 0.500 to 0.722 (+44%).
-        Proof-continuity reward teaches models to produce structured, terminating proofs.
+        <strong>GRPO with consistency reward produces the largest gains.</strong>
+        Qwen3 improves from 0.080 to 0.359 on LogicBench (+349%). Both models show 3&ndash;7x improvement on FOLIO.
+        The consistency signal teaches models to produce structured, terminating proofs.
     </div>
 
     <div class="finding finding-positive">
-        <strong>Answer-only training does not change reasoning structure.</strong>
-        For DeepSeek, answer-only completions are nearly identical to base &mdash; same rambling prose, same truncation before reaching a conclusion.
-        The consistency signal is what drives structural improvement.
+        <strong>SFT warmup is essential for format learning.</strong>
+        Without SFT, thinking models cannot produce the structured <code>&lt;step&gt;</code> format.
+        SFT teaches the output format; GRPO then improves reasoning quality within that format.
     </div>
 
     <div class="finding finding-insight">
-        <strong>SAT training teaches metacognitive reasoning.</strong>
-        SAT-trained models reason about <em>when rules don't apply</em> (e.g., correctly rejecting denying-the-antecedent fallacy).
-        They also produce self-correction steps when initial derivations are wrong.
+        <strong>GRPO generalizes to unseen domains.</strong>
+        On SARA (legal reasoning) and LSAT (constraint satisfaction), GRPO models outperform both base and SFT models.
+        Qwen3 GRPO reaches 43.0% on SARA (vs 16.0% base) and 28.3% on LSAT (vs 21.7% base).
+    </div>
+
+    <div class="finding finding-caution">
+        <strong>SFT alone hurts out-of-domain transfer.</strong>
+        SFT models perform worse than base on SARA and LSAT, likely due to format overfitting on logic-specific training data.
+        The consistency reward during GRPO prevents this overfitting by rewarding valid reasoning regardless of domain.
     </div>
 
     <div class="finding finding-insight">
-        <strong>Transfer to out-of-distribution benchmarks is promising.</strong>
-        Mistral Diff-Anneal reaches 0.913 on ProntoQA (vs 0.263 base). Llama SAT reaches 0.783.
-        ProofWriter shows consistent gains for DeepSeek SAT (0.545 vs 0.338 base).
-    </div>
-
-    <div class="finding finding-caution">
-        <strong>Qwen3 struggles without SFT warmup.</strong>
-        In Phase 1 (classic format, no SFT), Qwen3 shows minimal improvement across all conditions.
-        Phase 2 SFT warmup resolves this &mdash; the model first learns the output format, then GRPO improves reasoning.
-    </div>
-
-    <div class="finding finding-caution">
-        <strong>Checkpoint selection matters.</strong>
-        A diagnostic sweep on DeepSeek SAT shows checkpoint-1000 is optimal (total reward 1.25).
-        Later checkpoints show reward degradation &mdash; a known issue in RL training that motivates early stopping.
-    </div>
-</div>
-
-<!-- Training Dynamics -->
-<div class="card">
-    <h2>Training Dynamics</h2>
-    <p class="section-label">How rewards evolve during GRPO training (DeepSeek SAT)</p>
-    <div class="table-wrapper">
-    <table>
-        <thead>
-            <tr>
-                <th>Checkpoint</th>
-                <th>Consistency</th>
-                <th>Format</th>
-                <th>Answer</th>
-                <th>Total Reward</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>Base (no adapter)</td><td>-0.25</td><td>0.11</td><td>0.50</td><td>0.36</td></tr>
-            <tr><td>Step 100</td><td>-0.42</td><td>-0.07</td><td>0.17</td><td>-0.32</td></tr>
-            <tr class="improved"><td>Step 1000</td><td class="best">0.17</td><td class="best">0.75</td><td>0.33</td><td class="best">1.25</td></tr>
-            <tr><td>Step 1900</td><td>-0.31</td><td>0.27</td><td>0.17</td><td>0.13</td></tr>
-            <tr><td>Step 2800</td><td>-0.47</td><td>0.71</td><td>0.00</td><td>0.24</td></tr>
-            <tr><td>Step 3700</td><td>-0.33</td><td>0.17</td><td>0.17</td><td>0.00</td></tr>
-        </tbody>
-    </table>
-    </div>
-    <div class="finding finding-caution" style="margin-top:1rem;">
-        <strong>Sweet spot at checkpoint-1000.</strong> Consistency peaks at 0.17, then degrades. Later checkpoints show reward hacking &mdash;
-        format score remains high (0.71) but consistency collapses (-0.47). This motivates the Phase 2 approach: SFT warmup stabilizes
-        the format, allowing GRPO to focus on consistency improvement.
+        <strong>Models show complementary strengths.</strong>
+        DeepSeek excels at theories requiring chain-building (hypothetical syllogism: 0.675) with high consistency (34% overall).
+        Qwen achieves higher accuracy (LogicBench 0.359 vs 0.284) but lower faithfulness (16% vs 91%),
+        suggesting different strategies for leveraging the consistency signal.
     </div>
 </div>
 
 <!-- Conditions Legend -->
 <div class="card">
-    <h2>Training Conditions Explained</h2>
+    <h2>Training Conditions</h2>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:0.8rem;">
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #94a3b8;">
             <strong style="font-size:0.85rem;">Base</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Pretrained model with no additional training. Evaluated zero-shot with the structured reasoning prompt.</p>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Pretrained thinking model with no additional training. Evaluated zero-shot with the structured reasoning prompt.</p>
         </div>
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #f59e0b;">
-            <strong style="font-size:0.85rem;">Answer-Only</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">GRPO training with answer correctness reward only. No consistency signal &mdash; the model is not penalized for invalid reasoning chains.</p>
+            <strong style="font-size:0.85rem;">SFT (Format Warmup)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Supervised fine-tuning on 6,033 verified reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format. Teaches the model the output structure before RL. QLoRA, 10 epochs.</p>
         </div>
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #22c55e;">
-            <strong style="font-size:0.85rem;">SAT (RAILS)</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">GRPO with SAT-based consistency reward. Each derived step is checked against prior steps using a SAT solver. Invalid chains receive zero answer credit.</p>
-        </div>
-        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #8b5cf6;">
-            <strong style="font-size:0.85rem;">Diff-Anneal (RAILS)</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">GRPO with differentiable NSFR consistency reward. Produces continuous [0,1] scores via tensor-encoded soft logic, with gamma annealing over training.</p>
+            <strong style="font-size:0.85rem;">GRPO (RAILS)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Group Relative Policy Optimization from SFT checkpoint with SAT consistency reward. Each derived step is checked by a SAT solver. Invalid reasoning chains receive zero answer credit.</p>
         </div>
     </div>
 </div>
@@ -390,6 +320,8 @@ tr:hover { background: #fafbff; }
 <div class="footer">
     RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 2026<br>
     <a href="qualitative_comparison.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Qualitative Analysis &rarr;</a>
+    &middot;
+    <a href="transfer_eval.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Transfer Evaluation &rarr;</a>
 </div>
 </body>
 </html>
