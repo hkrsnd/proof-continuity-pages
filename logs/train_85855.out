@@ -1,0 +1,84 @@
+============================================
+  LoGRPO Training Experiment
+============================================
+Date: Fri Feb 20 08:14:58 PM UTC 2026
+Node: cn04
+Job ID: 85855
+Config: experiments/configs/deepseek_sat_think_from_sft_v2.yaml
+============================================
+0, NVIDIA H100 80GB HBM3, 81559 MiB
+CUDA_VISIBLE_DEVICES=0
+GPU UUID: GPU-e44b39f2-3f63-2342-ab80-abe64cd71e70
+Mapped GPU UUID GPU-e44b39f2-3f63-2342-ab80-abe64cd71e70 -> CUDA_VISIBLE_DEVICES=0
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+2026-02-20 20:15:38,470 INFO Config: {'model': 'deepseek', 'max_seq_length': 10240, 'load_in_4bit': True, 'lora_r': 16, 'lora_alpha': 16, 'lora_target_modules': ['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj'], 'max_lora_rank': 32, 'gpu_memory_utilization': 0.6, 'logic_type': 'propositional_logic', 'theory': 'mixed', 'data_path': './LogicBench/data/LogicBench(Aug)', 'num_train_epochs': 2, 'max_prompt_length': 6144, 'max_completion_length': 4096, 'logging_steps': 10, 'save_steps': 100, 'bf16': True, 'fp16': False, 'learning_rate': 2e-05, 'beta': 0.04, 'max_grad_norm': 1.0, 'warmup_ratio': 0.05, 'lr_scheduler_type': 'cosine', 'consistency_method': 'sat', 'reward_clip_range': 3.0, 'min_reasoning_steps': 2, 'length_penalty_weight': 0.5, 'consistency_weight': 1.5, 'gamma_schedule': None, 'wandb_project': 'LoGRPO-Experiments', 'wandb_run_name': 'auto', 'sample_log_interval': 50, 'num_samples_to_log': 5, 'model_name': 'unsloth/DeepSeek-R1-Distill-Qwen-7B', 'sft_adapter_path': 'models/deepseek-sft-think-mixed-85831', 'think': True, 'per_device_train_batch_size': 8, 'num_generations': 8, 'gradient_checkpointing': True, 'truncation_penalty': -0.5, 'mask_truncated_completions': True, 'off_policy_mask_threshold': 0.5}
+2026-02-20 20:15:40,915 INFO Think mode: using <think> + <step> verified thinking format
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/bidirectional_dilemma/data_instances.json
+2026-02-20 20:15:40,919 INFO Loaded 150 samples from propositional_logic/bidirectional_dilemma
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/commutation/data_instances.json
+2026-02-20 20:15:40,922 INFO Loaded 150 samples from propositional_logic/commutation
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/constructive_dillema/data_instances.json
+2026-02-20 20:15:40,925 INFO Loaded 151 samples from propositional_logic/constructive_dillema
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/destructive_dillema/data_instances.json
+2026-02-20 20:15:40,928 INFO Loaded 150 samples from propositional_logic/destructive_dillema
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/disjunctive_syllogism/data_instances.json
+2026-02-20 20:15:40,931 INFO Loaded 151 samples from propositional_logic/disjunctive_syllogism
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/hypothetical_syllogism/data_instances.json
+2026-02-20 20:15:40,934 INFO Loaded 150 samples from propositional_logic/hypothetical_syllogism
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/material_implication/data_instances.json
+2026-02-20 20:15:40,937 INFO Loaded 150 samples from propositional_logic/material_implication
+✅ Successfully loaded dataset from: ./LogicBench/data/LogicBench(Aug)/propositional_logic/modus_tollens/data_instances.json
+2026-02-20 20:15:40,940 INFO Loaded 150 samples from propositional_logic/modus_tollens
+2026-02-20 20:15:40,940 INFO Total mixed samples for propositional_logic: 1202
+2026-02-20 20:15:40,983 INFO Training dataset: 4808 samples
+2026-02-20 20:15:40,984 INFO Loading model: unsloth/DeepSeek-R1-Distill-Qwen-7B
+2026-02-20 20:15:40,984 INFO GPUs available: 1
+2026-02-20 20:15:40,984 INFO Attempting fast_inference=True with full precision (vllm_mem=0.35)...
+Unsloth: Patching vLLM v1 graph capture
+Unsloth: Patching vLLM v0 graph capture
+==((====))==  Unsloth 2025.9.4: Fast Qwen2 patching. Transformers: 4.57.6. vLLM: 0.10.1.1.
+   \\   /|    NVIDIA H100 80GB HBM3. Num GPUs = 1. Max memory: 79.189 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.7.0+cu128. CUDA: 9.0. CUDA Toolkit: 12.8. Triton: 3.3.0
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.30. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+Unsloth: vLLM loading unsloth/DeepSeek-R1-Distill-Qwen-7B with actual GPU utilization = 34.73%
+Unsloth: Your GPU has CUDA compute capability 9.0 with VRAM = 79.19 GB.
+Unsloth: Using conservativeness = 1.0. Chunked prefill tokens = 10240. Num Sequences = 256.
+Unsloth: vLLM's KV Cache can use up to 13.17 GB. Also swap space = 6 GB.
+Unsloth: Not an error, but `device` is not supported in vLLM. Skipping.
+Unsloth: Just some info: will skip parsing ['pre_feedforward_layernorm', 'q_norm', 'k_norm', 'post_feedforward_layernorm']
+Unsloth: Just some info: will skip parsing ['pre_feedforward_layernorm', 'q_norm', 'k_norm', 'post_feedforward_layernorm']
+2026-02-20 20:16:19,198 INFO fast_inference=True loaded successfully
+2026-02-20 20:16:19,198 INFO Patched chat template: disabled <think> stripping for GRPO training
+2026-02-20 20:16:20,920 INFO Gradient checkpointing mode: True
+2026-02-20 20:16:20,920 INFO Loading SFT adapter from /mnt/vast/home/hs40vahe/ProofContinuity/models/deepseek-sft-think-mixed-85831
+2026-02-20 20:16:21,183 INFO SFT adapter warm-start: loaded 392 params, skipped 0
+2026-02-20 20:16:21,184 INFO Set generation_config: max_new_tokens=4096, max_length=10240
+2026-02-20 20:16:21,365 INFO Prompts truncated: system<=23347 chars, user<=1228 chars
+2026-02-20 20:16:21,365 INFO Estimated total steps: 1202
+2026-02-20 20:16:21,369 INFO DiagnosticLogger writing to /mnt/vast/home/hs40vahe/ProofContinuity/logs/deepseek-sat-think-mixed-85855/diagnostics
+2026-02-20 20:16:21,369 INFO Capped max_position_embeddings: 131072 -> 10240
+2026-02-20 20:16:21,369 INFO Set vllm_max_model_length=10240
+2026-02-20 20:16:21,369 INFO Set beta=0.04 (KL penalty enabled)
+2026-02-20 20:16:21,369 INFO Enabled mask_truncated_completions (DAPO)
+2026-02-20 20:16:21,370 INFO Set off_policy_mask_threshold=0.5 (DeepSeek-V3.2)
+2026-02-20 20:16:21,411 INFO Patched vLLM max_num_batched_tokens to 10240
+2026-02-20 20:16:32,752 INFO Starting training: deepseek-sat-think-mixed-85855
+2026-02-20 20:16:32,752 INFO   Model: deepseek
+2026-02-20 20:16:32,752 INFO   Method: sat
+2026-02-20 20:16:32,752 INFO   Theory: mixed
+2026-02-20 20:16:32,753 INFO   Gamma schedule: None
+2026-02-20 20:16:32,753 INFO   Epochs: 2
+2026-02-20 20:16:32,753 INFO   Learning rate: 2e-05
+2026-02-20 20:16:32,753 INFO   Max grad norm: 1.0
+2026-02-20 20:16:32,753 INFO   Warmup ratio: 0.05
+2026-02-20 20:16:32,753 INFO   LR scheduler: cosine
+2026-02-20 20:16:32,753 INFO   Beta (KL): 0.04
+2026-02-20 20:16:32,753 INFO   Reward clip: 3.0
+2026-02-20 20:16:32,753 INFO   Min reasoning steps: 2
+2026-02-20 20:16:32,753 INFO   Max reasoning steps: 10
+2026-02-20 20:16:32,753 INFO   Length penalty weight: 0.5
+2026-02-20 20:16:32,753 INFO   Consistency weight: 1.5
+2026-02-20 20:16:32,753 INFO   Output: /mnt/vast/home/hs40vahe/ProofContinuity/models/deepseek-sat-think-mixed-85855
