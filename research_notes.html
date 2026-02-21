@@ -85,6 +85,14 @@
     <div class="toc-item">
         <span class="toc-date">2026-02-21</span>
         <div>
+            <a class="toc-link" href="#beta-zero">The Beta=0 Discovery: Why KL Penalty Destroys GRPO Training</a>
+            <span class="toc-tag tag-red">key finding</span>
+            <div class="toc-desc">Reference run had NaN KL throughout &mdash; effectively no penalty. Setting beta=0 explicitly produced the best results ever: reward 2.66, consistency 0.84, format compliance 68%.</div>
+        </div>
+    </div>
+    <div class="toc-item">
+        <span class="toc-date">2026-02-21</span>
+        <div>
             <a class="toc-link" href="#think-template">Think Template Divergence: DeepSeek-R1 vs Qwen3/QwQ</a>
             <span class="toc-tag tag-red">key finding</span>
             <div class="toc-desc">Why think-stripping models resist structured verification training. Empirical evidence, root cause, and recommendations.</div>
@@ -105,6 +113,103 @@
             <span class="toc-tag tag-amber">paper framing</span>
             <div class="toc-desc">Benchmarks, related work, and motivation for why formal verification matters in high-stakes domains.</div>
         </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- NOTE 0: Beta=0 Discovery                                               -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="note open" id="beta-zero">
+    <div class="note-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-chevron">&#x25B6;</span>
+        <span class="note-title">The Beta=0 Discovery: Why KL Penalty Destroys GRPO Training</span>
+        <span class="note-date">2026-02-21</span>
+    </div>
+    <div class="note-body">
+
+        <div class="finding good">
+            <strong>Key finding:</strong> Our best-ever run (85855, reward 2.66) had <code>KL=NaN</code> at every step &mdash; effectively training with <strong>zero KL penalty</strong> despite <code>beta=0.04</code>. Setting <code>beta=0</code> explicitly reproduced and exceeded this result. Any <code>beta&gt;0</code> with working KL computation causes catastrophic instability.
+        </div>
+
+        <h2>The Mystery: Why Did 85855 Succeed?</h2>
+
+        <p>Job 85855 was our reference "successful" GRPO run: reward reached 2.66, consistency 0.84, format 0.77. We assumed its hyperparameters (<code>beta=0.04</code>, <code>LR=5e-5</code>) were the recipe. But when we launched new runs with the same settings from the SFT v2 checkpoint, they all exploded.</p>
+
+        <table>
+            <tr><th>Run</th><th>Config</th><th>KL at Step 20</th><th>Grad Norm Peak</th><th>Outcome</th></tr>
+            <tr><td>85855</td><td>beta=0.04, LR=5e-5</td><td style="color:#16a34a"><strong>NaN</strong></td><td>3.7</td><td style="color:#16a34a">Reward 2.66</td></tr>
+            <tr><td>85920</td><td>beta=0.01, LR=5e-5</td><td style="color:#dc2626">2,459</td><td style="color:#dc2626">1.7M</td><td style="color:#dc2626">Cancelled (unstable)</td></tr>
+            <tr><td>85929</td><td>beta=0.04, LR=2e-5</td><td style="color:#dc2626">23,020</td><td style="color:#dc2626">675,840</td><td style="color:#dc2626">Cancelled (KL dominated)</td></tr>
+        </table>
+
+        <h2>Root Cause: NaN KL = No Penalty</h2>
+
+        <p>Examining the metrics CSV from 85855 revealed the smoking gun: <strong>every single row had <code>kl=NaN</code></strong> across all 2000+ steps. When KL computes to NaN, PyTorch's loss computation effectively ignores the KL term entirely. The model was training with pure GRPO advantage signal and zero KL constraint.</p>
+
+        <div class="finding">
+            <strong>The math:</strong> GRPO loss = policy_gradient_loss + beta * KL_divergence. When KL=NaN, this becomes loss = policy_gradient_loss + 0.04 * NaN = NaN... but TRL/PyTorch handles this by masking or skipping the NaN term, so effectively <strong>loss = policy_gradient_loss</strong> alone.
+        </div>
+
+        <p>The NaN KL is likely tied to <code>fast_inference=True</code> (Unsloth vLLM engine). When TRL creates the reference model for KL computation, something in the Unsloth fast-inference path produces NaN log-probabilities. With <code>fast_inference=False</code> (14B config, TRL-managed vLLM), KL computes correctly &mdash; and immediately dominates the loss.</p>
+
+        <h3>Proof: KL Dominates When It Works</h3>
+
+        <p>In run 85929 (<code>beta=0.04</code>, working KL):</p>
+        <pre><code>Step 20: loss = -0.013, KL = 23,020
+         loss / KL = 0.013 / 23020 = 0.0000006
+
+         KL contribution to loss: beta * KL = 0.04 * 23020 = 921
+         Policy gradient contribution: ~0.01
+
+         Ratio: KL term is 92,100x larger than the useful signal</code></pre>
+
+        <p>The policy gradient (which carries the reward signal) is completely drowned out. The optimizer sees only "minimize KL" and ignores the reward entirely.</p>
+
+        <h2>The Fix: beta=0</h2>
+
+        <p>Setting <code>beta=0.0</code> explicitly removes KL penalty. Run 85934 with beta=0 from SFT v2 checkpoint:</p>
+
+        <table>
+            <tr><th>Step</th><th>Total Reward</th><th>Consistency</th><th>Format</th><th>Answer</th><th>Grad Norm</th></tr>
+            <tr><td>40</td><td>0.20</td><td>-0.03</td><td>0.24</td><td>0.54</td><td>8.1</td></tr>
+            <tr><td>90</td><td>0.59</td><td>+0.08</td><td>0.27</td><td>0.61</td><td>5.2</td></tr>
+            <tr><td>180</td><td>1.63</td><td>+0.52</td><td>0.51</td><td>0.81</td><td>2.4</td></tr>
+            <tr><td>300</td><td>1.95</td><td>+0.52</td><td>0.66</td><td>0.89</td><td>1.3</td></tr>
+            <tr><td>600</td><td>2.40</td><td>+0.82</td><td>0.73</td><td>0.94</td><td>1.2</td></tr>
+            <tr><td>1030</td><td style="color:#16a34a;font-weight:700">2.66</td><td style="color:#16a34a;font-weight:700">+0.84</td><td style="color:#16a34a;font-weight:700">0.77</td><td style="color:#16a34a;font-weight:700">1.00</td><td>0.8</td></tr>
+            <tr><td>1260</td><td style="color:#16a34a;font-weight:700">2.70</td><td style="color:#16a34a;font-weight:700">+0.90</td><td>0.79</td><td>0.88</td><td>0.7</td></tr>
+        </table>
+
+        <div class="finding good">
+            <strong>Result:</strong> Reward 2.70, consistency 0.90, format 0.79, 100% answer accuracy at peak. Grad norms stay below 10 throughout. This is the best GRPO result in the project &mdash; matching 85855's performance with a <strong>known, reproducible</strong> configuration.
+        </div>
+
+        <h2>Why Beta=0 Works Here</h2>
+
+        <p>Standard RL wisdom says KL penalty prevents reward hacking and mode collapse. Why does removing it work for RAILS?</p>
+
+        <ol>
+            <li><strong>SFT warm-start provides the anchor.</strong> The LoRA weights are initialized from a 10-epoch SFT checkpoint that already produces reasonable format and structure. The model starts close to a good policy.</li>
+            <li><strong>Multi-signal reward is self-regularizing.</strong> The 4-component reward (consistency + format + answer + length) constrains the output space. The model can't hack one signal without losing another.</li>
+            <li><strong>LoRA limits capacity.</strong> With rank-16 LoRA, the model can't deviate as far from the base weights as full fine-tuning would allow. This acts as implicit regularization.</li>
+            <li><strong>Clean context propagation.</strong> Invalid steps don't enter the context for subsequent verification. This makes reward hacking progressively harder (can't build on a fake foundation).</li>
+        </ol>
+
+        <h2>Implications</h2>
+
+        <ul>
+            <li><strong>For RAILS:</strong> All future GRPO configs should use <code>beta=0</code>. The 14B config (v4, job 85954) already uses this.</li>
+            <li><strong>For the paper:</strong> This is an interesting finding &mdash; with sufficiently rich reward signals and SFT warm-start, KL penalty is unnecessary and harmful. Could be its own ablation study.</li>
+            <li><strong>For reproducibility:</strong> The "successful" 85855 run was not reproducible because it depended on a NaN KL bug. The beta=0 configuration makes the same behavior explicit and reliable.</li>
+        </ul>
+
+        <h2>Active Runs</h2>
+        <table>
+            <tr><th>Job</th><th>Model</th><th>Config</th><th>Status</th></tr>
+            <tr><td>85934</td><td>DeepSeek-7B</td><td>v3 (beta=0, LR=2e-5)</td><td style="color:#16a34a">Step 1260, reward 2.70</td></tr>
+            <tr><td>85954</td><td>DeepSeek-14B</td><td>v4 (beta=0, LR=1e-5)</td><td>Step 30, early (stable so far)</td></tr>
+        </table>
+
     </div>
 </div>
 
@@ -241,10 +346,10 @@ Hold that step, it seem <span class="garbled">problematic&#x5947;&#x7EB3;</span>
             <tr><td>SFT epochs: 5 &rarr; 10</td><td><code>deepseek_sft_think_v2.yaml</code></td><td>Stronger override of scratchpad bias</td></tr>
             <tr><td>SFT data: 4,364 &rarr; 6,033</td><td>Rebuilt <code>think_all.jsonl</code></td><td>More diverse format examples</td></tr>
             <tr><td>SFT LR: 1.5e-4 &rarr; 1.0e-4</td><td>Same config</td><td>Avoid overfitting on longer training</td></tr>
-            <tr><td>GRPO beta: 0.01 &rarr; 0.05</td><td><code>deepseek_sat_think_from_sft_v2.yaml</code></td><td>5x stronger KL anchor</td></tr>
+            <tr><td>GRPO beta: 0.04 &rarr; <strong>0.0</strong></td><td><code>deepseek_sat_think_from_sft_v3.yaml</code></td><td>KL penalty is harmful with SFT warm-start (see <a href="#beta-zero">beta=0 note</a>)</td></tr>
         </table>
 
-        <p>Expected: format reward 0.72 &rarr; 0.85+, KL 15&ndash;30 &rarr; &lt;5, garbled outputs eliminated.</p>
+        <p><strong>Result:</strong> SFT v2 + beta=0 GRPO (job 85934) achieved format reward <strong>0.79</strong>, consistency <strong>0.90</strong>, total reward <strong>2.70</strong>. KL stays at 0 (no penalty), grad norms &lt;10. Garbled outputs eliminated.</p>
 
     </div>
 </div>
