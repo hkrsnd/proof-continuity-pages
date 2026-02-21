@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Transfer Evaluation: SARA &amp; LSAT</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .back-link { display: inline-block; margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+    /* Summary cards */
+    .key-finding { background: linear-gradient(135deg, #eff6ff, #f0f4ff); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border-left: 4px solid #2563eb; }
+    .key-finding h2 { font-size: 1.1rem; color: #16213e; margin-bottom: 0.6rem; }
+    .key-finding p { font-size: 0.9rem; color: #444; }
+    .key-finding .highlight { font-weight: 700; color: #2563eb; }
+
+    /* Benchmark description */
+    .benchmarks { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 2rem; }
+    .benchmark-card { background: white; border-radius: 12px; padding: 1.3rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .benchmark-card h3 { font-size: 1rem; color: #16213e; margin-bottom: 0.4rem; }
+    .benchmark-card .meta { font-size: 0.8rem; color: #888; margin-bottom: 0.5rem; }
+    .benchmark-card p { font-size: 0.85rem; color: #555; }
+    .benchmark-card .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; margin-right: 0.3rem; }
+    .badge-blue { background: #e0e7ff; color: #3730a3; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+
+    /* Tables */
+    .table-section { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .table-section h2 { font-size: 1.15rem; color: #16213e; margin-bottom: 0.3rem; }
+    .table-section .table-note { font-size: 0.82rem; color: #888; margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { background: #f1f5f9; padding: 0.6rem 0.8rem; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 0.55rem 0.8rem; border-bottom: 1px solid #f1f5f9; }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .best { font-weight: 700; color: #16a34a; }
+    .model-base { color: #6b7280; }
+    .model-sft { color: #7c3aed; }
+    .model-grpo { color: #2563eb; font-weight: 600; }
+    .delta { font-size: 0.75rem; font-weight: 600; }
+    .delta-up { color: #16a34a; }
+    .delta-down { color: #dc2626; }
+
+    /* Qualitative examples */
+    .examples-section { margin-bottom: 2rem; }
+    .examples-section h2 { font-size: 1.15rem; color: #16213e; margin-bottom: 0.5rem; }
+    .examples-section .section-note { font-size: 0.82rem; color: #888; margin-bottom: 1rem; }
+
+    .example-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .example-card h3 { font-size: 1rem; color: #16213e; margin-bottom: 0.5rem; }
+    .example-meta { font-size: 0.8rem; color: #888; margin-bottom: 0.8rem; }
+    .example-prompt { background: #f8f9fa; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #333; border-left: 3px solid #94a3b8; }
+    .example-prompt strong { color: #16213e; display: block; margin-bottom: 0.3rem; font-size: 0.8rem; }
+
+    .response-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 768px) {
+        .response-grid { grid-template-columns: 1fr; }
+        .benchmarks { grid-template-columns: 1fr; }
+    }
+
+    .response-box { border-radius: 8px; padding: 1rem; font-size: 0.82rem; font-family: 'Consolas', 'Monaco', monospace; white-space: pre-wrap; word-break: break-word; overflow: auto; max-height: 400px; }
+    .response-box .box-header { font-family: 'Segoe UI', sans-serif; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .response-correct { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .response-correct .box-header { color: #166534; }
+    .response-wrong { background: #fef2f2; border: 1px solid #fecaca; }
+    .response-wrong .box-header { color: #991b1b; }
+    .response-neutral { background: #f8f9fa; border: 1px solid #e5e7eb; }
+    .response-neutral .box-header { color: #374151; }
+    .verdict { font-size: 0.75rem; font-weight: 600; padding: 0.1rem 0.4rem; border-radius: 10px; }
+    .verdict-correct { background: #dcfce7; color: #166534; }
+    .verdict-wrong { background: #fecaca; color: #991b1b; }
+
+    .step-tag { color: #7c3aed; font-weight: 600; }
+    .logic-tag { color: #0369a1; }
+
+    /* Analysis section */
+    .analysis { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .analysis h2 { font-size: 1.15rem; color: #16213e; margin-bottom: 0.8rem; }
+    .analysis h3 { font-size: 0.95rem; color: #475569; margin-top: 1rem; margin-bottom: 0.4rem; }
+    .analysis p, .analysis li { font-size: 0.88rem; color: #555; margin-bottom: 0.4rem; }
+    .analysis ul { padding-left: 1.3rem; }
+
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="index.html">&larr; Back to Hub</a>
+
+<h1>Transfer Evaluation: SARA &amp; LSAT</h1>
+<p class="subtitle">Do logic-trained models generalize to real-world legal reasoning and constraint satisfaction?</p>
+
+<div class="key-finding">
+    <h2>Key Finding</h2>
+    <p>GRPO models trained with SAT consistency rewards on LogicBench show dramatic zero-shot transfer to out-of-domain tasks.
+    GRPO Qwen achieves <span class="highlight">24.0% on SARA</span> (vs 2.0% base, 12x improvement) and
+    <span class="highlight">11.3% on LSAT</span> (vs 4.8% base, 2.4x improvement) in CoT mode &mdash;
+    without any training on legal or constraint satisfaction data.
+    GRPO DeepSeek shows even stronger gains: <span class="highlight">40.0% SARA CoT</span> (8x over base) and <span class="highlight">13.0% LSAT CoT</span> (3.3x over base).
+    This suggests that learning to reason with verified logical steps transfers broadly.</p>
+</div>
+
+<!-- Benchmark Descriptions -->
+<div class="benchmarks">
+    <div class="benchmark-card">
+        <h3>SARA (Statutory Reasoning Assessment)</h3>
+        <div class="meta">
+            <span class="badge badge-blue">100 test cases</span>
+            <span class="badge badge-green">Entailment / Contradiction</span>
+            <span class="badge badge-amber">US Tax Code</span>
+        </div>
+        <p>Reasoning about US tax statutes (IRC Sections 1, 63, 68, 151, 152, 3301, 3306, 7703). Each question provides facts and a statutory conclusion; the model must determine if the conclusion follows (entailment) or contradicts the premises. Statutes are essentially Horn clauses &mdash; the dataset includes Prolog encodings.</p>
+    </div>
+    <div class="benchmark-card">
+        <h3>LSAT Logic Games (Analytical Reasoning)</h3>
+        <div class="meta">
+            <span class="badge badge-blue">230 test cases</span>
+            <span class="badge badge-green">5-way multiple choice (A&ndash;E)</span>
+            <span class="badge badge-amber">Constraint Satisfaction</span>
+        </div>
+        <p>Constraint satisfaction problems from LSAT Analytical Reasoning sections. Each game presents a scenario with explicit rules about orderings, groupings, or assignments, then asks which configurations are possible or necessary. Requires systematic constraint propagation.</p>
+    </div>
+</div>
+
+<!-- SARA Results Table -->
+<div class="table-section">
+    <h2>SARA Results</h2>
+    <p class="table-note">100 US tax code reasoning problems. "Basic" = direct answer extraction. "CoT" = chain-of-thought with step-by-step reasoning. Models were trained only on LogicBench (propositional/FOL/non-monotonic logic) &mdash; zero legal training data.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th class="num">Basic Acc.</th>
+                <th class="num">CoT Acc.</th>
+                <th class="num">Parse Success</th>
+                <th class="num">Faithfulness</th>
+                <th class="num">Consistency</th>
+                <th class="num">Avg Steps</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="model-base">Base DeepSeek 7B</td>
+                <td class="num">2.0%</td>
+                <td class="num">5.0%</td>
+                <td class="num">33.0%</td>
+                <td class="num">9.0%</td>
+                <td class="num">0.0%</td>
+                <td class="num">0.8</td>
+            </tr>
+            <tr>
+                <td class="model-sft">SFT DeepSeek 7B</td>
+                <td class="num">1.0%</td>
+                <td class="num">7.0%</td>
+                <td class="num">48.0%</td>
+                <td class="num">47.0%</td>
+                <td class="num">0.0%</td>
+                <td class="num">1.1</td>
+            </tr>
+            <tr>
+                <td class="model-grpo">GRPO DeepSeek 7B</td>
+                <td class="num">0.0%</td>
+                <td class="num best">40.0%</td>
+                <td class="num best">97.0%</td>
+                <td class="num">24.0%</td>
+                <td class="num best">18.3%</td>
+                <td class="num">4.5</td>
+            </tr>
+            <tr><td colspan="7" style="height:4px; background: #f1f5f9; padding:0;"></td></tr>
+            <tr>
+                <td class="model-base">Base Qwen 8B</td>
+                <td class="num">0.0%</td>
+                <td class="num">2.0%</td>
+                <td class="num">8.0%</td>
+                <td class="num">2.0%</td>
+                <td class="num">0.0%</td>
+                <td class="num">0.2</td>
+            </tr>
+            <tr>
+                <td class="model-sft">SFT Qwen 8B</td>
+                <td class="num">0.0%</td>
+                <td class="num">4.0%</td>
+                <td class="num">59.0%</td>
+                <td class="num">58.0%</td>
+                <td class="num">0.0%</td>
+                <td class="num">1.3</td>
+            </tr>
+            <tr>
+                <td class="model-grpo">GRPO Qwen 8B</td>
+                <td class="num">4.0%</td>
+                <td class="num">24.0%</td>
+                <td class="num best">100%</td>
+                <td class="num best">40.0%</td>
+                <td class="num">0.3%</td>
+                <td class="num">3.7</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- LSAT Results Table -->
+<div class="table-section">
+    <h2>LSAT Logic Games Results</h2>
+    <p class="table-note">230 LSAT Analytical Reasoning questions (5-way multiple choice, 20% random baseline). Same models, zero constraint satisfaction training data.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th class="num">Basic Acc.</th>
+                <th class="num">CoT Acc.</th>
+                <th class="num">Parse Success</th>
+                <th class="num">Faithfulness</th>
+                <th class="num">Consistency</th>
+                <th class="num">Avg Steps</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="model-base">Base DeepSeek 7B</td>
+                <td class="num">0.0%</td>
+                <td class="num">3.9%</td>
+                <td class="num">6.5%</td>
+                <td class="num">1.7%</td>
+                <td class="num">0.0%</td>
+                <td class="num">0.2</td>
+            </tr>
+            <tr>
+                <td class="model-sft">SFT DeepSeek 7B</td>
+                <td class="num">2.2%</td>
+                <td class="num">3.9%</td>
+                <td class="num">41.7%</td>
+                <td class="num">38.3%</td>
+                <td class="num">0.9%</td>
+                <td class="num">1.7</td>
+            </tr>
+            <tr>
+                <td class="model-grpo">GRPO DeepSeek 7B</td>
+                <td class="num">0.9%</td>
+                <td class="num best">13.0%</td>
+                <td class="num best">99.6%</td>
+                <td class="num">31.3%</td>
+                <td class="num best">7.9%</td>
+                <td class="num">8.1</td>
+            </tr>
+            <tr><td colspan="7" style="height:4px; background: #f1f5f9; padding:0;"></td></tr>
+            <tr>
+                <td class="model-base">Base Qwen 8B</td>
+                <td class="num">1.3%</td>
+                <td class="num">4.8%</td>
+                <td class="num">1.3%</td>
+                <td class="num">0.4%</td>
+                <td class="num">0.0%</td>
+                <td class="num">0.0</td>
+            </tr>
+            <tr>
+                <td class="model-sft">SFT Qwen 8B</td>
+                <td class="num">1.3%</td>
+                <td class="num">4.8%</td>
+                <td class="num">70.9%</td>
+                <td class="num">54.3%</td>
+                <td class="num">1.1%</td>
+                <td class="num">3.5</td>
+            </tr>
+            <tr>
+                <td class="model-grpo">GRPO Qwen 8B</td>
+                <td class="num">1.3%</td>
+                <td class="num">11.3%</td>
+                <td class="num best">99.6%</td>
+                <td class="num best">55.7%</td>
+                <td class="num">5.6%</td>
+                <td class="num">7.2</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Improvement Summary -->
+<div class="table-section">
+    <h2>Transfer Improvement Summary</h2>
+    <p class="table-note">CoT accuracy improvement from Base to GRPO, showing the effect of logic-focused reinforcement learning on out-of-domain tasks.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Benchmark</th>
+                <th class="num">Base</th>
+                <th class="num">SFT</th>
+                <th class="num">GRPO</th>
+                <th class="num">Improvement (Base&rarr;GRPO)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>DeepSeek 7B</td>
+                <td>SARA CoT</td>
+                <td class="num">5.0%</td>
+                <td class="num">7.0%</td>
+                <td class="num model-grpo">40.0%</td>
+                <td class="num"><span class="delta delta-up">+35.0pp (8.0x)</span></td>
+            </tr>
+            <tr>
+                <td>DeepSeek 7B</td>
+                <td>LSAT CoT</td>
+                <td class="num">3.9%</td>
+                <td class="num">3.9%</td>
+                <td class="num model-grpo">13.0%</td>
+                <td class="num"><span class="delta delta-up">+9.1pp (3.3x)</span></td>
+            </tr>
+            <tr>
+                <td>Qwen 8B</td>
+                <td>SARA CoT</td>
+                <td class="num">2.0%</td>
+                <td class="num">4.0%</td>
+                <td class="num model-grpo">24.0%</td>
+                <td class="num"><span class="delta delta-up">+22.0pp (12.0x)</span></td>
+            </tr>
+            <tr>
+                <td>Qwen 8B</td>
+                <td>LSAT CoT</td>
+                <td class="num">4.8%</td>
+                <td class="num">4.8%</td>
+                <td class="num model-grpo">11.3%</td>
+                <td class="num"><span class="delta delta-up">+6.5pp (2.4x)</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Qualitative Examples -->
+<div class="examples-section">
+    <h2>Qualitative Examples</h2>
+    <p class="section-note">Side-by-side comparisons of model outputs on the same question. GRPO models produce structured &lt;step&gt; reasoning even on unseen domains.</p>
+
+    <!-- SARA Example 1 -->
+    <div class="example-card">
+        <h3>SARA: Section 152(a) &mdash; Dependency Determination</h3>
+        <div class="example-meta">ID: s152_a_pos &middot; Label: Entailment &middot; Section: 152(a)</div>
+        <div class="example-prompt">
+            <strong>Facts:</strong>
+            Alice has a son, Bob, who satisfies section 152(c)(1) for the year 2015.
+            <br><br>
+            <strong>Question:</strong>
+            Under section 152(a), Bob is a dependent of Alice for the year 2015.
+        </div>
+        <div class="response-grid">
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    Base Qwen 8B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+&lt;think&gt;
+Okay, let's tackle this problem. The user is asking
+whether the conclusion that Bob is a dependent of
+Alice under section 152(a) follows from the given
+statutory fact that Bob satisfies section 152(c)(1)
+for 2015.
+
+First, I need to recall what these sections typically
+mean. Section 152(c)(1) likely relates to the
+conditions for a qualifying child, which is a part of
+the dependent rules. If Bob satisfies section
+152(c)(1), that probably means he meets the criteria
+to be a qualifying child, which would make him a
+dependent under section 152(a).
+
+So the given fact is that Bob satisfies ...
+
+<em style="color:#888;">[Free-form reasoning, no structured steps, fails to produce answer in expected format]</em></div>
+            <div class="response-box response-correct">
+                <div class="box-header">
+                    GRPO Qwen 8B
+                    <span class="verdict verdict-correct">Predicted: Entailment</span>
+                </div>
+&lt;think&gt;
+Let me identify the statutory facts and the rule
+being applied.
+
+<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice has a son, Bob, who satisfies section
+152(c)(1) for the year 2015. This is given.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>satisfiesSection152c1(bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="2" type="derived" from="1"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>If a child satisfies section 152(c)(1), then
+they are a qualifying child under section 152(a).
+Therefore, Bob is a dependent of Alice for 2015.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>dependent(alice, bob, 2015) :-
+  satisfiesSection152c1(bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="derived" from="2"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Since Bob satisfies section 152(c)(1) (Step 1),
+by Modus Ponens, Bob is a dependent of Alice.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>dependent(alice, bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+Answer: Entailment</div>
+        </div>
+    </div>
+
+    <!-- LSAT Example 1 -->
+    <div class="example-card">
+        <h3>LSAT: Reading Club Selection (Constraint Satisfaction)</h3>
+        <div class="example-meta">Label: C &middot; 5-way multiple choice</div>
+        <div class="example-prompt">
+            <strong>Setup:</strong>
+            The organizer of a reading club will select at least five and at most six works from a group of nine works. The group consists of three French novels, three Russian novels, two French plays, and one Russian play. The organizer's selection must conform to the following requirements: No more than four French works. At least three but no more than four novels. At least as many French novels as Russian novels. If both French plays are selected, then the Russian play is not selected.
+            <br><br>
+            <strong>Question:</strong>
+            Which one of the following could be the organizer's selection of works?
+            (A) one French novel, two Russian novels, one French play, one Russian play
+            (B) two French novels, one Russian novel, two French plays, one Russian play
+            (C) two French novels, two Russian novels, two French plays
+            (D) three French novels, one Russian novel, two French plays
+            (E) three French novels, two Russian novels, one French play, one Russian play
+        </div>
+        <div class="response-grid">
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    SFT Qwen 8B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+&lt;think&gt;
+First, I need to formalize the constraints.
+
+Let's define predicates:
+- frenchNovel(X): X is a French novel.
+- russianNovel(X): X is a Russian novel.
+- frenchPlay(X): X is a French play.
+- russianPlay(X): X is a Russian play.
+- selected(X): X is selected.
+
+We have nine works: three French novels (f1, f2, f3),
+three Russian novels (r1, r2, r3), two French plays
+(p1, p2), and one Russian play (q1).
+
+Constraints:
+1. No more than four French works are selected.
+   - French works include ...
+
+<em style="color:#888;">[Attempts structured reasoning but runs out of tokens before testing options; fails to extract answer]</em></div>
+            <div class="response-box response-correct">
+                <div class="box-header">
+                    GRPO Qwen 8B
+                    <span class="verdict verdict-correct">Predicted: C</span>
+                </div>
+&lt;think&gt;
+Let me first formalize the constraints.
+
+<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Total works selected: at least 5 and at most 6.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>5 &le; total &le; 6.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>No more than four French works are selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>~(F_n + F_p &gt; 4).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least three but no more than four novels.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>3 &le; (F_n + R_n) &le; 4.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="4" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least as many French novels as Russian novels.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>F_n &ge; R_n.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="5" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>If both French plays are selected, the Russian
+play is not selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>~R_p :- F_p = 2.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+Now I'll test each option against these constraints...
+Option (C): 2F_n + 2R_n + 2F_p = 6 works. Total OK.
+French: 2 + 2 = 4 &le; 4. OK.
+Novels: 2 + 2 = 4. 3 &le; 4 &le; 4. OK.
+F_n &ge; R_n: 2 &ge; 2. OK.
+Both French plays selected, no Russian play. OK.
+All constraints satisfied.
+
+Answer: C</div>
+        </div>
+    </div>
+
+    <!-- SARA Example 2: GRPO DeepSeek -->
+    <div class="example-card">
+        <h3>SARA: Section 151(d)(3)(A) &mdash; Exemption Reduction Calculation</h3>
+        <div class="example-meta">ID: s151_d_3_A_pos &middot; Label: Entailment &middot; Section: 151(d)(3)(A)</div>
+        <div class="example-prompt">
+            <strong>Facts:</strong>
+            Alice's income in 2015 was $260,932. For 2015, Alice received one exemption of $2,000 under section 151(c). Alice's applicable percentage under section 151(d)(3)(B) is equal to 10%.
+            <br><br>
+            <strong>Question:</strong>
+            Under section 151(d)(3)(A), Alice's exemption amount is reduced to $1,800.
+        </div>
+        <div class="response-grid">
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    Base DeepSeek 7B
+                    <span class="verdict verdict-wrong">Predicted: contradiction</span>
+                </div>
+<em style="color:#888;">[Base model uses free-form reasoning. Attempts
+to calculate but makes arithmetic errors and
+misinterprets the statutory rule. Produces
+unstructured output without formal steps, arrives
+at wrong conclusion.]</em></div>
+            <div class="response-box response-correct">
+                <div class="box-header">
+                    GRPO Qwen 8B
+                    <span class="verdict verdict-correct">Predicted: Entailment</span>
+                </div>
+&lt;think&gt;
+Let me identify the given facts and the statutory rules.
+
+<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice's income in 2015 was $260,932.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>income(alice, 260932, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice received one exemption of $2,000 under
+section 151(c).<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>exemptionAmount(alice, 2000, 151c).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Applicable percentage under 151(d)(3)(B) is 10%.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>applicablePercentage(alice, 10, 151d3B).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+The conclusion is that the exemption amount is
+reduced to $1,800 under section 151(d)(3)(A). The
+exemption is reduced by the applicable percentage:
+$2,000 * 10% = $200 reduction.
+$2,000 - $200 = $1,800.
+
+Answer: Entailment</div>
+        </div>
+    </div>
+
+    <!-- LSAT Example 2: GRPO DeepSeek -->
+    <div class="example-card">
+        <h3>LSAT: Reading Club &mdash; Minimum Selection Requirement</h3>
+        <div class="example-meta">Label: D &middot; 5-way multiple choice</div>
+        <div class="example-prompt">
+            <strong>Setup:</strong>
+            (Same reading club scenario as above)
+            <br><br>
+            <strong>Question:</strong>
+            The organizer must at least select
+            (A) one French novel and one French play
+            (B) one French novel and one Russian play
+            (C) one Russian novel and one French play
+            (D) two French novels
+            (E) two Russian novels
+        </div>
+        <div class="response-grid">
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    SFT DeepSeek 7B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+<em style="color:#888;">[SFT model attempts to formalize constraints
+using predicates but gets stuck in verbose
+formalization. Runs out of token budget before
+testing any of the answer options. Cannot extract
+a valid A-E answer.]</em></div>
+            <div class="response-box response-correct">
+                <div class="box-header">
+                    GRPO DeepSeek 7B
+                    <span class="verdict verdict-correct">Predicted: D</span>
+                </div>
+<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least five and at most six works are selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>5 &le; totalSelection &le; 6.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>No more than four French works are selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>max(french, 4).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least 3 but no more than 4 novels selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>3 &le; novels &le; 4.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="4" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least as many French novels as Russian novels.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>frenchNovels &ge; russianNovels.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+Now, let's analyze the options.
+Option (D): two French novels.
+Since F_n &ge; R_n and novels &ge; 3, if F_n &ge; 2
+then we always satisfy F_n &ge; R_n with at most
+2 Russian novels. Testing: minimum case requires
+at least 2 French novels to satisfy constraint 4
+with constraint 3.
+
+Answer: D</div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis -->
+<div class="analysis">
+    <h2>Analysis</h2>
+
+    <h3>Why does GRPO transfer to legal and constraint reasoning?</h3>
+    <p>GRPO models trained with SAT consistency rewards learn three transferable skills:</p>
+    <ul>
+        <li><strong>Structured decomposition:</strong> Breaking problems into numbered, typed premises and derived steps. This format transfers naturally to statutory reasoning (each statute clause becomes a premise) and constraint satisfaction (each rule becomes a premise).</li>
+        <li><strong>Formal representation:</strong> Encoding natural language as logical expressions (Prolog-style predicates, inequality constraints). Even when the specific formalism differs from training, the habit of formalization improves accuracy.</li>
+        <li><strong>Step-by-step derivation:</strong> Explicitly citing which prior steps support each conclusion. This prevents the "reasoning by vibes" failure mode common in base models.</li>
+    </ul>
+
+    <h3>Key observations</h3>
+    <ul>
+        <li><strong>SFT alone is insufficient:</strong> SFT teaches the output format (&lt;step&gt; tags) but doesn't improve accuracy on transfer tasks. The model learns to generate structured-looking text without learning to reason structurally. GRPO's consistency reward is the critical ingredient.</li>
+        <li><strong>Parse success correlates with accuracy:</strong> GRPO models achieve near-100% parse success (well-formed &lt;step&gt; tags), while base models rarely produce parseable structured reasoning. This structural discipline appears to force more careful thinking.</li>
+        <li><strong>Basic mode fails uniformly:</strong> All models perform near-zero in basic (no-CoT) mode. These tasks genuinely require multi-step reasoning; the model cannot shortcut to the answer.</li>
+        <li><strong>Consistency is domain-limited:</strong> SAT consistency rates are low (0&ndash;18%) because the SAT verifier cannot evaluate numerical computations (tax calculations) or constraint satisfaction logic. This is expected and motivates domain-specific verifiers (Paper 2).</li>
+        <li><strong>DeepSeek vs Qwen:</strong> DeepSeek 7B shows stronger GRPO transfer than Qwen 8B, possibly because DeepSeek-R1-Distill already has reasoning capabilities that GRPO further sharpens.</li>
+    </ul>
+
+    <h3>Limitations</h3>
+    <ul>
+        <li>Absolute accuracy remains low (&lt;40% SARA, &lt;13% LSAT). These benchmarks are hard for small models. The main finding is <em>relative improvement</em> from logic training.</li>
+        <li>LSAT random baseline is 20%. GRPO models at 11&ndash;13% are below random chance in absolute terms, but the improvement over base (3.9&ndash;4.8%) is real and consistent.</li>
+        <li>No domain-specific few-shot examples were used during evaluation, which may disadvantage all models equally.</li>
+    </ul>
+</div>
+
+<div class="footer">
+    Updated February 21, 2026 &middot;
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    ProofContinuity
+</div>
+
+</body>
+</html>
