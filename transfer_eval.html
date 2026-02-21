@@ -58,8 +58,8 @@
     .example-prompt { background: #f8f9fa; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #333; border-left: 3px solid #94a3b8; }
     .example-prompt strong { color: #16213e; display: block; margin-bottom: 0.3rem; font-size: 0.8rem; }
 
-    .response-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 768px) {
+    .response-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    @media (max-width: 1000px) {
         .response-grid { grid-template-columns: 1fr; }
         .benchmarks { grid-template-columns: 1fr; }
     }
@@ -388,12 +388,12 @@
 <!-- Qualitative Examples -->
 <div class="examples-section">
     <h2>Qualitative Examples</h2>
-    <p class="section-note">Side-by-side comparisons of model outputs on the same question. GRPO models produce structured &lt;step&gt; reasoning even on unseen domains.</p>
+    <p class="section-note">Full model outputs on the same problem, comparing Base &rarr; SFT &rarr; GRPO. Scroll within each box to see the complete reasoning trace.</p>
 
-    <!-- SARA Example 1 -->
+    <!-- SARA Example 1: Qwen 8B -->
     <div class="example-card">
-        <h3>SARA: Section 152(a) &mdash; Dependency Determination</h3>
-        <div class="example-meta">ID: s152_a_pos &middot; Label: Entailment &middot; Section: 152(a)</div>
+        <h3>SARA: Section 152(a) &mdash; Dependency Determination (Qwen 8B)</h3>
+        <div class="example-meta">ID: s152_a_pos &middot; Gold label: Entailment &middot; Section: 152(a)</div>
         <div class="example-prompt">
             <strong>Facts:</strong>
             Alice has a son, Bob, who satisfies section 152(c)(1) for the year 2015.
@@ -410,49 +410,48 @@
                     <span class="verdict verdict-wrong">Predicted: unknown</span>
                 </div>
 &lt;think&gt;
-Okay, let's tackle this problem. The user is asking
-whether the conclusion that Bob is a dependent of
-Alice under section 152(a) follows from the given
-statutory fact that Bob satisfies section 152(c)(1)
-for 2015.
+Okay, let's tackle this problem. The user is asking whether the conclusion that Bob is a dependent of Alice under section 152(a) follows from the given statutory fact that Bob satisfies section 152(c)(1) for 2015.
 
-First, I need to recall what these sections typically
-mean. Section 152(c)(1) likely relates to the
-conditions for a qualifying child, which is a part of
-the dependent rules. If Bob satisfies section
-152(c)(1), that probably means he meets the criteria
-to be a qualifying child, which would make him a
-dependent under section 152(a).
+First, I need to recall what these sections typically mean. Section 152(c)(1) likely relates to the conditions for a qualifying child, which is a part of the dependent rules. If Bob satisfies section 152(c)(1), that probably means he meets the criteria to be a qualifying child, which would make him a dependent under section 152(a).
 
-So the given fact is that Bob satisfies ...
+So the given fact is that Bob satisfies section 152(c)(1). The conclusion is that he's a dependent under section 152(a). The key here is understanding the relationship between these sections. Typically, section 152(c) outlines the requirements for a qualifying child, and section 152(a) defines who is considered a dependent. If someone meets the criteria in section 152(c), they are considered a dependent under section 152(a).
 
-<em style="color:#888;">[Free-form reasoning, no structured steps, fails to produce answer in expected format]</em></div>
+So the lo</div>
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    SFT Qwen 8B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+&lt;think&gt;
+First, I need to understand the statutory provisions referenced. Section 152(c)(1) likely refers to the conditions under which a child is considered a qualifying child for the purposes of the child tax credit or dependency exemption. Section 152(a) likely refers to the general rule that a child is a dependent of a taxpayer.
+
+The fact given: "Alice has a son, Bob, who satisfies section 152(c)(1) for the year 2015." This means Bob meets the requirements of section 152(c)(1). Typically, section 152(c)(1) includes criteria such as relationship, age, residency, and support.
+
+The conclusion: "Under section 152(a), Bob is a dependent of Alice for the year 2015." This is a claim that Bob is a dependent of Alice.
+
+I need to see if satisfying section 152(c)(1) implies that Bob is a dependent under section 152(a). Section 152(a) likely defines what constitutes a dependent. If section 152(c)(1) is a subset of the requirements for being a dependent, then satisfying it would mean Bob is a de</div>
             <div class="response-box response-correct">
                 <div class="box-header">
                     GRPO Qwen 8B
                     <span class="verdict verdict-correct">Predicted: Entailment</span>
                 </div>
 &lt;think&gt;
-Let me identify the statutory facts and the rule
-being applied.
+Let me identify the statutory facts and the rule being applied.
 
 <span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>Alice has a son, Bob, who satisfies section
-152(c)(1) for the year 2015. This is given.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice has a son, Bob, who satisfies section 152(c)(1) for the year 2015. This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>satisfiesSection152c1(bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
+Section 152(c)(1) likely refers to the definition of a qualifying child under the Internal Revenue Code. If Bob satisfies section 152(c)(1), then he is a qualifying child of Alice, which would make him a dependent under section 152(a).
+
 <span class="step-tag">&lt;step n="2" type="derived" from="1"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>If a child satisfies section 152(c)(1), then
-they are a qualifying child under section 152(a).
-Therefore, Bob is a dependent of Alice for 2015.<span class="logic-tag">&lt;/text&gt;</span>
-<span class="logic-tag">&lt;logic&gt;</span>dependent(alice, bob, 2015) :-
-  satisfiesSection152c1(bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>If a child satisfies section 152(c)(1), then they are a qualifying child under section 152(a). Therefore, Bob is a dependent of Alice for the year 2015.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>dependent(alice, bob, 2015) :- satisfiesSection152c1(bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
 <span class="step-tag">&lt;step n="3" type="derived" from="2"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>Since Bob satisfies section 152(c)(1) (Step 1),
-by Modus Ponens, Bob is a dependent of Alice.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Since Bob satisfies section 152(c)(1) (Step 1), by Modus Ponens, Bob is a dependent of Alice for the year 2015.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>dependent(alice, bob, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
@@ -460,10 +459,95 @@ Answer: Entailment</div>
         </div>
     </div>
 
-    <!-- LSAT Example 1 -->
+    <!-- SARA Example 2: DeepSeek 7B -->
     <div class="example-card">
-        <h3>LSAT: Reading Club Selection (Constraint Satisfaction)</h3>
-        <div class="example-meta">Label: C &middot; 5-way multiple choice</div>
+        <h3>SARA: Section 151(d)(3)(A) &mdash; Exemption Reduction Calculation (DeepSeek 7B)</h3>
+        <div class="example-meta">ID: s151_d_3_A_pos &middot; Gold label: Entailment &middot; Section: 151(d)(3)(A)</div>
+        <div class="example-prompt">
+            <strong>Facts:</strong>
+            Alice's income in 2015 was $260,932. For 2015, Alice received one exemption of $2,000 under section 151(c). Alice's applicable percentage under section 151(d)(3)(B) is equal to 10%.
+            <br><br>
+            <strong>Conclusion to evaluate:</strong>
+            Under section 151(d)(3)(A), Alice's exemption amount is reduced to $1,800.
+            <br><br>
+            <em style="color:#888; font-size:0.8rem;">Prompt: &ldquo;Does the following conclusion follow from the facts? Answer with: Entailment or Contradiction.&rdquo;</em>
+        </div>
+        <div class="response-grid">
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    Base DeepSeek 7B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+Alright, let's try to figure out if the conclusion about Alice's exemption amount follows from the given facts. So, the facts are that Alice's income in 2015 was $260,932, she received one exemption of $2000 under section 151(c), and her applicable percentage under section 151(d)(3)(B) is 10%. The conclusion claims her exemption is reduced to $1800 under section 151(d)(3)(A).
+
+First, I need to understand the relevant sections. Section 151(c) gives her one exemption of $2000. Then, section 151(d)(3)(B) sets her applicable percentage at 10%. I think the percentage is used to calculate the exemption amount. So, if her percentage is 10%, I should calculate 10% of her income to see if that's the new exemption.
+
+Wait, but she already has one exemption of $2000. Does the 10% apply to that or her income? I'm a bit confused. Maybe the 10% is applied to her income to determine the exemption. So, 10% of $260,932 is $26,093.20. But the conclusion says her exemption is reduced to $1800, which is mu</div>
+            <div class="response-box response-wrong">
+                <div class="box-header">
+                    SFT DeepSeek 7B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+First, I need to identify the facts and the statutory rule being tested.
+
+<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice's income in 2015 was $260,932. This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>income(alice, 260932, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>For 2015, Alice received one exemption of $2000 under section 151(c). This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>exemption(151c, 2000, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice's applicable percentage under section 151(d)(3)(B) is equal to 10%. This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>applicablePercentage(alice, 10%, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+Now, I need to understand the statutory rule. Section 151(d)(3)(A) likely refers to a reduction of the exemption amount. Typically, under section 151(d)(3), the exemption is reduced by a percentage of the income over a certain threshold. The general rule might be: exemption amount = original exemption amount &times; (1 - applicable percentage). But here, the original exemption i</div>
+            <div class="response-box response-correct">
+                <div class="box-header">
+                    GRPO DeepSeek 7B
+                    <span class="verdict verdict-correct">Predicted: Entailment</span>
+                </div>
+First, I need to identify the facts and the statutory rule being tested.
+
+<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice's income in 2015 was $260,932. This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>income(alice, 260932, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>For 2015, Alice received one exemption of $2000 under section 151(c). This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>exemptionAmount(151c, 2000, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Alice's applicable percentage under section 151(d)(3)(B) is equal to 10%. This is given as a fact.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>applicablePercentage(151d3B, 10, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="4" type="derived" from="2"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Under section 151(d)(3)(A), the exemption amount is reduced by the applicable percentage. Since the applicable percentage is 10%, the reduction is 10% of the exemption amount.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>exemptionReduction(alice, 10, 2015) :- applicablePercentage(151d3B, 10, 2015) &and; exemptionAmount(151c, 2000, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="5" type="derived" from="2,3,4"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>The reduction amount is $2,000 &times; 10% = $200. The reduced exemption is $2,000 - $200 = $1,800.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>reducedExemption(alice, 1800, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+The conclusion states that Alice's exemption amount is reduced to $1,800. This matches the calculated value.
+
+Answer: Entailment</div>
+        </div>
+    </div>
+
+    <!-- LSAT Example 1: Qwen 8B -->
+    <div class="example-card">
+        <h3>LSAT: Reading Club &mdash; Valid Selection (Qwen 8B)</h3>
+        <div class="example-meta">Gold label: C &middot; 5-way multiple choice (A&ndash;E)</div>
         <div class="example-prompt">
             <strong>Setup:</strong>
             The organizer of a reading club will select at least five and at most six works from a group of nine works. The group consists of three French novels, three Russian novels, two French plays, and one Russian play. The organizer's selection must conform to the following requirements: No more than four French works. At least three but no more than four novels. At least as many French novels as Russian novels. If both French plays are selected, then the Russian play is not selected.
@@ -479,6 +563,37 @@ Answer: Entailment</div>
         <div class="response-grid">
             <div class="response-box response-wrong">
                 <div class="box-header">
+                    Base Qwen 8B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+&lt;think&gt;
+Okay, let's tackle this problem step by step. The question is about selecting works for a reading club with specific constraints. Let me first list out all the constraints to make sure I don't miss any.
+
+First, the organizer needs to select between 5 and 6 works from 9 total. The works are categorized into French novels, Russian novels, French plays, and Russian plays. The constraints are:
+
+1. No more than four French works selected.
+2. At least three but no more than four novels selected.
+3. At least as many French novels as Russian novels selected.
+4. If both French plays are selected, then the Russian play is not selected.
+
+The options are A to E. I need to check each one against these constraints.
+
+Let me start by breaking down each option. Let's go through each step.
+
+First, let's note the categories:
+
+- French novels: 3
+- Russian novels: 3
+- French plays: 2
+- Russian plays: 1
+
+Total works: 3+3+2+1=9.
+
+Now, the constraints:
+
+1. French works (novels + plays) &le;4. So total Fr</div>
+            <div class="response-box response-wrong">
+                <div class="box-header">
                     SFT Qwen 8B
                     <span class="verdict verdict-wrong">Predicted: unknown</span>
                 </div>
@@ -492,15 +607,22 @@ Let's define predicates:
 - russianPlay(X): X is a Russian play.
 - selected(X): X is selected.
 
-We have nine works: three French novels (f1, f2, f3),
-three Russian novels (r1, r2, r3), two French plays
-(p1, p2), and one Russian play (q1).
+We have nine works: three French novels (call them f1, f2, f3), three Russian novels (r1, r2, r3), two French plays (p1, p2), and one Russian play (q1).
 
 Constraints:
 1. No more than four French works are selected.
-   - French works include ...
+   - French works include French novels and French plays.
+   - So: selectedFrenchNovels + selectedFrenchPlays &le; 4.
 
-<em style="color:#888;">[Attempts structured reasoning but runs out of tokens before testing options; fails to extract answer]</em></div>
+2. At least three but no more than four novels are selected.
+   - Novels include French novels and Russian novels.
+   - So: 3 &le; selectedFrenchNovels + selectedRussianNovels &le; 4.
+
+3. At least as many French novels as Russian novels are selected.
+   - selectedFrenchNovels &ge; selectedRussianNovels.
+
+4. If both French plays are selected, then the Russian play is not selected.
+   - If selectedFrenchPlays = </div>
             <div class="response-box response-correct">
                 <div class="box-header">
                     GRPO Qwen 8B
@@ -515,27 +637,43 @@ Let me first formalize the constraints.
 <span class="step-tag">&lt;/step&gt;</span>
 
 <span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Group composition: 3 French novels (F_n), 3 Russian novels (R_n), 2 French plays (F_p), 1 Russian play (R_p).<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>totalWorks = 3 + 3 + 2 + 1 = 9.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
+<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
 <span class="logic-tag">&lt;text&gt;</span>No more than four French works are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>~(F_n + F_p &gt; 4).<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
-<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>At least three but no more than four novels.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="step-tag">&lt;step n="4" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least three but no more than four novels are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>3 &le; (F_n + R_n) &le; 4.<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
-<span class="step-tag">&lt;step n="4" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>At least as many French novels as Russian novels.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="step-tag">&lt;step n="5" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>At least as many French novels as Russian novels are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>F_n &ge; R_n.<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
-<span class="step-tag">&lt;step n="5" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>If both French plays are selected, the Russian
-play is not selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="step-tag">&lt;step n="6" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>If both French plays are selected, then the Russian play is not selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>~R_p :- F_p = 2.<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
-Now I'll test each option against these constraints...
+Now I'll test each option against these constraints.
+
+Option (A): 1F_n + 2R_n + 1F_p + 1R_p = 5 works. Total OK.
+French: 1 + 1 = 2 &le; 4. OK.
+Novels: 1 + 2 = 3. 3 &le; 3 &le; 4. OK.
+F_n &ge; R_n: 1 &ge; 2? NO. Fails constraint 5.
+
+Option (B): 2F_n + 1R_n + 2F_p + 1R_p = 6 works. Total OK.
+French: 2 + 2 = 4 &le; 4. OK.
+Novels: 2 + 1 = 3. OK.
+F_n &ge; R_n: 2 &ge; 1. OK.
+Both French plays selected AND Russian play selected? Fails constraint 6.
+
 Option (C): 2F_n + 2R_n + 2F_p = 6 works. Total OK.
 French: 2 + 2 = 4 &le; 4. OK.
 Novels: 2 + 2 = 4. 3 &le; 4 &le; 4. OK.
@@ -547,68 +685,10 @@ Answer: C</div>
         </div>
     </div>
 
-    <!-- SARA Example 2: GRPO DeepSeek -->
+    <!-- LSAT Example 2: DeepSeek 7B -->
     <div class="example-card">
-        <h3>SARA: Section 151(d)(3)(A) &mdash; Exemption Reduction Calculation</h3>
-        <div class="example-meta">ID: s151_d_3_A_pos &middot; Label: Entailment &middot; Section: 151(d)(3)(A)</div>
-        <div class="example-prompt">
-            <strong>Facts:</strong>
-            Alice's income in 2015 was $260,932. For 2015, Alice received one exemption of $2,000 under section 151(c). Alice's applicable percentage under section 151(d)(3)(B) is equal to 10%.
-            <br><br>
-            <strong>Conclusion to evaluate:</strong>
-            Under section 151(d)(3)(A), Alice's exemption amount is reduced to $1,800.
-            <br><br>
-            <em style="color:#888; font-size:0.8rem;">Prompt: &ldquo;Does the following conclusion follow from the facts? Answer with: Entailment or Contradiction.&rdquo;</em>
-        </div>
-        <div class="response-grid">
-            <div class="response-box response-wrong">
-                <div class="box-header">
-                    Base DeepSeek 7B
-                    <span class="verdict verdict-wrong">Predicted: contradiction</span>
-                </div>
-<em style="color:#888;">[Base model uses free-form reasoning. Attempts
-to calculate but makes arithmetic errors and
-misinterprets the statutory rule. Produces
-unstructured output without formal steps, arrives
-at wrong conclusion.]</em></div>
-            <div class="response-box response-correct">
-                <div class="box-header">
-                    GRPO Qwen 8B
-                    <span class="verdict verdict-correct">Predicted: Entailment</span>
-                </div>
-&lt;think&gt;
-Let me identify the given facts and the statutory rules.
-
-<span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>Alice's income in 2015 was $260,932.<span class="logic-tag">&lt;/text&gt;</span>
-<span class="logic-tag">&lt;logic&gt;</span>income(alice, 260932, 2015).<span class="logic-tag">&lt;/logic&gt;</span>
-<span class="step-tag">&lt;/step&gt;</span>
-
-<span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>Alice received one exemption of $2,000 under
-section 151(c).<span class="logic-tag">&lt;/text&gt;</span>
-<span class="logic-tag">&lt;logic&gt;</span>exemptionAmount(alice, 2000, 151c).<span class="logic-tag">&lt;/logic&gt;</span>
-<span class="step-tag">&lt;/step&gt;</span>
-
-<span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>Applicable percentage under 151(d)(3)(B) is 10%.<span class="logic-tag">&lt;/text&gt;</span>
-<span class="logic-tag">&lt;logic&gt;</span>applicablePercentage(alice, 10, 151d3B).<span class="logic-tag">&lt;/logic&gt;</span>
-<span class="step-tag">&lt;/step&gt;</span>
-
-The conclusion is that the exemption amount is
-reduced to $1,800 under section 151(d)(3)(A). The
-exemption is reduced by the applicable percentage:
-$2,000 * 10% = $200 reduction.
-$2,000 - $200 = $1,800.
-
-Answer: Entailment</div>
-        </div>
-    </div>
-
-    <!-- LSAT Example 2: GRPO DeepSeek -->
-    <div class="example-card">
-        <h3>LSAT: Reading Club &mdash; Minimum Selection Requirement</h3>
-        <div class="example-meta">Label: D &middot; 5-way multiple choice</div>
+        <h3>LSAT: Reading Club &mdash; Minimum Selection Requirement (DeepSeek 7B)</h3>
+        <div class="example-meta">Gold label: D &middot; 5-way multiple choice (A&ndash;E)</div>
         <div class="example-prompt">
             <strong>Setup:</strong>
             (Same reading club scenario as above)
@@ -624,46 +704,90 @@ Answer: Entailment</div>
         <div class="response-grid">
             <div class="response-box response-wrong">
                 <div class="box-header">
+                    Base DeepSeek 7B
+                    <span class="verdict verdict-wrong">Predicted: unknown</span>
+                </div>
+Alright, let's tackle this problem step by step. So, the organizer is selecting works from a group of nine, which includes different categories: French novels, Russian novels, French plays, and a Russian play. The constraints are a bit complex, so I need to break them down one by one.
+
+First, the organizer must select at least five and at most six works. That means the total number of works selected, N, must satisfy 5 &le; N &le; 66. So, N can be 5, 66, or 6.
+
+Next, the group composition: there are 3 French novels, 3 Russian novels, 2 French plays, and 1 Russian play. So, total works are 3+3+2+1=9, which matches the initial statement.
+
+Now, the constraints:
+
+1. No more than four French works are selected. So, the total number of French works (French novels + French plays) cannot exceed 4. Since there are only 2 French plays, the maximum French works possible are 4 (if both plays are selected along with 2 novels). But wait, the organizer can't select more than 4 French works, so French novels</div>
+            <div class="response-box response-wrong">
+                <div class="box-header">
                     SFT DeepSeek 7B
                     <span class="verdict verdict-wrong">Predicted: unknown</span>
                 </div>
-<em style="color:#888;">[SFT model attempts to formalize constraints
-using predicates but gets stuck in verbose
-formalization. Runs out of token budget before
-testing any of the answer options. Cannot extract
-a valid A-E answer.]</em></div>
+First, I need to parse the problem and identify the constraints.
+
+We have a group of nine works:
+- 3 French novels
+- 3 Russian novels
+- 2 French plays
+- 1 Russian play.
+
+The organizer selects at least five and at most six works. So the total selected is 5 or 6.
+
+Constraints:
+1. No more than four French works are selected. Since there are only 3 French novels and 2 French plays, total French works possible: 3 + 2 = 5. So "no more than four" means at most 4 French works selected. That is, French novels + French plays &le; 4.
+
+2. At least three but no more than four novels are selected. Novels are both French and Russian. So total novels selected &ge;3 and &le;4.
+
+3. At least as many French novels as Russian novels are selected. So French novels selected &ge; Russian novels selected.
+
+4. If both French plays are selected, then the Russian play is not selected.
+
+We need to determine what must be selected: the organizer must at least select one of the options (A) to (E). That is, we need to find which </div>
             <div class="response-box response-correct">
                 <div class="box-header">
                     GRPO DeepSeek 7B
                     <span class="verdict verdict-correct">Predicted: D</span>
                 </div>
+First, let's formalize the constraints.
+
 <span class="step-tag">&lt;step n="1" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>At least five and at most six works are selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Constraint 1: At least five and at most six works are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>5 &le; totalSelection &le; 6.<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
 <span class="step-tag">&lt;step n="2" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>No more than four French works are selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Constraint 2: No more than four French works are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>max(french, 4).<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
 <span class="step-tag">&lt;step n="3" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>At least 3 but no more than 4 novels selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Constraint 3: At least three but no more than four novels are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>3 &le; novels &le; 4.<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
 <span class="step-tag">&lt;step n="4" type="premise"&gt;</span>
-<span class="logic-tag">&lt;text&gt;</span>At least as many French novels as Russian novels.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Constraint 4: At least as many French novels as Russian novels are selected.<span class="logic-tag">&lt;/text&gt;</span>
 <span class="logic-tag">&lt;logic&gt;</span>frenchNovels &ge; russianNovels.<span class="logic-tag">&lt;/logic&gt;</span>
 <span class="step-tag">&lt;/step&gt;</span>
 
+<span class="step-tag">&lt;step n="5" type="premise"&gt;</span>
+<span class="logic-tag">&lt;text&gt;</span>Constraint 5: If both French plays are selected, then the Russian play is not selected.<span class="logic-tag">&lt;/text&gt;</span>
+<span class="logic-tag">&lt;logic&gt;</span>(frenchPlays &ge; 2) &rarr; ~russianPlay.<span class="logic-tag">&lt;/logic&gt;</span>
+<span class="step-tag">&lt;/step&gt;</span>
+
 Now, let's analyze the options.
+
+Option (A): one French novel and one French play.
+- French novel: 1
+- French play: 1
+- Total French: 2
+- Novels: 1 (French) + ? (Russian) &ge; 3, so we need at least 2 Russian novels.
+- But frenchNovels &ge; russianNovels: 1 &ge; 2? NO. Cannot guarantee this constraint.
+- So (A) is not necessarily selected.
+
 Option (D): two French novels.
-Since F_n &ge; R_n and novels &ge; 3, if F_n &ge; 2
-then we always satisfy F_n &ge; R_n with at most
-2 Russian novels. Testing: minimum case requires
-at least 2 French novels to satisfy constraint 4
-with constraint 3.
+- With novels &ge; 3 and frenchNovels &ge; russianNovels, if frenchNovels = 2, then russianNovels &le; 2.
+- novels = frenchNovels + russianNovels &ge; 3, so russianNovels &ge; 1.
+- If frenchNovels = 1, then russianNovels &le; 1, so novels &le; 2 &lt; 3. Fails constraint 3.
+- Therefore frenchNovels &ge; 2 is required in all valid selections.
 
 Answer: D</div>
         </div>
