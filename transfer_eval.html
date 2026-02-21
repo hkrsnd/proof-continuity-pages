@@ -86,6 +86,22 @@
     .analysis p, .analysis li { font-size: 0.88rem; color: #555; margin-bottom: 0.4rem; }
     .analysis ul { padding-left: 1.3rem; }
 
+    /* Metric glossary */
+    .glossary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .glossary h2 { font-size: 1.15rem; color: #16213e; margin-bottom: 0.8rem; }
+    .glossary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    @media (max-width: 768px) { .glossary-grid { grid-template-columns: 1fr; } }
+    .glossary-item { padding: 0.8rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid #3b82f6; }
+    .glossary-item h4 { font-size: 0.88rem; color: #16213e; margin-bottom: 0.3rem; }
+    .glossary-item .metric-formula { font-family: 'Consolas', 'Monaco', monospace; font-size: 0.8rem; color: #7c3aed; margin-bottom: 0.3rem; }
+    .glossary-item p { font-size: 0.82rem; color: #555; line-height: 1.5; }
+    .glossary-item.acc { border-left-color: #2563eb; }
+    .glossary-item.parse { border-left-color: #0891b2; }
+    .glossary-item.faith { border-left-color: #7c3aed; }
+    .glossary-item.cons { border-left-color: #16a34a; }
+    .glossary-item.steps { border-left-color: #f59e0b; }
+    .glossary-item.basic { border-left-color: #6b7280; }
+
     .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
 </style>
 </head>
@@ -128,10 +144,47 @@
     </div>
 </div>
 
+<!-- Metric Glossary -->
+<div class="glossary">
+    <h2>Metric Definitions</h2>
+    <div class="glossary-grid">
+        <div class="glossary-item basic">
+            <h4>Basic Accuracy</h4>
+            <div class="metric-formula">correct / total</div>
+            <p>The model is given the problem and asked to answer directly (no chain-of-thought prompting). We extract the final answer from its output and compare to the gold label. This measures raw task performance without structured reasoning.</p>
+        </div>
+        <div class="glossary-item acc">
+            <h4>CoT Accuracy</h4>
+            <div class="metric-formula">correct / total</div>
+            <p>The model is prompted with a system message instructing it to reason step-by-step using numbered <code>&lt;step&gt;</code> tags (with <code>&lt;text&gt;</code> for natural language and <code>&lt;logic&gt;</code> for formal expressions). We extract the final answer from the end of the chain-of-thought and compare to the gold label. This measures whether structured reasoning improves task accuracy.</p>
+        </div>
+        <div class="glossary-item parse">
+            <h4>Parse Success</h4>
+            <div class="metric-formula">parseable_outputs / total</div>
+            <p>Fraction of model outputs where at least one valid <code>&lt;step&gt;</code> tag was successfully parsed. A step is parseable if it has the correct XML structure (<code>&lt;step n=... type=...&gt;</code> with <code>&lt;text&gt;</code> and <code>&lt;logic&gt;</code> sub-tags). Low parse success means the model is not following the structured output format at all &mdash; it may be producing free-form text instead.</p>
+        </div>
+        <div class="glossary-item faith">
+            <h4>Faithfulness (F)</h4>
+            <div class="metric-formula">all_steps_valid / total</div>
+            <p>Fraction of outputs where <strong>every</strong> derived (non-premise) step is logically entailed by the preceding validated steps. A single invalid step makes the whole chain unfaithful. This is the strictest measure: it asks "is the entire reasoning chain logically valid?" Formally: F = 1 iff all derived steps pass SAT entailment check.</p>
+        </div>
+        <div class="glossary-item cons">
+            <h4>Consistency (C)</h4>
+            <div class="metric-formula">entailed_derived_steps / total_derived_steps</div>
+            <p>Average fraction of derived (non-premise) steps that are logically entailed by prior steps, checked via SAT solver. For each derived step, we test whether the negation of that step is unsatisfiable given the premises and previously validated steps (clean context &mdash; invalid steps do not propagate forward). This is more granular than faithfulness: a chain with 3/4 valid steps gets C = 0.75 but F = 0. <strong>Note:</strong> on SARA/LSAT, C is expected to be low because the SAT solver can only verify propositional logic, not numerical computations or constraint arithmetic.</p>
+        </div>
+        <div class="glossary-item steps">
+            <h4>Avg Steps</h4>
+            <div class="metric-formula">mean(steps per output)</div>
+            <p>Average number of <code>&lt;step&gt;</code> tags parsed per output. Includes both premise steps (encoding given facts) and derived steps (drawing conclusions). More steps generally indicates more thorough decomposition of the problem. Base models typically produce 0&ndash;1 steps (unstructured), while GRPO models produce 4&ndash;8 steps.</p>
+        </div>
+    </div>
+</div>
+
 <!-- SARA Results Table -->
 <div class="table-section">
     <h2>SARA Results</h2>
-    <p class="table-note">100 US tax code reasoning problems. "Basic" = direct answer extraction. "CoT" = chain-of-thought with step-by-step reasoning. Models were trained only on LogicBench (propositional/FOL/non-monotonic logic) &mdash; zero legal training data.</p>
+    <p class="table-note">100 US tax code reasoning problems. Models were trained only on LogicBench (propositional/FOL/non-monotonic logic) &mdash; zero legal training data.</p>
     <table>
         <thead>
             <tr>
