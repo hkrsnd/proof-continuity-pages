@@ -126,6 +126,248 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- NOTE: Experiment Status & Key Insights (Feb 21)                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="note open" id="status-feb21">
+    <div class="note-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-chevron">&#x25B6;</span>
+        <span class="note-title">Experiment Status &amp; Key Insights (Feb 21)</span>
+        <span class="note-date">2026-02-21</span>
+    </div>
+    <div class="note-body">
+
+        <div class="finding bad">
+            <strong>Critical finding:</strong> Training reward does NOT predict downstream eval performance. Run 85934 (beta=0, highest training reward <strong>2.77</strong>) has the <strong>worst</strong> eval (LogicBench = 5.0%). Run 85931 (reward 1.25) has the <strong>best</strong> DeepSeek eval (LogicBench = 28.4%). This is strong evidence of reward hacking.
+        </div>
+
+        <!-- ── Section 1: Reward-Eval Disconnect ── -->
+        <h2>1. Reward-Eval Disconnect</h2>
+
+        <p>Comparing training reward to LogicBench evaluation accuracy reveals a striking inverse relationship for DeepSeek runs:</p>
+
+        <table>
+            <tr><th>Run</th><th>Config</th><th>Train Reward</th><th>LB Acc</th><th>Consistency</th><th>Faithfulness</th></tr>
+            <tr><td>85934</td><td>beta=0, LR=2e-5 (v3)</td><td style="color:#16a34a;font-weight:700">2.77</td><td style="color:#dc2626;font-weight:700">5.0%</td><td>0.127</td><td>0.641</td></tr>
+            <tr><td>85855</td><td>beta=0.04, LR=5e-5 (v1)</td><td>2.66</td><td>11.4%</td><td>0.139</td><td>0.648</td></tr>
+            <tr><td>85781</td><td>beta=0.04, LR=5e-5 (v1)</td><td>2.40</td><td>13.0%</td><td>0.340</td><td>0.909</td></tr>
+            <tr style="background:#f0fdf4"><td>85931</td><td>beta=0.04, LR=2e-5 (v2)</td><td style="color:#b45309">1.25</td><td style="color:#16a34a;font-weight:700">28.4%</td><td style="color:#16a34a;font-weight:700">0.389</td><td style="color:#16a34a;font-weight:700">0.907</td></tr>
+        </table>
+
+        <div class="finding warn">
+            <strong>Pattern:</strong> The runs with the highest training reward have collapsed into a narrow output mode &mdash; they score well on training examples but fail to generalize. Run 85931 (moderate reward, lower LR) retains more diverse reasoning strategies. This is classic <strong>reward hacking</strong>: the model finds a shortcut that satisfies the reward function without actually learning the target skill.
+        </div>
+
+        <p>For Qwen3, the same pattern holds but the gap is smaller:</p>
+        <table>
+            <tr><th>Run</th><th>Train Reward</th><th>LB Acc</th><th>Consistency</th><th>Faithfulness</th></tr>
+            <tr style="background:#f0fdf4"><td>85716 (GRPO)</td><td>2.22</td><td style="color:#16a34a;font-weight:700">35.9%</td><td>0.093</td><td>0.159</td></tr>
+            <tr><td>85307 (diff-anneal)</td><td>1.54</td><td>6.1%</td><td>0.000</td><td>0.245</td></tr>
+            <tr><td>85303 (SAT mixed)</td><td>1.68</td><td>8.7%</td><td>0.000</td><td>0.242</td></tr>
+        </table>
+
+        <!-- ── Section 2: SFT Regression (J-Curve) ── -->
+        <h2>2. The SFT J-Curve</h2>
+
+        <p>SFT warm-start alone makes models <strong>worse</strong> on LogicBench. But GRPO then recovers dramatically &mdash; a classic J-shaped learning curve.</p>
+
+        <table>
+            <tr><th>Model</th><th>Stage</th><th>LogicBench</th><th>FOLIO</th><th>ProntoQA</th><th>ProofWriter</th></tr>
+            <tr><td rowspan="3"><strong>DeepSeek-7B</strong></td><td>Base</td><td>15.9%</td><td>5.9%</td><td>1.3%</td><td>33.8%</td></tr>
+            <tr><td style="color:#dc2626">SFT (85831)</td><td style="color:#dc2626">8.2% <small>(-48%)</small></td><td>6.4%</td><td>0.0%</td><td>35.2%</td></tr>
+            <tr style="background:#f0fdf4"><td style="color:#16a34a">GRPO (85931)</td><td style="color:#16a34a;font-weight:700">28.4% <small>(+246%)</small></td><td>&#8212;</td><td>&#8212;</td><td>&#8212;</td></tr>
+            <tr style="border-top:2px solid #e2e8f0"><td rowspan="3"><strong>Qwen3-8B</strong></td><td>Base</td><td>6.1%</td><td>9.3%</td><td>0.0%</td><td>37.8%</td></tr>
+            <tr><td style="color:#dc2626">SFT (85832)</td><td style="color:#dc2626">3.9% <small>(-36%)</small></td><td>10.3%</td><td>0.0%</td><td>36.5%</td></tr>
+            <tr style="background:#f0fdf4"><td style="color:#16a34a">GRPO (85716)</td><td style="color:#16a34a;font-weight:700">35.9% <small>(+820%)</small></td><td>18.1%</td><td>8.0%</td><td>43.8%</td></tr>
+        </table>
+
+        <div class="finding good">
+            <strong>Interpretation:</strong> SFT narrows the output distribution into the <code>&lt;step&gt;</code> format but the model doesn't yet know <em>how</em> to reason in that format &mdash; it loses generality. GRPO then refines within this constrained space, learning to produce logically valid chains. The combination is essential: SFT without GRPO hurts; GRPO without SFT fails to adopt the format.
+        </div>
+
+        <!-- ── Section 3: Full Eval Leaderboard ── -->
+        <h2>3. Comprehensive Eval Leaderboard</h2>
+
+        <h3>LogicBench (Propositional) &mdash; Primary Benchmark</h3>
+        <p>Sorted by accuracy. Bold = RAILS-trained models.</p>
+
+        <table>
+            <tr><th>Model</th><th>Method</th><th>LB Acc</th><th>Consist.</th><th>Faithful.</th><th>Parse %</th><th>Avg Steps</th></tr>
+            <tr><td>Llama-3.1-8B</td><td>Base</td><td>71.2%</td><td>0.403</td><td>0.765</td><td>100%</td><td>4.09</td></tr>
+            <tr><td>OLMo-3-7B</td><td>Base</td><td>66.6%</td><td>0.317</td><td>0.252</td><td>99.7%</td><td>3.93</td></tr>
+            <tr><td>Mistral-7B</td><td>Base</td><td>50.0%</td><td>0.237</td><td>0.583</td><td>100%</td><td>4.48</td></tr>
+            <tr style="background:#f0fdf4"><td><strong>Qwen3-8B</strong></td><td><strong>GRPO (85716)</strong></td><td style="color:#16a34a;font-weight:700">35.9%</td><td>0.093</td><td>0.159</td><td>31.6%</td><td>0.89</td></tr>
+            <tr style="background:#f0fdf4"><td><strong>DeepSeek-7B</strong></td><td><strong>GRPO (85931)</strong></td><td style="color:#16a34a;font-weight:700">28.4%</td><td style="color:#16a34a">0.389</td><td style="color:#16a34a">0.907</td><td>95.9%</td><td>2.88</td></tr>
+            <tr><td>DeepSeek-7B</td><td>Answer-only</td><td>24.5%</td><td>0.000</td><td>0.484</td><td>48.4%</td><td>0.96</td></tr>
+            <tr><td>DeepSeek-7B</td><td>Base</td><td>15.9%</td><td>0.000</td><td>0.423</td><td>42.3%</td><td>1.20</td></tr>
+            <tr><td><strong>DeepSeek-7B</strong></td><td>GRPO (85781)</td><td>13.0%</td><td>0.340</td><td>0.909</td><td>100%</td><td>3.30</td></tr>
+            <tr><td><strong>DeepSeek-7B</strong></td><td>GRPO (85855)</td><td>11.4%</td><td>0.139</td><td>0.648</td><td>67.5%</td><td>1.66</td></tr>
+            <tr><td>Qwen3-8B</td><td>SAT mixed (85303)</td><td>8.7%</td><td>0.000</td><td>0.242</td><td>24.2%</td><td>0.59</td></tr>
+            <tr><td>DeepSeek-7B</td><td>SFT (85831)</td><td>8.2%</td><td>0.127</td><td>0.650</td><td>66.6%</td><td>1.55</td></tr>
+            <tr><td>Qwen3-8B</td><td>Base</td><td>6.1%</td><td>0.000</td><td>0.230</td><td>23.0%</td><td>0.54</td></tr>
+            <tr><td>Qwen3-8B</td><td>Diff-anneal (85307)</td><td>6.1%</td><td>0.000</td><td>0.245</td><td>24.5%</td><td>0.57</td></tr>
+            <tr><td><strong>DeepSeek-7B</strong></td><td>GRPO (85934)</td><td>5.0%</td><td>0.127</td><td>0.641</td><td>65.5%</td><td>1.55</td></tr>
+            <tr><td>Qwen3-8B</td><td>SFT (85832)</td><td>3.9%</td><td>0.029</td><td>0.064</td><td>7.1%</td><td>0.15</td></tr>
+        </table>
+
+        <div class="finding">
+            <strong>Note:</strong> Base Llama (71.2%) and OLMo (66.6%) score far higher than any RAILS model on LogicBench &mdash; but they use free-form CoT (classic <code>Step N:</code> format), not the structured <code>&lt;step&gt;</code>+<code>&lt;logic&gt;</code> format. The format constraint is a major handicap that GRPO partially overcomes. DeepSeek GRPO 85931 achieves 90.7% faithfulness vs Llama's 76.5%.
+        </div>
+
+        <h3>Transfer Benchmarks</h3>
+        <p>Performance on out-of-distribution benchmarks. Sorted by FOLIO accuracy.</p>
+
+        <table>
+            <tr><th>Model</th><th>FOLIO</th><th>ProntoQA</th><th>ProofWriter</th><th>ACPBench</th></tr>
+            <tr><td>Mistral answer-only</td><td>46.1%</td><td>7.7%</td><td>35.8%</td><td>&#8212;</td></tr>
+            <tr><td>OLMo base</td><td>45.6%</td><td>54.7%</td><td>43.3%</td><td>10.7%</td></tr>
+            <tr><td>Llama base</td><td>43.6%</td><td>20.0%</td><td>40.3%</td><td>9.4%</td></tr>
+            <tr><td>Mistral diff-anneal</td><td>42.6%</td><td>0.7%</td><td>37.0%</td><td>&#8212;</td></tr>
+            <tr><td>Mistral SAT</td><td>42.6%</td><td>6.7%</td><td>35.7%</td><td>&#8212;</td></tr>
+            <tr><td>Mistral base</td><td>41.2%</td><td>26.3%</td><td>36.5%</td><td>1.6%</td></tr>
+            <tr><td>Llama diff-anneal</td><td>39.7%</td><td>17.0%</td><td>39.8%</td><td>&#8212;</td></tr>
+            <tr><td>Llama SAT</td><td>33.8%</td><td>17.0%</td><td>40.3%</td><td>&#8212;</td></tr>
+            <tr style="background:#f0fdf4"><td><strong>Qwen GRPO (85716)</strong></td><td>18.1%</td><td>8.0%</td><td style="color:#16a34a;font-weight:700">43.8%</td><td>0.1%</td></tr>
+            <tr><td>DeepSeek GRPO (85855)</td><td>11.8%</td><td>0.3%</td><td>34.3%</td><td>0.0%</td></tr>
+            <tr><td>Qwen base</td><td>9.3%</td><td>0.0%</td><td>37.8%</td><td>0.7%</td></tr>
+            <tr><td>DeepSeek SAT mixed</td><td>7.8%</td><td>8.3%</td><td>34.5%</td><td>&#8212;</td></tr>
+            <tr><td>DeepSeek answer-only</td><td>6.9%</td><td>0.0%</td><td>34.2%</td><td>0.2%</td></tr>
+            <tr><td>DeepSeek base</td><td>5.9%</td><td>1.3%</td><td>33.8%</td><td>0.1%</td></tr>
+        </table>
+
+        <h3>SARA &amp; LSAT (Legal Reasoning)</h3>
+        <p>Only evaluated for a subset of models. CoT = chain-of-thought prompting.</p>
+
+        <table>
+            <tr><th>Model</th><th>SARA</th><th>SARA CoT</th><th>LSAT</th><th>LSAT CoT</th></tr>
+            <tr style="background:#f0fdf4"><td><strong>Qwen GRPO (85716)</strong></td><td>4.0%</td><td style="color:#16a34a;font-weight:700">43.0%</td><td>1.3%</td><td style="color:#16a34a;font-weight:700">28.3%</td></tr>
+            <tr><td>DeepSeek GRPO (85781)</td><td>0.0%</td><td>40.0%</td><td>0.9%</td><td>17.0%</td></tr>
+            <tr><td>DeepSeek base</td><td>2.0%</td><td>35.0%</td><td>0.0%</td><td>15.2%</td></tr>
+            <tr><td>Qwen base</td><td>0.0%</td><td>16.0%</td><td>1.3%</td><td>21.7%</td></tr>
+            <tr><td>Qwen SFT (85832)</td><td>0.0%</td><td>11.0%</td><td>1.3%</td><td>16.1%</td></tr>
+            <tr><td>DeepSeek SFT (85831)</td><td>1.0%</td><td>5.0%</td><td>2.2%</td><td>9.1%</td></tr>
+        </table>
+
+        <div class="finding">
+            <strong>SARA/LSAT takeaway:</strong> Direct (non-CoT) accuracy is near 0% for all models &mdash; these tasks need multi-step reasoning. With CoT prompting, Qwen GRPO reaches 43% on SARA (tax law) and 28.3% on LSAT. Consistency is effectively 0 on all legal benchmarks (the SAT verifier can't parse legal predicates).
+        </div>
+
+        <!-- ── Section 4: Per-Theory Analysis ── -->
+        <h2>4. Per-Theory Analysis</h2>
+
+        <p>LogicBench propositional contains 8 theories. Performance varies dramatically by theory difficulty.</p>
+
+        <h3>Best DeepSeek Run (85931) &mdash; Per Theory</h3>
+        <table>
+            <tr><th>Theory</th><th>Accuracy</th><th>Consistency</th><th>Faithfulness</th><th>Difficulty</th></tr>
+            <tr style="background:#f0fdf4"><td>Disjunctive syllogism</td><td style="color:#16a34a;font-weight:700">85.0%</td><td>0.775</td><td>0.850</td><td style="color:#16a34a">Easy</td></tr>
+            <tr style="background:#f0fdf4"><td>Hypothetical syllogism</td><td style="color:#16a34a;font-weight:700">67.5%</td><td>0.650</td><td>0.900</td><td style="color:#16a34a">Easy</td></tr>
+            <tr><td>Modus tollens</td><td>50.0%</td><td>0.650</td><td>0.950</td><td>Medium</td></tr>
+            <tr><td>Material implication</td><td>12.5%</td><td>0.306</td><td>0.900</td><td style="color:#b45309">Hard</td></tr>
+            <tr><td>Commutation</td><td>11.3%</td><td>0.219</td><td>0.850</td><td style="color:#b45309">Hard</td></tr>
+            <tr><td>Constructive dilemma</td><td>1.3%</td><td>0.062</td><td>0.975</td><td style="color:#dc2626">Very hard</td></tr>
+            <tr style="background:#fff5f5"><td>Bidirectional dilemma</td><td style="color:#dc2626;font-weight:700">0.0%</td><td>0.250</td><td>0.850</td><td style="color:#dc2626">Very hard</td></tr>
+            <tr style="background:#fff5f5"><td>Destructive dilemma</td><td style="color:#dc2626;font-weight:700">0.0%</td><td>0.200</td><td>0.975</td><td style="color:#dc2626">Very hard</td></tr>
+        </table>
+
+        <h3>Best Qwen Run (85716) &mdash; Per Theory</h3>
+        <table>
+            <tr><th>Theory</th><th>Accuracy</th><th>Consistency</th><th>Faithfulness</th></tr>
+            <tr style="background:#f0fdf4"><td>Disjunctive syllogism</td><td style="color:#16a34a;font-weight:700">80.0%</td><td>0.113</td><td>0.175</td></tr>
+            <tr style="background:#f0fdf4"><td>Modus tollens</td><td style="color:#16a34a;font-weight:700">70.0%</td><td>0.100</td><td>0.100</td></tr>
+            <tr><td>Material implication</td><td>50.0%</td><td>0.237</td><td>0.175</td></tr>
+            <tr><td>Hypothetical syllogism</td><td>43.8%</td><td>0.092</td><td>0.225</td></tr>
+            <tr><td>Constructive dilemma</td><td>42.5%</td><td>0.125</td><td>0.275</td></tr>
+            <tr><td>Commutation</td><td>22.5%</td><td>0.087</td><td>0.175</td></tr>
+            <tr><td>Destructive dilemma</td><td>16.3%</td><td>0.000</td><td>0.125</td></tr>
+            <tr style="background:#fff5f5"><td>Bidirectional dilemma</td><td style="color:#dc2626;font-weight:700">1.3%</td><td>0.000</td><td>0.000</td></tr>
+        </table>
+
+        <div class="finding warn">
+            <strong>Theory difficulty spectrum:</strong> Disjunctive syllogism (80&ndash;85%) is near-solved. Bidirectional dilemma (0&ndash;1%) is essentially unsolved. The three dilemma theories (constructive, destructive, bidirectional) all require coordinating multiple conditionals &mdash; fundamentally harder for step-level verification. These 3 theories account for the bulk of the accuracy gap vs. base models.
+        </div>
+
+        <h3>DeepSeek vs Qwen: Complementary Strengths</h3>
+        <table>
+            <tr><th>Theory</th><th>DS 85931</th><th>Qwen 85716</th><th>Winner</th></tr>
+            <tr><td>Disjunctive syllogism</td><td>85.0%</td><td>80.0%</td><td>DS (+5)</td></tr>
+            <tr><td>Hypothetical syllogism</td><td style="color:#16a34a;font-weight:700">67.5%</td><td>43.8%</td><td style="color:#16a34a">DS (+23.7)</td></tr>
+            <tr><td>Modus tollens</td><td>50.0%</td><td style="color:#16a34a;font-weight:700">70.0%</td><td style="color:#16a34a">Qwen (+20)</td></tr>
+            <tr><td>Material implication</td><td>12.5%</td><td style="color:#16a34a;font-weight:700">50.0%</td><td style="color:#16a34a">Qwen (+37.5)</td></tr>
+            <tr><td>Constructive dilemma</td><td>1.3%</td><td style="color:#16a34a;font-weight:700">42.5%</td><td style="color:#16a34a">Qwen (+41.2)</td></tr>
+            <tr><td>Commutation</td><td>11.3%</td><td style="color:#16a34a;font-weight:700">22.5%</td><td>Qwen (+11.2)</td></tr>
+        </table>
+
+        <div class="finding">
+            <strong>Insight:</strong> DeepSeek excels on chain-based theories (hypothetical syllogism, disjunctive syllogism) where high consistency + faithfulness &gt;90% translates to accuracy. Qwen excels on broader set of theories but with <em>much lower</em> faithfulness (15&ndash;28%) &mdash; it often gets the right answer without valid formal reasoning. An ensemble or theory-adaptive strategy could combine both strengths.
+        </div>
+
+        <!-- ── Section 5: Active Experiments ── -->
+        <h2>5. Active Experiments</h2>
+
+        <p>11 SLURM jobs running as of Feb 21, 2026. Snapshot from <code>squeue</code>:</p>
+
+        <table>
+            <tr><th>Job</th><th>Type</th><th>Model</th><th>Runtime</th><th>Status / Notes</th></tr>
+            <tr style="background:#f0fdf4"><td>85934</td><td>GRPO</td><td>DeepSeek-7B (v3, beta=0)</td><td>8h 32m</td><td style="color:#16a34a">Step 1400, reward 2.77 (highest ever)</td></tr>
+            <tr style="background:#f0fdf4"><td>85931</td><td>GRPO</td><td>DeepSeek-7B (v2, LR=2e-5)</td><td>8h 52m</td><td style="color:#16a34a">Step 1200, reward 1.25 &mdash; best eval so far</td></tr>
+            <tr><td>85954</td><td>GRPO</td><td>DeepSeek-14B (v4, beta=0)</td><td>2h 12m</td><td>Early (step ~100), stable so far</td></tr>
+            <tr><td>85855</td><td>GRPO</td><td>DeepSeek-7B (v1, NaN KL)</td><td>1d 3h</td><td>Step 2900, reward 2.66 (reference run)</td></tr>
+            <tr><td>85764</td><td>2-GPU GRPO</td><td>QwQ-32B</td><td>1d 14h</td><td>Step 500, reward 0.79 (slow: 230s/step)</td></tr>
+            <tr><td>85881</td><td>2-GPU GRPO</td><td>QwQ-32B (#2)</td><td>22h 47m</td><td>Step 300, reward -0.17 (struggling)</td></tr>
+            <tr><td>85844_1</td><td>PPO multi-node</td><td>Test (2 nodes)</td><td>1d 4h</td><td>PPO infrastructure test</td></tr>
+            <tr><td>85953_1</td><td>PPO multi-node</td><td>Test (2 nodes)</td><td>3h 19m</td><td>PPO infrastructure test</td></tr>
+            <tr><td>85963</td><td>vLLM serve</td><td>&#8212;</td><td>39m</td><td>Inference server</td></tr>
+            <tr><td>85964</td><td>Agentic lab</td><td>&#8212;</td><td>38m</td><td>Agent session</td></tr>
+            <tr><td>85965</td><td>Agentic lab</td><td>&#8212;</td><td>38m</td><td>Agent session</td></tr>
+        </table>
+
+        <h3>Top GRPO Runs by Final Reward (All Time)</h3>
+        <table>
+            <tr><th>Run</th><th>Model</th><th>Steps</th><th>Final Reward</th><th>Eval LB</th></tr>
+            <tr><td>85934</td><td>DeepSeek-7B (v3)</td><td>1400 (ongoing)</td><td style="color:#16a34a;font-weight:700">2.77</td><td style="color:#dc2626">5.0%</td></tr>
+            <tr><td>85562</td><td>Qwen3-8B</td><td>4808 (done)</td><td>2.64</td><td>&#8212;</td></tr>
+            <tr><td>85855</td><td>DeepSeek-7B (v1)</td><td>2900 (ongoing)</td><td>2.66</td><td>11.4%</td></tr>
+            <tr><td>85781</td><td>DeepSeek-7B (v1)</td><td>4808 (done)</td><td>2.40</td><td>13.0%</td></tr>
+            <tr><td>85716</td><td>Qwen3-8B</td><td>4808 (done)</td><td>2.22</td><td style="color:#16a34a;font-weight:700">35.9%</td></tr>
+            <tr><td>85099</td><td>Mistral-7B (SAT)</td><td>4808 (done)</td><td>2.00</td><td>&#8212;</td></tr>
+            <tr><td>85304</td><td>Llama-8B (SAT)</td><td>4808 (done)</td><td>1.73</td><td>&#8212;</td></tr>
+        </table>
+
+        <h3>SFT Training Summary</h3>
+        <table>
+            <tr><th>Model</th><th>Job</th><th>Epochs</th><th>Final Loss</th><th>Runtime</th></tr>
+            <tr><td>DeepSeek-7B</td><td>85899 (v2)</td><td>10</td><td>0.085</td><td>~75 min</td></tr>
+            <tr><td>DeepSeek-14B</td><td>85900 (v2)</td><td>10</td><td>0.067</td><td>~150 min</td></tr>
+            <tr><td>Qwen3-8B</td><td>85832</td><td>5</td><td>0.168</td><td>41 min</td></tr>
+            <tr><td>QwQ-32B</td><td>85834</td><td>5</td><td style="color:#b45309">0.0002 <small>(suspicious)</small></td><td>112 min</td></tr>
+        </table>
+
+        <div class="finding warn">
+            <strong>QwQ-32B anomaly:</strong> SFT loss drops to 0.0002 &mdash; near-perfect memorization. This likely means QwQ has enough capacity to overfit the 6K SFT examples completely. The resulting GRPO runs (85764, 85881) are both struggling with low/negative reward. Possible fix: fewer SFT epochs (1&ndash;2), or larger/more diverse SFT data.
+        </div>
+
+        <!-- ── Section 6: Infrastructure Stats ── -->
+        <h2>6. Infrastructure Overview</h2>
+
+        <table>
+            <tr><th>Metric</th><th>Count</th></tr>
+            <tr><td>Total model directories</td><td>177</td></tr>
+            <tr><td>Completed GRPO runs</td><td>31</td></tr>
+            <tr><td>Partial / ongoing runs</td><td>58</td></tr>
+            <tr><td>SFT directories (with checkpoints)</td><td>24</td></tr>
+            <tr><td>Crashed runs (0 checkpoints)</td><td>64 (36% failure rate)</td></tr>
+            <tr><td>Eval result JSON files</td><td>25</td></tr>
+            <tr><td>Active SLURM jobs</td><td>11</td></tr>
+        </table>
+
+        <div class="finding bad">
+            <strong>36% crash rate</strong> across all training attempts. Primary causes: OOM on 14B/32B models, vLLM initialization failures, NCCL timeouts on multi-node. Each crashed run wastes 10&ndash;60 min of GPU allocation before failing.
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- NOTE 0: Beta=0 Discovery                                               -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div class="note open" id="beta-zero">
@@ -541,7 +783,7 @@ SAT: rejected (invalid inference)</div>
 </div>
 
 <div class="footer">
-    Updated February 21, 2026 &middot;
+    Updated February 22, 2026 &middot;
     RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
     <a href="index.html">Project Hub</a>
 </div>

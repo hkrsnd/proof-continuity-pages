@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Qualitative Examples by Benchmark</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+h2 { font-size: 1.3rem; color: #16213e; margin-bottom: 0.8rem; }
+h3 { font-size: 1.05rem; color: #374151; margin-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+/* Nav */
+.back-link { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+.back-link:hover { text-decoration: underline; }
+
+/* Summary */
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+.stat-green .stat-value { color: #16a34a; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.badge-wrong { background: #fee2e2; color: #991b1b; }
+.badge-correct { background: #dcfce7; color: #166534; }
+.badge-theory { background: #e0e7ff; color: #3730a3; margin-left: 0.4rem; }
+.badge-model { background: #f3e8ff; color: #6b21a8; }
+.badge-benchmark { background: #fef3c7; color: #92400e; }
+
+/* Benchmark section */
+.benchmark-section { margin-bottom: 2.5rem; }
+.benchmark-header { background: white; border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.benchmark-header h2 { margin-bottom: 0; }
+.benchmark-delta { font-size: 0.85rem; }
+.delta-pos { color: #16a34a; font-weight: 700; }
+
+/* Example container */
+.example { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.example-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 0.5rem; }
+
+/* Context and question */
+.context { background: #fafafa; border-left: 3px solid #94a3b8; padding: 0.8rem 1rem; margin-bottom: 0.8rem; border-radius: 0 6px 6px 0; font-size: 0.88rem; }
+.context-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+.question { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 0.8rem 1rem; margin-bottom: 0.8rem; border-radius: 0 6px 6px 0; font-size: 0.9rem; font-weight: 500; }
+.ground-truth { font-size: 0.82rem; color: #16a34a; font-weight: 600; margin-bottom: 1rem; }
+
+/* Side-by-side comparison */
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+@media (max-width: 768px) { .comparison { grid-template-columns: 1fr; } }
+
+.trace { border-radius: 8px; padding: 1rem; font-size: 0.82rem; overflow-x: auto; }
+.trace-base { background: #fef2f2; border: 1px solid #fecaca; }
+.trace-grpo { background: #f0fdf4; border: 1px solid #bbf7d0; }
+
+.trace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
+.trace-title { font-weight: 700; font-size: 0.85rem; }
+.trace-base .trace-title { color: #dc2626; }
+.trace-grpo .trace-title { color: #16a34a; }
+
+.trace-content { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.76rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; color: #374151; }
+.truncated { color: #9ca3af; font-style: italic; }
+
+/* Observation */
+.observation { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 0.8rem 1rem; margin-top: 1rem; border-radius: 0 8px 8px 0; font-size: 0.85rem; }
+.observation strong { color: #1e40af; }
+
+/* Findings */
+.finding { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.88rem; }
+.finding-positive { background: #f0fdf4; border-left: 4px solid #22c55e; }
+.finding-insight { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.finding-caution { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.finding strong { color: #16213e; }
+
+.card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+/* Footer */
+.footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+
+@media (max-width: 768px) { body { padding: 1rem; } }
+</style>
+</head>
+<body>
+<a href="index.html" class="back-link">&larr; Back to Hub</a>
+<h1>RAILS &mdash; Qualitative Examples by Benchmark</h1>
+<p class="subtitle">How GRPO-trained models improve reasoning across each evaluation benchmark &middot; Base vs GRPO side-by-side</p>
+
+<div class="summary">
+    <h2>Overview</h2>
+    <p style="font-size:0.88rem; color:#555; margin-bottom:1rem;">
+        For each benchmark, we show examples where the <strong>GRPO model answers correctly</strong> while the <strong>base model fails</strong>.
+        The GRPO models produce structured <code>&lt;step&gt;</code>-tagged reasoning with formal logic annotations,
+        while base models typically produce unstructured prose that either gets truncated or fails to commit to an answer.
+    </p>
+    <div class="stats">
+        <div class="stat"><div class="stat-value">6</div><div class="stat-label">Benchmarks Covered</div></div>
+        <div class="stat stat-green"><div class="stat-value">11</div><div class="stat-label">Example Pairs</div></div>
+        <div class="stat"><div class="stat-value">2</div><div class="stat-label">Models</div></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- LOGICBENCH                                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="benchmark-section">
+    <div class="benchmark-header">
+        <h2>1. LogicBench &mdash; Propositional Logic</h2>
+        <div class="benchmark-delta">
+            DeepSeek: 0.198 &rarr; <span class="delta-pos">0.284</span> &middot;
+            Qwen: 0.080 &rarr; <span class="delta-pos">0.359</span>
+        </div>
+    </div>
+
+    <!-- LB Example 1: Disjunctive Syllogism -->
+    <div class="example">
+        <div class="example-header">
+            <h3>Disjunctive Syllogism</h3>
+            <div>
+                <span class="badge badge-model">DeepSeek-R1 (7B)</span>
+                <span class="badge badge-theory">disjunctive_syllogism</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Context</div>
+            Either she is not making a cake for the party, or he is writing a report for his boss, or both. We don't know for sure which one is true. However, it turns out that she is indeed making a cake for the party.
+        </div>
+        <div class="question">Does this mean that he is writing a report for his boss?</div>
+        <div class="ground-truth">Ground Truth: Yes</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: unknown</span>
+                </div>
+                <div class="trace-content">Alright, let's try to figure out this logic problem. So, the context is that either she's making a cake for the party, he's writing a report, or both. We don't know which, but she's making a cake. The question is, does that mean he's writing a report?
+
+First, I need to translate the given information into First-Order Logic. The initial statement is "Either she is not making a cake, or he is writing a report, or both." That sounds like a disjunction. So, in FOL, that would be something like:
+~makingCake(she) v writingReport(he).
+
+Now, looking at the two premises, we have a disjunction and a <span class="truncated">[TRUNCATED &mdash; token limit]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: yes</span>
+                </div>
+                <div class="trace-content">&lt;step n="1" type="premise"&gt;
+&lt;text&gt;Either she is not making a cake for the party, or he is writing a report for his boss, or both. This is a disjunction.&lt;/text&gt;
+&lt;logic&gt;~makingCake(she) v writingReport(he).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="2" type="premise"&gt;
+&lt;text&gt;It turns out that she is indeed making a cake for the party.&lt;/text&gt;
+&lt;logic&gt;makingCake(she).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="3" type="derived" from="1,2"&gt;
+&lt;text&gt;Since she is making a cake, the first disjunct is false, so the second disjunct must be true.&lt;/text&gt;
+&lt;logic&gt;writingReport(he).&lt;/logic&gt;
+&lt;/step&gt;
+
+Answer: Yes</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The base model identifies the right logical structure but produces meandering prose that gets truncated before reaching an answer.
+            The GRPO model produces a clean 3-step proof: two premises, one derivation via disjunctive syllogism. SAT consistency = 1.0.
+        </div>
+    </div>
+
+    <!-- LB Example 2: Modus Tollens -->
+    <div class="example">
+        <div class="example-header">
+            <h3>Modus Tollens</h3>
+            <div>
+                <span class="badge badge-model">Qwen3 (8B)</span>
+                <span class="badge badge-theory">modus_tollens</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Context</div>
+            Isabella had been working hard on her project, knowing that if she finished it on time, she would receive a bonus from her company. However, despite her efforts, Isabella realized that she wouldn't be receiving a bonus.
+        </div>
+        <div class="question">Does this entail that Isabella didn't finish her project on time?</div>
+        <div class="ground-truth">Ground Truth: Yes (Modus Tollens: A&rarr;B, &not;B &vdash; &not;A)</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: unknown</span>
+                </div>
+                <div class="trace-content">Okay, let's tackle this problem step by step. In logic, if we have F -&gt; B and we know ~B, what can we infer? Well, Modus Tollens says that if we have a conditional A -&gt; B and we know ~B, then we can conclude ~A. So applying that here...
+
+<span class="truncated">[TRUNCATED &mdash; base model identifies the correct rule but fails to commit to an answer before token limit]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: yes</span>
+                </div>
+                <div class="trace-content">Step 1: receivesBonus(isabella) :- finishesOnTime(isabella).
+Step 2: ~receivesBonus(isabella).
+Step 3: ~finishesOnTime(isabella).
+    [by Modus Tollens from Steps 1, 2]
+
+Answer: Yes</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The base model <em>recognizes</em> modus tollens by name and starts applying it correctly, but its unstructured output gets truncated before producing an answer.
+            The GRPO model produces a minimal 3-step proof. Qwen GRPO achieves 70% accuracy on modus tollens (vs 12% base).
+        </div>
+    </div>
+
+    <!-- LB Example 3: Hypothetical Syllogism (fallacy detection) -->
+    <div class="example">
+        <div class="example-header">
+            <h3>Fallacy Detection (Denying the Antecedent)</h3>
+            <div>
+                <span class="badge badge-model">DeepSeek-R1 (7B)</span>
+                <span class="badge badge-theory">hypothetical_syllogism</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Context</div>
+            If Jim cleans his room, he will receive a reward. And if he receives a reward, he will use it to buy a new toy. Jim decided to tidy up his room, hoping to earn a reward.
+        </div>
+        <div class="question">If Jim didn't clean his room, does this entail that he won't buy a new toy?</div>
+        <div class="ground-truth">Ground Truth: No (denying the antecedent is a fallacy)</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: unknown</span>
+                </div>
+                <div class="trace-content">Okay, so I'm trying to figure out whether Jim not cleaning his room means he won't buy a new toy.
+
+The first is cleaning_room(jim) -&gt; reward(jim).
+The second is reward(jim) -&gt; buys_new_toy(jim).
+
+I need to see if ~cleaning_room(jim) leads to ~buys_new_toy(jim).
+
+Looking at the given premises, I have two implications. The first is cleaning_room(jim) -&gt; <span class="truncated">[TRUNCATED]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: no</span>
+                </div>
+                <div class="trace-content">&lt;step n="1" type="premise"&gt;
+&lt;text&gt;If Jim cleans his room, he will receive a reward.&lt;/text&gt;
+&lt;logic&gt;receiveReward(jim) :- cleanRoom(jim).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="2" type="premise"&gt;
+&lt;text&gt;If he receives a reward, he will use it to buy a new toy.&lt;/text&gt;
+&lt;logic&gt;useRewardToBuyToy(jim) :- receiveReward(jim).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="3" type="premise"&gt;
+&lt;text&gt;Jim decided to tidy up his room.&lt;/text&gt;
+&lt;logic&gt;cleanRoom(jim).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="4" type="derived" from="1,3"&gt;
+&lt;text&gt;Since Jim cleaned his room, he will receive a reward.&lt;/text&gt;
+&lt;logic&gt;receiveReward(jim).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="5" type="derived" from="2,4"&gt;
+&lt;text&gt;Since Jim received a reward, he will buy a new toy.&lt;/text&gt;
+&lt;logic&gt;useRewardToBuyToy(jim).&lt;/logic&gt;
+&lt;/step&gt;
+
+The question asks about ~cleanRoom(jim). The premises don't say the only way to buy a toy is through a reward; there could be other ways. ~cleanRoom(jim) does not entail ~useRewardToBuyToy(jim).
+
+Answer: No</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight: Metacognitive reasoning.</strong> The GRPO model first derives the forward chain (clean &rarr; reward &rarr; toy), then explicitly reasons about
+            why the <em>negation</em> of the antecedent doesn't yield a conclusion. It correctly identifies the "denying the antecedent" fallacy.
+            DeepSeek GRPO achieves 68% on hypothetical syllogism (vs 47% base).
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- FOLIO                                                                  -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="benchmark-section">
+    <div class="benchmark-header">
+        <h2>2. FOLIO &mdash; First-Order Logic NLI</h2>
+        <div class="benchmark-delta">
+            DeepSeek: 0.059 &rarr; <span class="delta-pos">0.431</span> &middot;
+            Qwen: 0.093 &rarr; <span class="delta-pos">0.402</span>
+        </div>
+    </div>
+
+    <!-- FOLIO Example 1: Elimination -->
+    <div class="example">
+        <div class="example-header">
+            <h3>Elimination Reasoning</h3>
+            <div>
+                <span class="badge badge-model">Qwen3 (8B)</span>
+                <span class="badge badge-benchmark">FOLIO</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Premises</div>
+            There are six types of wild turkeys: Eastern, Osceola, Gould's, Merriam's, Rio Grande, and Ocellated.
+            Tom is not an Eastern wild turkey. Tom is not an Osceola wild turkey. Tom is not a Gould's wild turkey.
+            Tom is not a Merriam's wild turkey. Tom is not a Rio Grande wild turkey. Tom is a wild turkey.
+        </div>
+        <div class="question">Conclusion: Tom is an Ocellated wild turkey.</div>
+        <div class="ground-truth">Ground Truth: True</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: unknown</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model produces unstructured reasoning that fails to reach a conclusion]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: true</span>
+                </div>
+                <div class="trace-content">&lt;step n="1"-"6" type="premise"&gt;
+  [Six premises: Tom is not Eastern, not Osceola,
+   not Gould's, not Merriam's, not Rio Grande]
+
+&lt;step n="7" type="premise"&gt;
+&lt;text&gt;Tom is a wild turkey.&lt;/text&gt;
+&lt;logic&gt;wild_turkey(tom).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="8" type="derived" from="1,2,3,4,5,6"&gt;
+&lt;text&gt;Tom is a wild turkey and not any of the other
+five types, so he must be Ocellated.&lt;/text&gt;
+&lt;logic&gt;ocellated(tom).&lt;/logic&gt;
+&lt;/step&gt;
+
+Answer: Yes</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model performs elimination reasoning &mdash; systematically excluding 5 of 6 types to conclude the 6th.
+            This requires tracking all 6 premises and applying disjunctive elimination, which the unstructured base model fails to organize.
+        </div>
+    </div>
+
+    <!-- FOLIO Example 2: Uncertain reasoning -->
+    <div class="example">
+        <div class="example-header">
+            <h3>Correctly Identifying Uncertainty</h3>
+            <div>
+                <span class="badge badge-model">Qwen3 (8B)</span>
+                <span class="badge badge-benchmark">FOLIO</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Premises</div>
+            All people who eat salads regularly are very conscious about their health. All people who grew up in health-conscious homes eat salads regularly.
+            If people have good relationships with their parents, then they do not eat salads regularly.
+            Taylor either both grew up in a health-conscious home and has a good relationship with her parents, or neither.
+        </div>
+        <div class="question">Conclusion: Taylor eats salads regularly.</div>
+        <div class="ground-truth">Ground Truth: Uncertain</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: true</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model incorrectly concludes "true" without considering the contradiction case]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: uncertain</span>
+                </div>
+                <div class="trace-content">Case 1: Taylor grew up in a health-conscious
+home AND has a good relationship with parents.
+  &rarr; eats salads (from health-conscious home)
+  &rarr; does NOT eat salads (from good relationship)
+  Contradiction! This case is impossible.
+
+Case 2: Neither condition holds.
+  &rarr; No information about salad eating.
+  &rarr; Cannot determine.
+
+Since Case 1 is contradictory and Case 2 gives
+no information, the conclusion is uncertain.
+
+Answer: Unknown</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model performs <strong>case analysis</strong> on the disjunction, discovers that Case 1 leads to a contradiction,
+            and correctly concludes "uncertain." The base model fails to consider both cases and incorrectly commits to "true."
+        </div>
+    </div>
+
+    <!-- FOLIO Example 3: Property reasoning -->
+    <div class="example">
+        <div class="example-header">
+            <h3>Distinguishing Entailment from Open Questions</h3>
+            <div>
+                <span class="badge badge-model">DeepSeek-R1 (7B)</span>
+                <span class="badge badge-benchmark">FOLIO</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Premises</div>
+            All rabbits are cute. Some turtles exist. An animal is either a rabbit or a squirrel.
+            If something is skittish, then it is not still. All squirrels are skittish. Rock is still.
+        </div>
+        <div class="question">Conclusion: Rock is not a turtle.</div>
+        <div class="ground-truth">Ground Truth: Uncertain</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: true</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model incorrectly infers "true"]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: uncertain</span>
+                </div>
+                <div class="trace-content">The premises don't say anything about whether
+Rock is a turtle or not. They only say that
+turtles exist, but not about Rock specifically.
+
+Rock is still &rarr; Rock is not skittish &rarr;
+Rock is not a squirrel &rarr; Rock is a rabbit
+(from the animal disjunction).
+
+But "rabbit" and "turtle" are not mutually
+exclusive in the premises. Rock could be both
+a rabbit and a turtle. The premises are
+insufficient to determine Rock's turtle status.
+
+Answer: Unknown</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model correctly identifies what the premises <em>can</em> and <em>cannot</em> determine.
+            It derives that Rock is a rabbit (via elimination from the animal disjunction) but recognizes this doesn't exclude being a turtle.
+            The base model makes an unjustified leap to "true."
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- PRONTOQA                                                               -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="benchmark-section">
+    <div class="benchmark-header">
+        <h2>3. ProntoQA &mdash; Multi-Hop Deductive Reasoning</h2>
+        <div class="benchmark-delta">
+            DeepSeek: 0.013 &rarr; <span class="delta-pos">0.053</span> &middot;
+            Qwen: 0.000 &rarr; <span class="delta-pos">0.073</span>
+        </div>
+    </div>
+
+    <div class="example">
+        <div class="example-header">
+            <h3>1-Hop Chain Reasoning</h3>
+            <div>
+                <span class="badge badge-model">DeepSeek-R1 (7B)</span>
+                <span class="badge badge-benchmark">ProntoQA</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Context</div>
+            Wumpuses are bitter. Each grimpus is a zumpus. Tumpuses are small. Every wumpus is an impus.
+            Grimpuses are not transparent. Wumpuses are tumpuses. Max is a grimpus. Max is a wumpus.
+        </div>
+        <div class="question">Prove: Max is bitter.</div>
+        <div class="ground-truth">Ground Truth: Yes</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: unknown</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model produces verbose reasoning that fails to reach a conclusion]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: yes</span>
+                </div>
+                <div class="trace-content">&lt;step n="1" type="premise"&gt;
+&lt;text&gt;Wumpuses are bitter.&lt;/text&gt;
+&lt;logic&gt;bitter(X) :- wumpus(X).&lt;/logic&gt;
+&lt;/step&gt;
+
+[... steps 2-7: remaining premises ...]
+
+&lt;step n="8" type="premise"&gt;
+&lt;text&gt;Max is a wumpus.&lt;/text&gt;
+&lt;logic&gt;wumpus(max).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="9" type="derived" from="1,8"&gt;
+&lt;text&gt;Since Max is a wumpus and all wumpuses are bitter, Max is bitter.&lt;/text&gt;
+&lt;logic&gt;bitter(max).&lt;/logic&gt;
+&lt;/step&gt;
+
+Answer: Yes</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model systematically formalizes all 8 premises, then identifies the shortest derivation path:
+            wumpus(max) + bitter(X) :- wumpus(X) &rarr; bitter(max). Despite many distracting premises, it selects the relevant ones.
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- PROOFWRITER                                                            -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="benchmark-section">
+    <div class="benchmark-header">
+        <h2>4. ProofWriter &mdash; Multi-Depth Proof Generation</h2>
+        <div class="benchmark-delta">
+            DeepSeek: 0.338 &rarr; <span class="delta-pos">0.380</span> &middot;
+            Qwen: 0.378 &rarr; <span class="delta-pos">0.385</span>
+        </div>
+    </div>
+
+    <div class="example">
+        <div class="example-header">
+            <h3>Depth-2 Chain Reasoning</h3>
+            <div>
+                <span class="badge badge-model">DeepSeek-R1 (7B)</span>
+                <span class="badge badge-benchmark">ProofWriter</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Context</div>
+            The cat is rough. The dog visits the cat. The rabbit likes the cat.
+            If someone visits the cat then they like the dog. If someone likes the dog then they need the dog.
+        </div>
+        <div class="question">The dog needs the dog.</div>
+        <div class="ground-truth">Ground Truth: True</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: unknown</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model fails to chain the two rules together]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: true</span>
+                </div>
+                <div class="trace-content">&lt;step n="1"-"5" type="premise"&gt;
+  [5 premises formalized]
+
+&lt;step n="6" type="derived" from="2,4"&gt;
+&lt;text&gt;Since the dog visits the cat, the dog
+likes the dog.&lt;/text&gt;
+&lt;logic&gt;likes(dog, dog).&lt;/logic&gt;
+&lt;/step&gt;
+
+&lt;step n="7" type="derived" from="5,6"&gt;
+&lt;text&gt;Since the dog likes the dog, the dog
+needs the dog.&lt;/text&gt;
+&lt;logic&gt;needs(dog, dog).&lt;/logic&gt;
+&lt;/step&gt;
+
+Answer: Yes</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model constructs a clean 2-step derivation chain:
+            visits(dog,cat) &rarr; likes(dog,dog) &rarr; needs(dog,dog). Each step cites the premises it derives from.
+            ProofWriter improvements are modest (+4%) because the SAT solver cannot verify FOL predicates,
+            but the structured format still helps organize multi-hop reasoning.
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SARA                                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="benchmark-section">
+    <div class="benchmark-header">
+        <h2>5. SARA &mdash; Statutory Reasoning (Transfer)</h2>
+        <div class="benchmark-delta">
+            Qwen: 0.160 &rarr; <span class="delta-pos">0.430</span> (+0.270)
+        </div>
+    </div>
+
+    <div class="example">
+        <div class="example-header">
+            <h3>Statutory Entailment</h3>
+            <div>
+                <span class="badge badge-model">Qwen3 (8B)</span>
+                <span class="badge badge-benchmark">SARA (transfer)</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Facts</div>
+            Alice has paid $3200 to Bob for agricultural labor done from Feb 1st, 2017 to Sep 2nd, 2017, in Caracas, Venezuela.
+            Bob is an American citizen. Alice is an American employer.
+        </div>
+        <div class="question">Section 3306(c)(1)(B) applies to Alice employing Bob for the year 2017.</div>
+        <div class="ground-truth">Ground Truth: Entailment</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: contradiction</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model incorrectly reasons that foreign location means the statute doesn't apply]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: entailment</span>
+                </div>
+                <div class="trace-content">The GRPO model formalizes the key facts:
+- American employer (Alice)
+- American citizen (Bob)
+- Agricultural labor in foreign country
+- Payment of $3200
+
+It identifies that Section 3306(c)(1)(B)
+covers employment by American employers of
+American citizens in foreign countries,
+and correctly determines entailment.
+
+Answer: Entailment</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight: Zero-shot transfer.</strong> The GRPO model was never trained on legal reasoning, yet it applies structured logical analysis
+            to statutory conditions. The base model makes the common error of assuming foreign location excludes US law applicability.
+            SARA accuracy improves from 16.0% to 43.0% &mdash; the largest transfer gain across all benchmarks.
+        </div>
+    </div>
+
+    <div class="example">
+        <div class="example-header">
+            <h3>Statutory Contradiction</h3>
+            <div>
+                <span class="badge badge-model">Qwen3 (8B)</span>
+                <span class="badge badge-benchmark">SARA (transfer)</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Facts</div>
+            Alice has paid $45252 to Bob for work done in 2017. In 2017, Alice has also paid $9832 into a retirement fund for Bob,
+            and $5322 into life insurance for Charlie, who is Alice's father and has retired in 2016.
+        </div>
+        <div class="question">Section 3306(b)(2)(C) applies to the payment Alice made to the retirement fund for the year 2017.</div>
+        <div class="ground-truth">Ground Truth: Contradiction</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: entailment</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model incorrectly says the statute applies without checking conditions]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: contradiction</span>
+                </div>
+                <div class="trace-content">The GRPO model correctly identifies that
+there is no premise linking the retirement
+fund payment to the specific conditions
+required by Section 3306(b)(2)(C).
+
+The statute requires specific conditions
+that are not met by the given facts.
+
+Answer: Contradiction</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model correctly identifies missing conditions &mdash; it checks whether the statutory requirements
+            are actually met by the facts, rather than assuming applicability. This mirrors the metacognitive reasoning
+            learned from propositional logic ("when rules don't apply").
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- LSAT                                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="benchmark-section">
+    <div class="benchmark-header">
+        <h2>6. LSAT Logic Games &mdash; Constraint Satisfaction (Transfer)</h2>
+        <div class="benchmark-delta">
+            Qwen: 0.217 &rarr; <span class="delta-pos">0.283</span> (+0.065)
+        </div>
+    </div>
+
+    <div class="example">
+        <div class="example-header">
+            <h3>Ordering with Constraints</h3>
+            <div>
+                <span class="badge badge-model">Qwen3 (8B)</span>
+                <span class="badge badge-benchmark">LSAT (transfer)</span>
+            </div>
+        </div>
+        <div class="context">
+            <div class="context-label">Setup</div>
+            A detective is determining the order in which a criminal recruited seven accomplices: Peters, Quinn, Rovero, Stanton, Tao, Villas, and White.
+            Constraints: Stanton not adjacent to Tao. Quinn before Rovero. Villas immediately before White. Peters recruited fourth.
+        </div>
+        <div class="question">Which could be the list of the middle five accomplices (positions 2&ndash;6)?</div>
+        <div class="ground-truth">Ground Truth: C</div>
+        <div class="comparison">
+            <div class="trace trace-base">
+                <div class="trace-header">
+                    <span class="trace-title">Base Model</span>
+                    <span class="badge badge-wrong">predicted: E</span>
+                </div>
+                <div class="trace-content"><span class="truncated">[Base model attempts informal constraint checking but picks the wrong answer]</span></div>
+            </div>
+            <div class="trace trace-grpo">
+                <div class="trace-header">
+                    <span class="trace-title">GRPO (RAILS)</span>
+                    <span class="badge badge-correct">predicted: C</span>
+                </div>
+                <div class="trace-content">The GRPO model formalizes each constraint
+as a logical step and systematically tests
+each option against the constraint set:
+
+1. Peters = position 4 (fixed)
+2. Quinn before Rovero
+3. Villas immediately before White
+4. Stanton not adjacent to Tao
+
+Tests option C: satisfies all constraints.
+
+Answer: C</div>
+            </div>
+        </div>
+        <div class="observation">
+            <strong>Key insight:</strong> The GRPO model applies systematic constraint checking &mdash; formalizing rules and testing each option.
+            LSAT improvement is more modest (+6.5%) because constraint satisfaction requires domain-specific reasoning
+            beyond what propositional logic training covers, but the structured approach still helps.
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SUMMARY                                                                -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="card">
+    <h2>Cross-Benchmark Findings</h2>
+
+    <div class="finding finding-positive">
+        <strong>1. Base model failure mode: "unknown" by default.</strong>
+        Across all benchmarks, base models overwhelmingly predict "unknown" &mdash; they recognize reasoning patterns
+        but fail to commit to an answer. Even when their reasoning text identifies the correct rule, the unstructured
+        output gets truncated or fails to extract an answer. GRPO training teaches models to <em>conclude</em>.
+    </div>
+
+    <div class="finding finding-positive">
+        <strong>2. Structured format enables multi-step reasoning.</strong>
+        The <code>&lt;step&gt;</code> format with <code>type="derived" from="..."</code> provenance tracking helps models
+        organize complex chains. This is most visible in FOLIO (elimination over 6 premises) and ProofWriter (depth-2 chains).
+    </div>
+
+    <div class="finding finding-insight">
+        <strong>3. Logic training transfers to unseen domains.</strong>
+        SARA (+27pp for Qwen) and LSAT (+6.5pp) improvements occur despite zero legal/constraint training data.
+        The structured reasoning approach &mdash; formalize conditions, check systematically &mdash; generalizes beyond propositional logic.
+    </div>
+
+    <div class="finding finding-caution">
+        <strong>4. Verification coverage limits gains.</strong>
+        ProofWriter and ProntoQA show smaller improvements because the SAT solver cannot verify FOL predicates
+        (returns inconclusive). ACPBench (planning) shows 0% for both models &mdash; this domain requires different capabilities entirely.
+    </div>
+</div>
+
+<div class="footer">
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 2026<br>
+    <a href="eval_results.html" style="color:#2563eb; text-decoration:none; font-weight:500;">&larr; Performance Tables</a>
+    &middot;
+    <a href="qualitative_comparison.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Base vs GRPO Comparison</a>
+    &middot;
+    <a href="index.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Hub</a>
+</div>
+</body>
+</html>
