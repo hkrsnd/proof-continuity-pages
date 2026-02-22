@@ -173,7 +173,7 @@ tr:hover { background: #fafbff; }
             <tr class="model-header"><td colspan="3">DeepSeek-R1 (7B)</td></tr>
             <tr class="condition-row"><td>Base</td><td>0.350</td><td>0.152</td></tr>
             <tr class="condition-row"><td>SFT</td><td>0.050</td><td>0.091</td></tr>
-            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.400</td><td class="best">0.170</td></tr>
+            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.500 <span class="delta-pos">+0.150</span></td><td class="best">0.157</td></tr>
 
             <tr class="model-header"><td colspan="3">Qwen3 (8B)</td></tr>
             <tr class="condition-row"><td>Base</td><td>0.160</td><td>0.217</td></tr>
@@ -185,7 +185,7 @@ tr:hover { background: #fafbff; }
     <div class="finding finding-caution" style="margin-top:1rem;">
         <strong>SFT hurts transfer.</strong> SFT alone consistently degrades out-of-domain performance
         (DeepSeek SARA: 35.0% base &rarr; 5.0% SFT; Qwen LSAT: 21.7% base &rarr; 16.1% SFT).
-        GRPO recovers and exceeds base performance, suggesting the consistency reward &mdash; not format training &mdash; drives generalization.
+        GRPO recovers and exceeds base performance &mdash; DeepSeek GRPO reaches 50.0% on SARA (+15pp over base), suggesting the consistency reward drives generalization.
     </div>
 </div>
 
@@ -281,7 +281,7 @@ tr:hover { background: #fafbff; }
     <div class="finding finding-insight">
         <strong>GRPO generalizes to unseen domains.</strong>
         On SARA (legal reasoning) and LSAT (constraint satisfaction), GRPO models outperform both base and SFT models.
-        Qwen3 GRPO reaches 43.0% on SARA (vs 16.0% base) and 28.3% on LSAT (vs 21.7% base).
+        DeepSeek GRPO reaches 50.0% on SARA (vs 35.0% base) and Qwen3 GRPO reaches 43.0% on SARA (vs 16.0% base) and 28.3% on LSAT (vs 21.7% base).
     </div>
 
     <div class="finding finding-caution">
