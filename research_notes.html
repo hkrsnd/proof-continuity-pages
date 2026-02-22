@@ -85,6 +85,15 @@
     <div class="toc-item">
         <span class="toc-date">2026-02-21</span>
         <div>
+            <a class="toc-link" href="#status-feb21">Experiment Status &amp; Key Insights (Feb 21)</a>
+            <span class="toc-tag tag-red">key finding</span>
+            <span class="toc-tag tag-green">status</span>
+            <div class="toc-desc">Reward-eval disconnect (highest reward = worst eval), SFT J-curve regression, full leaderboard across 17+ models and 6 benchmarks, per-theory analysis, 11 active SLURM jobs.</div>
+        </div>
+    </div>
+    <div class="toc-item">
+        <span class="toc-date">2026-02-21</span>
+        <div>
             <a class="toc-link" href="#beta-zero">The Beta=0 Discovery: Why KL Penalty Destroys GRPO Training</a>
             <span class="toc-tag tag-red">key finding</span>
             <div class="toc-desc">Reference run had NaN KL throughout &mdash; effectively no penalty. Setting beta=0 explicitly produced the best results ever: reward 2.66, consistency 0.84, format compliance 68%.</div>
@@ -334,7 +343,7 @@ Hold that step, it seem <span class="garbled">problematic&#x5947;&#x7EB3;</span>
         </div>
 
         <ul>
-            <li><strong>Preserved reasoning</strong> (Qwen3, QwQ, likely Llama reasoning variants): Good candidates. Structured formats inside <code>&lt;think&gt;</code> align with pretrained behavior.</li>
+            <li><strong>Preserved reasoning</strong> (Qwen3, QwQ, and other ChatML-family models): Good candidates. Structured formats inside <code>&lt;think&gt;</code> align with pretrained behavior.</li>
             <li><strong>Stripped reasoning</strong> (DeepSeek-R1, "hidden CoT" models): Requires mitigation &mdash; stronger SFT (2x epochs), higher KL penalty (5x beta), or a different tag to avoid conflict.</li>
         </ul>
 
@@ -375,7 +384,7 @@ Hold that step, it seem <span class="garbled">problematic&#x5947;&#x7EB3;</span>
             <tr><td>1</td><td>Reversed Implication (P&rarr;Q, Q &there4; P)</td><td style="color:#dc2626;font-weight:600">+0.840</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
             <tr><td>2</td><td>Inverse &ne; Contrapositive (~P&rarr;~Q from P&rarr;Q)</td><td style="color:#dc2626;font-weight:600">+0.878</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
             <tr><td>3</td><td>Denying the Antecedent (~P &there4; ~Q)</td><td>-0.057</td><td>+0.000</td><td style="color:#16a34a">Correct reject</td></tr>
-            <tr><td>4</td><td>Logical Babble (answer-only, 7 steps)</td><td style="color:#dc2626;font-weight:600">+0.021</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
+            <tr><td>4</td><td>Logical Babble (no consistency reward, 7 steps)</td><td style="color:#dc2626;font-weight:600">+0.021</td><td style="color:#16a34a">-1.000</td><td style="color:#dc2626">FALSE ACCEPT</td></tr>
             <tr><td>5</td><td>Hidden Negation (valid NL, bad formal)</td><td>-0.923</td><td>-1.000</td><td style="color:#16a34a">Correct reject</td></tr>
         </table>
 
@@ -396,8 +405,8 @@ Derived:  ~weak :- ~skips.         "Doesn't skip &rarr; doesn't feel weak"  <spa
         <p>The correct contrapositive of <code>skips&rarr;weak</code> is <code>~weak&rarr;~skips</code>, but the model writes <code>~skips&rarr;~weak</code> (the inverse). NLI gives 85.4% because the text sounds perfectly natural. Humans make this same error.</p>
 
         <h3>Example 4: Logical Babble (NLI: +0.02, SAT: -1.0)</h3>
-        <p>Source: Llama-3.1-8B answer-only baseline, GRPO step 2900</p>
-        <p>No consistency reward during training. Produces 7 steps citing real rule names (Destructive Dilemma, Disjunctive Syllogism, Hypothetical Syllogism) &mdash; creating an <em>illusion</em> of rigorous reasoning. Every derived step fails SAT verification.</p>
+        <p>Source: GRPO baseline without consistency reward, step 2900</p>
+        <p>Without consistency reward, the model produces 7 steps citing real rule names (Destructive Dilemma, Disjunctive Syllogism, Hypothetical Syllogism) &mdash; creating an <em>illusion</em> of rigorous reasoning. Every derived step fails SAT verification.</p>
 
         <h2>Why NLI Fails</h2>
         <ol>
@@ -406,10 +415,10 @@ Derived:  ~weak :- ~skips.         "Doesn't skip &rarr; doesn't feel weak"  <spa
             <li><strong>No structural awareness:</strong> NLI operates on surface text. It cannot distinguish P&rarr;Q from Q&rarr;P, or valid from invalid rule application.</li>
         </ol>
 
-        <h2>The Answer-Only Baseline Gap</h2>
+        <h2>The Baseline Gap (No Consistency Reward)</h2>
 
         <div class="finding warn">
-            Answer-only baseline (no consistency reward): <strong>80% answer accuracy</strong> but <strong>-90% consistency score</strong>. Models learn correct answers through invalid reasoning. NLI would accept most of these chains.
+            Without consistency reward: <strong>80% answer accuracy</strong> but <strong>-90% consistency score</strong>. Models learn correct answers through invalid reasoning. NLI would accept most of these chains.
         </div>
 
         <h2>Paper Framing</h2>
