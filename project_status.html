@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 11:23 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 12:30 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -522,7 +522,7 @@ tr:hover { background: #fafbff; }
 <!-- Live eval jobs -->
 <div class="card">
     <h2>Live Evaluation Jobs <span class="badge badge-blue" style="font-size:0.65rem; vertical-align:middle;">RUNNING</span></h2>
-    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model). Progress as of 11:23 UTC.</p>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model). Progress as of 12:30 UTC.</p>
     <div class="table-wrapper">
     <table>
         <thead>
@@ -536,53 +536,53 @@ tr:hover { background: #fafbff; }
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <tr style="background:#f0fdf4;">
                 <td style="text-align:left">86465</td>
                 <td>DS-7B</td>
                 <td>Base</td>
-                <td><strong>421/800 (53%)</strong></td>
+                <td><strong>635/800 (79%)</strong></td>
                 <td>~5s/sample</td>
-                <td>~30min</td>
+                <td>~15min</td>
             </tr>
             <tr>
                 <td style="text-align:left">86467</td>
                 <td>DS-7B</td>
                 <td>SFT</td>
-                <td>258/800 (32%)</td>
-                <td>~10s/sample</td>
+                <td>413/800 (52%)</td>
+                <td>~9s/sample</td>
+                <td>~1h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86464</td>
+                <td>Qwen-8B</td>
+                <td>GRPO</td>
+                <td>407/800 (51%)</td>
+                <td>~9s/sample</td>
+                <td>~1h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86462</td>
+                <td>Qwen-8B</td>
+                <td>Base</td>
+                <td>365/800 (46%)</td>
+                <td>~12s/sample</td>
                 <td>~1.5h</td>
             </tr>
             <tr>
                 <td style="text-align:left">86466</td>
                 <td>DS-7B</td>
                 <td>GRPO</td>
-                <td>210/800 (26%)</td>
+                <td>353/800 (44%)</td>
                 <td>~12s/sample</td>
-                <td>~2h</td>
-            </tr>
-            <tr>
-                <td style="text-align:left">86464</td>
-                <td>Qwen-8B</td>
-                <td>GRPO</td>
-                <td>244/800 (31%)</td>
-                <td>~10s/sample</td>
                 <td>~1.5h</td>
-            </tr>
-            <tr>
-                <td style="text-align:left">86462</td>
-                <td>Qwen-8B</td>
-                <td>Base</td>
-                <td>177/800 (22%)</td>
-                <td>~14s/sample</td>
-                <td>~2.5h</td>
             </tr>
             <tr>
                 <td style="text-align:left">86471</td>
                 <td>Qwen-8B</td>
                 <td>SFT</td>
-                <td>172/800 (22%)</td>
-                <td>~14s/sample</td>
-                <td>~2.5h</td>
+                <td>335/800 (42%)</td>
+                <td>~12s/sample</td>
+                <td>~1.5h</td>
             </tr>
         </tbody>
     </table>
