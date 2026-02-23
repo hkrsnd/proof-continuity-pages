@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 13:50 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 16:21 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -521,8 +521,8 @@ tr:hover { background: #fafbff; }
 
 <!-- Live eval jobs -->
 <div class="card">
-    <h2>Live Evaluation Jobs <span class="badge badge-blue" style="font-size:0.65rem; vertical-align:middle;">1/6 COMPLETE</span></h2>
-    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model). Progress as of 13:50 UTC.</p>
+    <h2>Live Evaluation Jobs <span class="badge badge-blue" style="font-size:0.65rem; vertical-align:middle;">2/6 COMPLETE</span></h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model). Progress as of 16:21 UTC.</p>
     <div class="table-wrapper">
     <table>
         <thead>
@@ -544,27 +544,19 @@ tr:hover { background: #fafbff; }
                 <td><span class="badge badge-green">Complete</span></td>
                 <td><strong>59.8%</strong></td>
             </tr>
-            <tr>
+            <tr style="background:#f0fdf4;">
                 <td style="text-align:left">86467</td>
                 <td>DS-7B</td>
                 <td>GRPO <span class="badge badge-green" style="font-size:0.6rem;">RAILS</span></td>
-                <td>525/800 (66%)</td>
-                <td><span class="badge badge-blue">Running</span></td>
-                <td>&mdash;</td>
-            </tr>
-            <tr>
-                <td style="text-align:left">86464</td>
-                <td>Qwen-8B</td>
-                <td>GRPO <span class="badge badge-green" style="font-size:0.6rem;">RAILS</span></td>
-                <td>511/800 (64%)</td>
-                <td><span class="badge badge-blue">Running</span></td>
-                <td>&mdash;</td>
+                <td><strong>800/800 (100%)</strong></td>
+                <td><span class="badge badge-green">Complete</span></td>
+                <td><strong>56.6%</strong></td>
             </tr>
             <tr>
                 <td style="text-align:left">86462</td>
                 <td>Qwen-8B</td>
                 <td>Base</td>
-                <td>497/800 (62%)</td>
+                <td>741/800 (93%)</td>
                 <td><span class="badge badge-blue">Running</span></td>
                 <td>&mdash;</td>
             </tr>
@@ -572,7 +564,15 @@ tr:hover { background: #fafbff; }
                 <td style="text-align:left">86466</td>
                 <td>DS-7B</td>
                 <td>SFT</td>
-                <td>462/800 (58%)</td>
+                <td>707/800 (88%)</td>
+                <td><span class="badge badge-blue">Running</span></td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86464</td>
+                <td>Qwen-8B</td>
+                <td>GRPO <span class="badge badge-green" style="font-size:0.6rem;">RAILS</span></td>
+                <td>690/800 (86%)</td>
                 <td><span class="badge badge-blue">Running</span></td>
                 <td>&mdash;</td>
             </tr>
@@ -580,7 +580,7 @@ tr:hover { background: #fafbff; }
                 <td style="text-align:left">86471</td>
                 <td>Qwen-8B</td>
                 <td>SFT</td>
-                <td>442/800 (55%)</td>
+                <td>634/800 (79%)</td>
                 <td><span class="badge badge-blue">Running</span></td>
                 <td>&mdash;</td>
             </tr>
@@ -595,10 +595,10 @@ tr:hover { background: #fafbff; }
 
 <!-- Incoming depth-scaling results -->
 <div class="card">
-    <h2>Depth-Scaling Results (Incoming) <span class="badge badge-purple" style="font-size:0.65rem; vertical-align:middle;">1/6 models</span></h2>
+    <h2>Depth-Scaling Results (Incoming) <span class="badge badge-purple" style="font-size:0.65rem; vertical-align:middle;">2/6 models</span></h2>
     <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
         Per-hop accuracy on Extended ProntoQA (100 samples per hop level). Results populate as jobs complete.
-        <strong>This is the paper's central experiment</strong> &mdash; demonstrating RAILS advantage on long-chain reasoning.
+        <strong>This is the paper's central experiment.</strong>
     </p>
     <div class="table-wrapper">
     <table>
@@ -618,9 +618,9 @@ tr:hover { background: #fafbff; }
                 <td>SFT <span style="font-size:0.7rem; color:#aaa;">(pending)</span></td>
                 <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
             </tr>
-            <tr class="condition-row" style="opacity:0.3;">
-                <td>GRPO <span class="badge badge-green" style="font-size:0.6rem;">RAILS</span> <span style="font-size:0.7rem; color:#aaa;">(pending)</span></td>
-                <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+            <tr class="condition-row improved">
+                <td>GRPO <span class="badge badge-green" style="font-size:0.6rem;">RAILS</span></td>
+                <td class="best-overall">99.0</td><td class="best">96.0</td><td>89.0</td><td>72.0</td><td>47.0</td><td>30.0</td><td>13.0</td><td>7.0</td><td>56.6</td>
             </tr>
             <tr class="model-header"><td colspan="10">Qwen3-8B</td></tr>
             <tr class="condition-row" style="opacity:0.3;">
@@ -641,31 +641,47 @@ tr:hover { background: #fafbff; }
 
     <div class="grid-2" style="margin-top:1rem;">
         <div>
-            <h3>DS-7B Base: Clear Depth Degradation</h3>
-            <div class="finding finding-caution" style="font-size:0.82rem;">
-                <strong>Accuracy drops from 87% (3-hop) to 22% (15-hop).</strong>
-                The base model collapses beyond 7 hops, falling to near-random (22&ndash;23%) at 15&ndash;20 hops.
-                Peak is at 3-hop (87%), with steady decay through the mid-range (5&ndash;10 hops).
+            <h3>DS-7B: GRPO Excels at Short Chains, Struggles at Long</h3>
+            <div class="table-wrapper">
+            <table style="font-size:0.78rem;">
+                <thead>
+                    <tr><th>Hops</th><th>Base</th><th>GRPO</th><th>&Delta;</th></tr>
+                </thead>
+                <tbody>
+                    <tr class="improved"><td>1</td><td>78.0</td><td class="best">99.0</td><td><span class="delta-pos">+21.0</span></td></tr>
+                    <tr class="improved"><td>2</td><td>86.0</td><td class="best">96.0</td><td><span class="delta-pos">+10.0</span></td></tr>
+                    <tr class="improved"><td>3</td><td>87.0</td><td>89.0</td><td><span class="delta-pos">+2.0</span></td></tr>
+                    <tr><td>5</td><td>74.0</td><td>72.0</td><td><span class="delta-neg">&minus;2.0</span></td></tr>
+                    <tr class="degraded"><td>7</td><td class="best">64.0</td><td>47.0</td><td><span class="delta-neg">&minus;17.0</span></td></tr>
+                    <tr class="degraded"><td>10</td><td class="best">44.0</td><td>30.0</td><td><span class="delta-neg">&minus;14.0</span></td></tr>
+                    <tr class="degraded"><td>15</td><td class="best">22.0</td><td>13.0</td><td><span class="delta-neg">&minus;9.0</span></td></tr>
+                    <tr class="degraded"><td>20</td><td class="best">23.0</td><td>7.0</td><td><span class="delta-neg">&minus;16.0</span></td></tr>
+                </tbody>
+            </table>
             </div>
-            <div style="font-family:monospace; font-size:0.75rem; background:#f9fafb; padding:0.8rem; border-radius:6px; margin-top:0.5rem; line-height:1.4;">
-                <span style="color:#999;">Hops:</span>  1    2    3    5    7   10   15   20<br>
-                <span style="color:#999;">Acc:</span>  78   86  <span style="color:#16a34a; font-weight:700;">87</span>   74   64   44  <span style="color:#dc2626; font-weight:700;">22   23</span><br>
-                <span style="color:#999;">     </span>  |    |    |    |    |    |    |    |<br>
-                <span style="color:#999;">     </span>  <span style="color:#3b82f6;">====</span><span style="color:#22c55e;">====</span><span style="color:#16a34a;">====</span><span style="color:#f59e0b;">====</span><span style="color:#f97316;">====</span><span style="color:#ef4444;">====</span><span style="color:#dc2626;">==</span><span style="color:#dc2626;">==</span><br>
-                <span style="color:#999;">     </span>  <span style="color:#999;">plateau &nbsp;&nbsp;&nbsp; decline &nbsp;&nbsp; collapse</span>
+            <div class="finding finding-caution" style="font-size:0.82rem; margin-top:0.5rem;">
+                <strong>Crossover at 5 hops.</strong> GRPO dominates 1&ndash;3 hops (+21pp at 1-hop) but degrades
+                faster than base beyond 5 hops. At 20 hops, base retains 23% vs GRPO's 7%.
             </div>
         </div>
         <div>
-            <h3>What to Watch For</h3>
-            <div class="finding finding-positive" style="font-size:0.82rem;">
-                <strong>If RAILS (GRPO) maintains &gt;50% at 10&ndash;15 hops</strong> vs base's 22&ndash;44%,
-                it confirms that step-level verification rewards produce reasoning chains that scale with problem complexity.
-                This would be a 20&ndash;30pp advantage at the critical depth range.
+            <h3>Key Insight: Format vs. Raw Intuition</h3>
+            <div class="finding finding-negative" style="font-size:0.82rem;">
+                <strong>GRPO attempts formal reasoning but fails at long chains.</strong>
+                Parse success: 75.1% (avg 8 steps) vs base's 0.3% (0 steps).
+                The GRPO model produces structured `&lt;step&gt;` reasoning that works well for short chains,
+                but formal reasoning errors compound over many steps.
             </div>
             <div class="finding finding-insight" style="font-size:0.82rem;">
-                <strong>SFT should fall between base and GRPO.</strong> If SFT matches GRPO at high depth,
-                the advantage is from structured format alone. If GRPO &gt;&gt; SFT at high depth,
-                the advantage is from the SAT verification reward signal.
+                <strong>Base relies on intuition, not formal reasoning.</strong>
+                With 0 structured steps, the base model uses pre-trained pattern matching to answer directly.
+                This "informal" approach degrades more gracefully at extreme depth because it doesn't
+                suffer from error compounding in sequential formal steps.
+            </div>
+            <div class="finding finding-caution" style="font-size:0.82rem;">
+                <strong>Critical question:</strong> Does the Qwen-8B model (stronger base, 98.7% ProntoQA)
+                show the same pattern? If Qwen GRPO maintains advantage at high depth, the issue
+                may be specific to DeepSeek's weaker reasoning base.
             </div>
         </div>
     </div>
