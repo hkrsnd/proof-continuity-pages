@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 19:15 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 21:12 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -465,13 +465,21 @@ tr:hover { background: #fafbff; }
     <div class="status-grid">
 
         <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Extended ProntoQA Eval (1&ndash;20 Hops)</h4>
+            <h4><span class="badge badge-green">Done</span> Extended ProntoQA Eval (1&ndash;20 Hops, 2048 tokens)</h4>
             <p>
                 All 6 models evaluated on 800 extended ProntoQA problems (hops 1&ndash;20).
-                <strong>Key finding:</strong> GRPO excels at 1&ndash;10 hops (GRPO &gt; SFT by +20&ndash;23pp at 10-hop),
-                but all fine-tuned models collapse at 15&ndash;20 hops due to error compounding in formal reasoning.
-                Base models' informal pattern matching is more robust at extreme depth.
-                <strong>Root cause: training data limited to 3-hop max.</strong>
+                GRPO excels at 1&ndash;10 hops, but collapses at 15&ndash;20 hops.
+                <strong>Token budget diagnosis:</strong> collapse partly caused by max_new_tokens=2048 truncating
+                GRPO's verbose formal reasoning before the answer is generated.
+            </p>
+        </div>
+
+        <div class="status-item status-running">
+            <h4><span class="badge badge-blue">Running</span> Re-Run: Extended ProntoQA with 4096 Tokens</h4>
+            <p>
+                4 critical models re-running with doubled token budget:
+                86524 (Qwen Base, 48%), 86525 (Qwen GRPO, 52%), 86527 (DS GRPO, 48%), 86528 (DS Base, 66%).
+                Will separate genuine error compounding from token budget truncation.
             </p>
         </div>
 
