@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS &mdash; Proof Bank Plan</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Header */
+.breadcrumb { font-size: 0.82rem; color: #94a3b8; margin-bottom: 1rem; }
+.breadcrumb a { color: #64748b; }
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+/* Progress overview bar */
+.progress-overview {
+    background: white; border-radius: 12px; padding: 1.5rem;
+    margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.progress-overview h2 { font-size: 1.1rem; color: #16213e; margin-bottom: 1rem; }
+.progress-bar-container {
+    background: #e5e7eb; border-radius: 8px; height: 28px; overflow: hidden;
+    display: flex; margin-bottom: 0.8rem;
+}
+.progress-segment {
+    height: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: white; transition: width 0.5s;
+    min-width: 0; overflow: hidden; white-space: nowrap;
+}
+.seg-done { background: #16a34a; }
+.seg-active { background: #2563eb; background-image: repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(255,255,255,0.15) 6px, rgba(255,255,255,0.15) 12px); animation: barberpole 1s linear infinite; }
+@keyframes barberpole { 0% { background-position: 0 0; } 100% { background-position: 24px 0; } }
+.seg-todo { background: #e5e7eb; }
+.progress-legend {
+    display: flex; gap: 1.5rem; font-size: 0.78rem; color: #555; flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 0.35rem; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.legend-dot.done { background: #16a34a; }
+.legend-dot.active { background: #2563eb; }
+.legend-dot.todo { background: #d1d5db; }
+
+/* Stats */
+.stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.8rem; margin: 1rem 0;
+}
+.stat-card {
+    background: #f0f4ff; border-radius: 8px; padding: 0.7rem 0.8rem; text-align: center;
+}
+.stat-val { font-size: 1.4rem; font-weight: 700; color: #2563eb; }
+.stat-lbl { font-size: 0.72rem; color: #666; margin-top: 0.15rem; }
+.stat-card.green .stat-val { color: #16a34a; }
+.stat-card.amber .stat-val { color: #d97706; }
+
+/* Section */
+.section { margin-bottom: 2rem; }
+.section-header {
+    display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;
+}
+.section-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 700; color: white; flex-shrink: 0;
+}
+.sn-blue { background: #2563eb; }
+.sn-purple { background: #7c3aed; }
+.sn-amber { background: #d97706; }
+.sn-green { background: #16a34a; }
+.sn-rose { background: #e11d48; }
+.sn-teal { background: #0d9488; }
+.sn-slate { background: #475569; }
+.sn-indigo { background: #4f46e5; }
+.section-title-text { font-size: 1.25rem; font-weight: 700; color: #16213e; }
+
+/* Card */
+.card {
+    background: white; border-radius: 12px; padding: 1.5rem;
+    margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.card p { font-size: 0.88rem; color: #555; margin-bottom: 0.6rem; }
+
+/* Composition table */
+.table-wrap { overflow-x: auto; margin: 0.8rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th {
+    background: #f0f4ff; color: #1e40af; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem;
+    padding: 0.6rem 0.6rem; text-align: center;
+    border-bottom: 2px solid #dbeafe; white-space: nowrap;
+}
+th:first-child { text-align: left; }
+td {
+    padding: 0.5rem 0.6rem; text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+td:first-child { text-align: left; font-weight: 500; }
+tr:hover { background: #fafbff; }
+.row-total td { font-weight: 700; border-top: 2px solid #e2e8f0; background: #f8fafc; }
+.domain-math { border-left: 3px solid #2563eb; }
+.domain-logic { border-left: 3px solid #7c3aed; }
+.domain-code { border-left: 3px solid #d97706; }
+.domain-science { border-left: 3px solid #0d9488; }
+
+/* Donut chart */
+.donut-container { display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin: 1rem 0; }
+.donut-chart { position: relative; width: 160px; height: 160px; }
+.donut-chart svg { transform: rotate(-90deg); }
+.donut-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center;
+}
+.donut-center .big { font-size: 1.4rem; font-weight: 700; color: #16213e; }
+.donut-center .small { font-size: 0.7rem; color: #666; }
+.donut-legend { display: flex; flex-direction: column; gap: 0.5rem; }
+.donut-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+.donut-legend-color { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+
+/* Task checklist */
+.task-list { list-style: none; padding: 0; }
+.task-item {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 0.4rem;
+    font-size: 0.85rem; transition: background 0.15s;
+}
+.task-item:hover { background: #f8fafc; }
+.task-check {
+    width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; margin-top: 1px;
+}
+.check-done { background: #dcfce7; color: #16a34a; border: 2px solid #86efac; }
+.check-active { background: #dbeafe; color: #2563eb; border: 2px solid #93c5fd; }
+.check-todo { background: #f3f4f6; color: #9ca3af; border: 2px solid #d1d5db; }
+.task-content { flex: 1; }
+.task-title { font-weight: 600; color: #1a1a2e; }
+.task-done .task-title { color: #16a34a; text-decoration: line-through; text-decoration-color: #86efac; }
+.task-desc { font-size: 0.78rem; color: #888; margin-top: 0.15rem; }
+.task-badges { display: flex; gap: 0.4rem; margin-top: 0.3rem; flex-wrap: wrap; }
+.badge {
+    display: inline-block; padding: 0.1rem 0.45rem; border-radius: 12px;
+    font-size: 0.68rem; font-weight: 600;
+}
+.b-blue { background: #dbeafe; color: #1e40af; }
+.b-green { background: #dcfce7; color: #166534; }
+.b-amber { background: #fef3c7; color: #92400e; }
+.b-purple { background: #f3e8ff; color: #6b21a8; }
+.b-rose { background: #ffe4e6; color: #9f1239; }
+.b-gray { background: #f3f4f6; color: #4b5563; }
+
+/* Sub-task breakdown within a card */
+.sub-task {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0;
+    font-size: 0.82rem; color: #555;
+}
+.sub-check {
+    width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700;
+}
+
+/* Domain cards grid */
+.domain-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem; margin: 1rem 0;
+}
+.domain-card {
+    background: white; border-radius: 12px; padding: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 3px solid;
+}
+.domain-card h3 { font-size: 1rem; margin-bottom: 0.3rem; }
+.domain-card .target { font-size: 0.82rem; color: #666; margin-bottom: 0.6rem; }
+.domain-card .current { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.5rem; }
+.domain-progress {
+    background: #e5e7eb; border-radius: 6px; height: 8px; overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+.domain-progress-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+.domain-sources { font-size: 0.75rem; color: #888; }
+
+/* Code blocks */
+.code-block {
+    background: #1e293b; color: #e2e8f0; border-radius: 8px;
+    padding: 1rem; font-family: 'Fira Code', 'SF Mono', 'Menlo', monospace;
+    font-size: 0.78rem; overflow-x: auto; margin: 0.8rem 0; line-height: 1.5;
+}
+.code-block .tag { color: #7dd3fc; }
+.code-block .attr { color: #fbbf24; }
+.code-block .str { color: #86efac; }
+.code-block .comment { color: #64748b; }
+
+/* Critical path */
+.critical-path {
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+    margin: 1rem 0;
+}
+.cp-node {
+    padding: 0.5rem 0.9rem; border-radius: 8px; font-size: 0.78rem;
+    font-weight: 600; white-space: nowrap;
+}
+.cp-done { background: #dcfce7; color: #166534; }
+.cp-active { background: #dbeafe; color: #1e40af; border: 2px dashed #93c5fd; }
+.cp-todo { background: #f3f4f6; color: #6b7280; }
+.cp-arrow { font-size: 1.1rem; color: #94a3b8; padding: 0 0.2rem; font-weight: 700; }
+
+/* Verification cards */
+.verify-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.8rem; margin: 0.8rem 0;
+}
+.verify-card {
+    padding: 0.8rem; background: #f9fafb; border-radius: 8px;
+    border-left: 3px solid; font-size: 0.82rem;
+}
+.verify-card h4 { font-size: 0.85rem; color: #16213e; margin-bottom: 0.2rem; }
+.verify-card p { font-size: 0.78rem; color: #666; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 2rem; margin: 1rem 0; }
+.timeline::before {
+    content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0;
+    width: 2px; background: #e5e7eb;
+}
+.tl-item { position: relative; margin-bottom: 1.2rem; }
+.tl-dot {
+    position: absolute; left: -1.65rem; top: 0.15rem;
+    width: 12px; height: 12px; border-radius: 50%;
+}
+.tl-dot.done { background: #16a34a; }
+.tl-dot.active { background: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+.tl-dot.todo { background: #d1d5db; }
+.tl-title { font-size: 0.88rem; font-weight: 600; color: #16213e; }
+.tl-desc { font-size: 0.78rem; color: #888; }
+.tl-files { font-size: 0.72rem; color: #a0aec0; font-family: monospace; margin-top: 0.2rem; }
+
+/* Footer */
+.footer {
+    text-align: center; color: #94a3b8; font-size: 0.78rem;
+    margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    body { padding: 1rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .donut-container { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<p class="breadcrumb"><a href="index.html">RAILS Hub</a> / Proof Bank Plan</p>
+<h1>Proof Bank</h1>
+<p class="subtitle">Large-scale multi-domain reasoning trace dataset &middot; ~100K verified examples in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format</p>
+
+<!-- ===== PROGRESS OVERVIEW ===== -->
+<div class="progress-overview">
+    <h2>Overall Progress</h2>
+    <div class="stats-grid">
+        <div class="stat-card green"><div class="stat-val">6.5K</div><div class="stat-lbl">Traces Built</div></div>
+        <div class="stat-card"><div class="stat-val">100K</div><div class="stat-lbl">Target Total</div></div>
+        <div class="stat-card amber"><div class="stat-val">3 / 13</div><div class="stat-lbl">Tasks Done</div></div>
+        <div class="stat-card"><div class="stat-val">4</div><div class="stat-lbl">Domains</div></div>
+        <div class="stat-card"><div class="stat-val">9+</div><div class="stat-lbl">Source Datasets</div></div>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-segment seg-done" style="width: 6.5%;" title="Logic (done): 6.5K">6.5K</div>
+        <div class="progress-segment seg-active" style="width: 0.5%;" title="In progress"></div>
+        <div class="progress-segment seg-todo" style="width: 93%;"></div>
+    </div>
+    <div class="progress-legend">
+        <span class="legend-item"><span class="legend-dot done"></span> Complete (6.5K)</span>
+        <span class="legend-item"><span class="legend-dot active"></span> In Progress</span>
+        <span class="legend-item"><span class="legend-dot todo"></span> Remaining (~93.5K)</span>
+    </div>
+</div>
+
+<!-- ===== CONTEXT ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-slate">?</div>
+        <div class="section-title-text">Why Proof Bank?</div>
+    </div>
+    <div class="card">
+        <p>RAILS currently trains on <strong>~6.5K SFT examples</strong> almost entirely from LogicBench (binary yes/no). This severely limits generalization:</p>
+        <ul style="font-size: 0.85rem; color: #555; padding-left: 1.2rem; margin: 0.5rem 0;">
+            <li>GRPO improves LogicBench significantly but <strong>fails on FOLIO</strong> (which requires True/False/Uncertain)</li>
+            <li>The model learns to classify, not to reason &mdash; no exposure to math, code, or science</li>
+            <li>State-of-the-art SFT datasets are 100&ndash;1000&times; larger:</li>
+        </ul>
+        <div class="stats-grid" style="margin-top: 0.8rem;">
+            <div class="stat-card"><div class="stat-val" style="font-size: 1.1rem;">800K</div><div class="stat-lbl">DeepSeek-R1 SFT</div></div>
+            <div class="stat-card"><div class="stat-val" style="font-size: 1.1rem;">1.2M</div><div class="stat-lbl">OpenThoughts3</div></div>
+            <div class="stat-card"><div class="stat-val" style="font-size: 1.1rem;">1.4M</div><div class="stat-lbl">SYNTHETIC-1</div></div>
+            <div class="stat-card green"><div class="stat-val" style="font-size: 1.1rem;">100K</div><div class="stat-lbl">Our Target</div></div>
+        </div>
+        <p style="margin-top: 0.8rem;"><strong>Strategy</strong>: Convert existing open-source reasoning traces (OpenR1-Math, SYNTHETIC-1) to our <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format rather than generating from scratch &mdash; much faster and cheaper.</p>
+    </div>
+</div>
+
+<!-- ===== TARGET COMPOSITION ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-blue">T</div>
+        <div class="section-title-text">Target Composition (~100K, Logic-Heavy)</div>
+    </div>
+    <div class="card">
+        <div class="donut-container">
+            <div class="donut-chart">
+                <svg width="160" height="160" viewBox="0 0 160 160">
+                    <!-- Math 40% -->
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#2563eb" stroke-width="24"
+                        stroke-dasharray="150.8 251.3" stroke-dashoffset="0"/>
+                    <!-- Logic 30% -->
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#7c3aed" stroke-width="24"
+                        stroke-dasharray="113.1 251.3" stroke-dashoffset="-150.8"/>
+                    <!-- Code 15% -->
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#d97706" stroke-width="24"
+                        stroke-dasharray="56.5 251.3" stroke-dashoffset="-263.9"/>
+                    <!-- Science 15% -->
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#0d9488" stroke-width="24"
+                        stroke-dasharray="56.5 251.3" stroke-dashoffset="-320.4"/>
+                </svg>
+                <div class="donut-center">
+                    <div class="big">100K</div>
+                    <div class="small">target</div>
+                </div>
+            </div>
+            <div class="donut-legend">
+                <div class="donut-legend-item"><div class="donut-legend-color" style="background:#2563eb"></div> Math &mdash; 40K (40%)</div>
+                <div class="donut-legend-item"><div class="donut-legend-color" style="background:#7c3aed"></div> Formal Logic &mdash; 30K (30%)</div>
+                <div class="donut-legend-item"><div class="donut-legend-color" style="background:#d97706"></div> Code &mdash; 15K (15%)</div>
+                <div class="donut-legend-item"><div class="donut-legend-color" style="background:#0d9488"></div> Science / STEM &mdash; 15K (15%)</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Domain</th><th>Target</th><th>Fraction</th><th>Source Datasets</th><th>Verification</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr class="domain-math">
+                    <td>Math</td><td>40K</td><td>40%</td>
+                    <td style="font-size:0.78rem;">OpenR1-Math-220k, GSM8K, MATH</td>
+                    <td>SymPy step-level</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr class="domain-logic">
+                    <td>Formal Logic</td><td>30K</td><td>30%</td>
+                    <td style="font-size:0.78rem;">LogicBench, ProofWriter, FOLIO, ProntoQA, EntailmentBank, RuleTaker, CLUTRR</td>
+                    <td>SAT / ASP / NSFR</td>
+                    <td><span class="badge b-green">6.5K done</span></td>
+                </tr>
+                <tr class="domain-code">
+                    <td>Code</td><td>15K</td><td>15%</td>
+                    <td style="font-size:0.78rem;">SYNTHETIC-1 code, CodeContests</td>
+                    <td>Sandboxed exec</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr class="domain-science">
+                    <td>Science / STEM</td><td>15K</td><td>15%</td>
+                    <td style="font-size:0.78rem;">SYNTHETIC-1 STEM, ARC, StrategyQA</td>
+                    <td>NLI + LLM judge</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr class="row-total"><td>Total</td><td>100K</td><td>100%</td><td></td><td></td><td></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p style="font-size:0.82rem; color:#666; margin-top:0.5rem;"><strong>Why logic-heavy?</strong> Logic is our core differentiator &mdash; RAILS provides the strongest step-level verification for logical reasoning (SAT/ASP/NSFR). Math is second because it also supports step-level verification (SymPy). Code and science add diversity.</p>
+    </div>
+</div>
+
+<!-- ===== DOMAIN PROGRESS CARDS ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-green">P</div>
+        <div class="section-title-text">Domain Progress</div>
+    </div>
+    <div class="domain-grid">
+        <div class="domain-card" style="border-top-color: #7c3aed;">
+            <h3 style="color: #7c3aed;">Formal Logic</h3>
+            <div class="target">Target: 30,000</div>
+            <div class="current" style="color: #7c3aed;">Current: 6,548</div>
+            <div class="domain-progress"><div class="domain-progress-fill" style="width: 21.8%; background: #7c3aed;"></div></div>
+            <div class="domain-sources">LogicBench (6,033) + ProofWriter (471) + FOLIO (44)</div>
+        </div>
+        <div class="domain-card" style="border-top-color: #2563eb;">
+            <h3 style="color: #2563eb;">Math</h3>
+            <div class="target">Target: 40,000</div>
+            <div class="current" style="color: #9ca3af;">Current: 0</div>
+            <div class="domain-progress"><div class="domain-progress-fill" style="width: 0%; background: #2563eb;"></div></div>
+            <div class="domain-sources">OpenR1-Math, GSM8K, MATH</div>
+        </div>
+        <div class="domain-card" style="border-top-color: #d97706;">
+            <h3 style="color: #d97706;">Code</h3>
+            <div class="target">Target: 15,000</div>
+            <div class="current" style="color: #9ca3af;">Current: 0</div>
+            <div class="domain-progress"><div class="domain-progress-fill" style="width: 0%; background: #d97706;"></div></div>
+            <div class="domain-sources">SYNTHETIC-1 code, CodeContests</div>
+        </div>
+        <div class="domain-card" style="border-top-color: #0d9488;">
+            <h3 style="color: #0d9488;">Science / STEM</h3>
+            <div class="target">Target: 15,000</div>
+            <div class="current" style="color: #9ca3af;">Current: 0</div>
+            <div class="domain-progress"><div class="domain-progress-fill" style="width: 0%; background: #0d9488;"></div></div>
+            <div class="domain-sources">SYNTHETIC-1 STEM, ARC, StrategyQA</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== STEP 1: INFRASTRUCTURE ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-blue">1</div>
+        <div class="section-title-text">Infrastructure &mdash; Prompt System &amp; Reward Updates</div>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.95rem; color: #16213e; margin-bottom: 0.8rem;">1.1 Multi-Answer Prompt System</h3>
+        <p><strong>Problem</strong>: <code>prompt/think_cot_prompt.txt</code> hardcodes "The answer is always Yes or No."</p>
+        <p><strong>Solution</strong>: Modular prompt system where answer instructions are injected per task type.</p>
+        <ul class="task-list">
+            <li class="task-item task-done">
+                <div class="task-check check-done">&#10003;</div>
+                <div class="task-content">
+                    <div class="task-title">3-class answer support in generate_sft_data.py</div>
+                    <div class="task-desc">FOLIO (True/False/Uncertain) and ProofWriter (True/False/Unknown) answer instructions</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Create prompt/answer_instructions.py</div>
+                    <div class="task-desc">Centralized answer type registry: binary, ternary, numeric, expression, multichoice, relational, proof</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Decouple answer instructions from think_cot_prompt.txt</div>
+                    <div class="task-desc">Remove hardcoded lines 30&ndash;32; inject dynamically per domain</div>
+                </div>
+            </li>
+        </ul>
+
+        <h3 style="font-size: 0.95rem; color: #16213e; margin: 1.2rem 0 0.8rem;">1.2 Domain-Specific &lt;logic&gt; Guidelines</h3>
+        <ul class="task-list">
+            <li class="task-item task-done">
+                <div class="task-check check-done">&#10003;</div>
+                <div class="task-content">
+                    <div class="task-title">Logic supplement (existing behavior)</div>
+                    <div class="task-desc">Prolog-style predicates, :- implications, ~ negation</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Create prompt/math_supplement.txt</div>
+                    <div class="task-desc">Algebraic expressions, equation transformations, standard math notation</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Create prompt/code_supplement.txt</div>
+                    <div class="task-desc">Executable Python snippets, self-contained operations per step</div>
+                </div>
+            </li>
+        </ul>
+
+        <h3 style="font-size: 0.95rem; color: #16213e; margin: 1.2rem 0 0.8rem;">1.3 Reward Function Updates</h3>
+        <ul class="task-list">
+            <li class="task-item task-done">
+                <div class="task-check check-done">&#10003;</div>
+                <div class="task-content">
+                    <div class="task-title">_canonicalize_answer() with cross-format matching</div>
+                    <div class="task-desc">yes/true, no/false, uncertain/unknown equivalence in reward.py</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">reward_proof_quality() for partial credit</div>
+                    <div class="task-desc">Score proof chain quality independent of final answer</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Extend answer matching for numeric, multichoice, expression types</div>
+                    <div class="task-desc">Numeric tolerance, letter matching, SymPy expression equivalence</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== STEP 2: DATASET DOWNLOADS ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-purple">2</div>
+        <div class="section-title-text">Dataset Downloads</div>
+    </div>
+    <div class="card">
+        <p>Unified HuggingFace downloader &mdash; <code>experiments/download_datasets.py</code></p>
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Dataset</th><th>HuggingFace ID</th><th>Est. Size</th><th>Domain</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>OpenR1-Math-220k</td><td style="font-size:0.75rem; font-family: monospace;">open-r1/OpenR1-Math-220k</td><td>220K</td><td><span class="badge b-blue">Math</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>GSM8K</td><td style="font-size:0.75rem; font-family: monospace;">openai/gsm8k</td><td>7.5K</td><td><span class="badge b-blue">Math</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>MATH</td><td style="font-size:0.75rem; font-family: monospace;">hendrycks/competition_math</td><td>12.5K</td><td><span class="badge b-blue">Math</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>EntailmentBank</td><td style="font-size:0.75rem; font-family: monospace;">allenai/entailmentbank</td><td>~1.8K</td><td><span class="badge b-purple">Logic</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>RuleTaker</td><td style="font-size:0.75rem; font-family: monospace;">Allen AI</td><td>~560K</td><td><span class="badge b-purple">Logic</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>CLUTRR</td><td style="font-size:0.75rem; font-family: monospace;">CLUTRR/v1.0</td><td>~10K</td><td><span class="badge b-purple">Logic</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>SYNTHETIC-1 SFT</td><td style="font-size:0.75rem; font-family: monospace;">PrimeIntellect/SYNTHETIC-1-SFT-Data</td><td>900K</td><td><span class="badge b-amber">Code</span> <span class="badge b-purple">STEM</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>ARC</td><td style="font-size:0.75rem; font-family: monospace;">allenai/ai2_arc</td><td>7.8K</td><td><span class="badge b-purple">Science</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>StrategyQA</td><td style="font-size:0.75rem; font-family: monospace;">wics/strategy-qa</td><td>2.8K</td><td><span class="badge b-purple">Science</span></td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>ProofWriter</td><td style="font-size:0.75rem; font-family: monospace;">local</td><td>174K</td><td><span class="badge b-purple">Logic</span></td>
+                    <td><span class="badge b-green">On disk</span></td>
+                </tr>
+                <tr>
+                    <td>ProntoQA</td><td style="font-size:0.75rem; font-family: monospace;">local</td><td>300</td><td><span class="badge b-purple">Logic</span></td>
+                    <td><span class="badge b-green">On disk</span></td>
+                </tr>
+                <tr>
+                    <td>FOLIO</td><td style="font-size:0.75rem; font-family: monospace;">local</td><td>204</td><td><span class="badge b-purple">Logic</span></td>
+                    <td><span class="badge b-green">On disk</span></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== STEP 3: LOGIC DOMAIN ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-purple">3</div>
+        <div class="section-title-text">Logic Domain &mdash; 30K Traces</div>
+    </div>
+
+    <!-- 3.1 ProofWriter -->
+    <div class="card">
+        <h3 style="font-size: 0.95rem; color: #7c3aed; margin-bottom: 0.5rem;">3.1 ProofWriter Gold Proof Conversion (~10K) <span class="badge b-rose">Highest Impact</span></h3>
+        <p>174K entries with gold proof trees, 3-class answers. <strong>Programmatic conversion</strong> &mdash; no LLM needed for structure.</p>
+        <ul class="task-list">
+            <li class="task-item task-done">
+                <div class="task-check check-done">&#10003;</div>
+                <div class="task-content">
+                    <div class="task-title">ProofWriter 3-class SFT generation (471 entries via LLM)</div>
+                    <div class="task-desc">Generated with DeepSeek V3.2 + strict validation. True: 166, False: 163, Unknown: 142</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Create convert_proofwriter_proofs.py</div>
+                    <div class="task-desc">Parse proof field recursively, map triples/rules, linearize bottom-up, generate &lt;logic&gt; from predicates</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">LLM polish pass for &lt;text&gt; descriptions</div>
+                    <div class="task-desc">Cheap deepseek-chat call to polish text into natural language</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">ASP verification of converted traces</div>
+                    <div class="task-desc">Verify all derived steps with ASP backend</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Select ~10K: 4K True, 3K False, 3K Unknown (depth 1-5)</div>
+                    <div class="task-desc">Balanced by depth and answer class</div>
+                </div>
+            </li>
+        </ul>
+        <div class="code-block">
+<span class="comment">// ProofWriter proof field (input)</span>
+[(((triple2 triple1 triple4) -> rule3))]
+
+<span class="comment">// Converted output</span>
+<span class="tag">&lt;step</span> <span class="attr">n="1" type="premise"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;text&gt;</span><span class="str">Dave is big.</span><span class="tag">&lt;/text&gt;</span>
+<span class="tag">&lt;logic&gt;</span><span class="str">big(dave).</span><span class="tag">&lt;/logic&gt;</span>
+<span class="tag">&lt;/step&gt;</span>
+        </div>
+    </div>
+
+    <!-- 3.2 LogicBench -->
+    <div class="card">
+        <h3 style="font-size: 0.95rem; color: #7c3aed; margin-bottom: 0.5rem;">3.2 LogicBench Expansion (~8K)</h3>
+        <ul class="task-list">
+            <li class="task-item task-done">
+                <div class="task-check check-done">&#10003;</div>
+                <div class="task-content">
+                    <div class="task-title">6,033 entries across 25 theories (prop + FOL + NM)</div>
+                    <div class="task-desc">Generated with GPT-4o + SAT/NSFR/ASP verification</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Fix 3 missing propositional theories</div>
+                    <div class="task-desc">hypothetical_syllogism, material_implication, modus_tollens have 0 examples</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Generate portion without answer hint</div>
+                    <div class="task-desc">Authentic reasoning instead of rationalization</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 3.3-3.7 Other logic -->
+    <div class="card">
+        <h3 style="font-size: 0.95rem; color: #7c3aed; margin-bottom: 0.5rem;">3.3&ndash;3.7 Additional Logic Sources</h3>
+        <div class="table-wrap">
+        <table>
+            <thead><tr><th>Source</th><th>Target</th><th>Method</th><th>Answer Type</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>FOLIO (3.3)</td><td>~200</td><td>LLM generation + NSFR verify</td><td>Ternary</td>
+                    <td><span class="badge b-green">44 done</span></td>
+                </tr>
+                <tr>
+                    <td>ProntoQA (3.4)</td><td>~1K</td><td>Programmatic from gold CoT</td><td>Binary</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>EntailmentBank (3.5)</td><td>~1.8K</td><td>Parse entailment trees</td><td>Binary</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>RuleTaker (3.6)</td><td>~5K</td><td>Same as ProofWriter pipeline</td><td>Ternary</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+                <tr>
+                    <td>CLUTRR (3.7)</td><td>~2K</td><td>Convert relational chains</td><td>Relational</td>
+                    <td><span class="badge b-gray">Not started</span></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <p style="font-size:0.82rem; color:#666; margin-top:0.5rem;">CLUTRR is especially interesting &mdash; relational answers (grandfather, uncle) break the yes/no pattern completely.</p>
+    </div>
+</div>
+
+<!-- ===== STEP 4: MATH DOMAIN ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-blue">4</div>
+        <div class="section-title-text">Math Domain &mdash; 40K Traces</div>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.95rem; color: #2563eb; margin-bottom: 0.5rem;">4.1 OpenR1-Math-220k Conversion (~30K)</h3>
+        <p>Already-verified reasoning traces from DeepSeek-R1 on NuminaMath problems. Convert to structured <code>&lt;step&gt;</code> format with SymPy verification.</p>
+        <ul class="task-list">
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Create convert_math_traces.py</div>
+                    <div class="task-desc">Download, parse free-form &lt;think&gt;, LLM decompose into steps, SymPy verify, filter &ge;70% valid</div>
+                </div>
+            </li>
+        </ul>
+        <div class="code-block">
+<span class="tag">&lt;step</span> <span class="attr">n="1" type="premise"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;text&gt;</span><span class="str">We are given the equation 3x + 5 = 20.</span><span class="tag">&lt;/text&gt;</span>
+<span class="tag">&lt;logic&gt;</span><span class="str">3*x + 5 = 20</span><span class="tag">&lt;/logic&gt;</span>
+<span class="tag">&lt;/step&gt;</span>
+<span class="tag">&lt;step</span> <span class="attr">n="2" type="derived" from="1"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;text&gt;</span><span class="str">Subtract 5 from both sides.</span><span class="tag">&lt;/text&gt;</span>
+<span class="tag">&lt;logic&gt;</span><span class="str">3*x = 15</span><span class="tag">&lt;/logic&gt;</span>
+<span class="tag">&lt;/step&gt;</span>
+<span class="tag">&lt;step</span> <span class="attr">n="3" type="derived" from="2"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;text&gt;</span><span class="str">Divide both sides by 3.</span><span class="tag">&lt;/text&gt;</span>
+<span class="tag">&lt;logic&gt;</span><span class="str">x = 5</span><span class="tag">&lt;/logic&gt;</span>
+<span class="tag">&lt;/step&gt;</span>
+        </div>
+
+        <h3 style="font-size: 0.95rem; color: #2563eb; margin: 1.2rem 0 0.5rem;">4.2 GSM8K (~5K) &amp; 4.3 MATH (~5K)</h3>
+        <ul class="task-list">
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">GSM8K: Parse annotated solution steps + SymPy verify</div>
+                    <div class="task-desc">7.5K train problems, easier difficulty &mdash; curriculum baseline</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">MATH: Convert competition problems + SymPy verify</div>
+                    <div class="task-desc">12.5K problems, harder difficulty &mdash; upper range</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== STEP 5: CODE DOMAIN ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-amber">5</div>
+        <div class="section-title-text">Code Domain &mdash; 15K Traces</div>
+    </div>
+    <div class="card">
+        <ul class="task-list">
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">5.1 SYNTHETIC-1 code conversion (~10K)</div>
+                    <div class="task-desc">Parse reasoning traces, identify algorithmic steps, convert to &lt;step&gt; format with Python &lt;logic&gt;, sandbox-verify</div>
+                    <div class="task-badges"><span class="badge b-amber">convert_code_traces.py</span></div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">5.2 CodeContests / Apps (~5K)</div>
+                    <div class="task-desc">Competition programming &rarr; step-by-step sub-operations, verify each code block in accumulated namespace</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== STEP 6: SCIENCE DOMAIN ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-teal">6</div>
+        <div class="section-title-text">Science / STEM Domain &mdash; 15K Traces</div>
+    </div>
+    <div class="card">
+        <ul class="task-list">
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">6.1 SYNTHETIC-1 STEM conversion (~10K)</div>
+                    <div class="task-desc">StackExchange-sourced, NL-heavy &lt;logic&gt;, NLI + LLM judge verification (entailment &ge; 0.7)</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">6.2 ARC Science (~3K)</div>
+                    <div class="task-desc">AI2 Reasoning Challenge, multiple-choice, teacher model generation</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">6.3 StrategyQA (~2K)</div>
+                    <div class="task-desc">Multi-hop yes/no with gold sub-question decomposition &rarr; steps</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== STEP 7: ASSEMBLY ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-indigo">7</div>
+        <div class="section-title-text">Assembly &amp; Quality Control</div>
+    </div>
+    <div class="card">
+        <p><code>experiments/assemble_proof_bank.py</code> &mdash; merge, validate, balance, and output final dataset.</p>
+
+        <h3 style="font-size: 0.92rem; color: #16213e; margin: 1rem 0 0.5rem;">Quality Gates (all must pass)</h3>
+        <div class="verify-grid">
+            <div class="verify-card" style="border-left-color: #2563eb;">
+                <h4>Format</h4>
+                <p>Valid &lt;think&gt; + &lt;step&gt; structure with &lt;text&gt; and &lt;logic&gt; sub-tags</p>
+            </div>
+            <div class="verify-card" style="border-left-color: #7c3aed;">
+                <h4>Parse</h4>
+                <p>Successfully parsed by <code>parse_think_steps()</code></p>
+            </div>
+            <div class="verify-card" style="border-left-color: #16a34a;">
+                <h4>Verification</h4>
+                <p>&ge; 60% of derived steps pass domain-specific verification</p>
+            </div>
+            <div class="verify-card" style="border-left-color: #d97706;">
+                <h4>Answer</h4>
+                <p>Final answer present and correctly formatted for its type</p>
+            </div>
+            <div class="verify-card" style="border-left-color: #e11d48;">
+                <h4>Length</h4>
+                <p>2+ derived steps, &le; 20 total steps</p>
+            </div>
+        </div>
+
+        <h3 style="font-size: 0.92rem; color: #16213e; margin: 1rem 0 0.5rem;">Metadata Schema</h3>
+        <div class="code-block">
+{
+  <span class="str">"id"</span>: <span class="str">"pb_math_001234"</span>,
+  <span class="str">"domain"</span>: <span class="str">"math"</span>,
+  <span class="str">"source"</span>: <span class="str">"openr1_math"</span>,
+  <span class="str">"difficulty"</span>: <span class="str">"medium"</span>,
+  <span class="str">"answer_type"</span>: <span class="str">"numeric"</span>,
+  <span class="str">"reasoning_depth"</span>: <span class="attr">5</span>,
+  <span class="str">"num_steps"</span>: <span class="attr">7</span>,
+  <span class="str">"verification_method"</span>: <span class="str">"sympy"</span>,
+  <span class="str">"verification_score"</span>: <span class="attr">0.95</span>,
+  <span class="str">"system_prompt"</span>: <span class="str">"..."</span>,
+  <span class="str">"user_prompt"</span>: <span class="str">"..."</span>,
+  <span class="str">"completion"</span>: <span class="str">"&lt;think&gt;...&lt;/think&gt;\nAnswer: 42"</span>
+}
+        </div>
+
+        <h3 style="font-size: 0.92rem; color: #16213e; margin: 1rem 0 0.5rem;">Balancing Strategy</h3>
+        <p>Within each domain: <strong>difficulty</strong> (easy 30% / medium 40% / hard 30%), <strong>answer types</strong> (within logic: binary, ternary, relational, proof), <strong>source datasets</strong> (no single source > 50% of domain).</p>
+    </div>
+</div>
+
+<!-- ===== STEP 8: TRAINING ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-rose">8</div>
+        <div class="section-title-text">Training Pipeline</div>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.92rem; color: #16213e; margin-bottom: 0.5rem;">SFT on Proof Bank</h3>
+        <div class="code-block">
+<span class="comment"># experiments/configs/deepseek_sft_proof_bank.yaml</span>
+dataset: data/proof_bank/proof_bank_v1.jsonl
+model: deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+epochs: <span class="attr">2</span>
+lr: <span class="attr">1.5e-4</span>
+max_seq_len: <span class="attr">10240</span>
+train_on_responses_only: <span class="attr">true</span>
+        </div>
+
+        <h3 style="font-size: 0.92rem; color: #16213e; margin: 1rem 0 0.5rem;">GRPO with Multi-Domain Verification</h3>
+        <p>Domain-aware reward dispatch &mdash; each training example's domain tag selects the verification backend:</p>
+        <div class="verify-grid">
+            <div class="verify-card" style="border-left-color: #7c3aed;">
+                <h4>Logic</h4>
+                <p>SAT / ASP / NSFR</p>
+            </div>
+            <div class="verify-card" style="border-left-color: #2563eb;">
+                <h4>Math</h4>
+                <p>SymPy algebraic verification</p>
+            </div>
+            <div class="verify-card" style="border-left-color: #d97706;">
+                <h4>Code</h4>
+                <p>Sandboxed Python execution</p>
+            </div>
+            <div class="verify-card" style="border-left-color: #0d9488;">
+                <h4>Science</h4>
+                <p>NLI entailment + LLM judge</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== IMPLEMENTATION PRIORITY ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-slate">!</div>
+        <div class="section-title-text">Implementation Priority &amp; Critical Path</div>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.92rem; color: #16213e; margin-bottom: 0.8rem;">Critical Path</h3>
+        <div class="critical-path">
+            <div class="cp-node cp-active">#1 Prompt System</div>
+            <div class="cp-arrow">&rarr;</div>
+            <div class="cp-node cp-todo">#3 ProofWriter Conv.</div>
+            <div class="cp-arrow">&rarr;</div>
+            <div class="cp-node cp-todo">#6 OpenR1-Math Conv.</div>
+            <div class="cp-arrow">&rarr;</div>
+            <div class="cp-node cp-todo">#11 Assembly</div>
+            <div class="cp-arrow">&rarr;</div>
+            <div class="cp-node cp-todo">#12 SFT</div>
+            <div class="cp-arrow">&rarr;</div>
+            <div class="cp-node cp-todo">#13 GRPO</div>
+        </div>
+        <p style="font-size:0.82rem; color:#666; margin: 0.8rem 0 0.5rem;">Estimated critical path: <strong>~2 weeks</strong>. Parallel tasks (#2, #4, #5, #7, #8, #9) can run alongside.</p>
+
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Task</th><th>Files</th><th>Effort</th><th>Deps</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1</strong></td><td><strong>Multi-answer prompt system</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">answer_instructions.py, think_cot_prompt.txt</td>
+                    <td>1 day</td><td>None</td>
+                    <td><span class="badge b-amber">Partial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td><td><strong>Dataset downloader</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">download_datasets.py</td>
+                    <td>0.5 day</td><td>None</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr style="background: #fefce8;">
+                    <td><strong>3</strong></td><td><strong>ProofWriter proof converter</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_proofwriter_proofs.py</td>
+                    <td>2-3 days</td><td>None</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr>
+                    <td>4</td><td>FOLIO + ProntoQA expansion</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">generate_sft_data.py</td>
+                    <td>1 day</td><td>#1</td>
+                    <td><span class="badge b-amber">Partial</span></td>
+                </tr>
+                <tr>
+                    <td>5</td><td>EntailmentBank + RuleTaker + CLUTRR</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_logic_traces.py</td>
+                    <td>2 days</td><td>#2</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr style="background: #fefce8;">
+                    <td><strong>6</strong></td><td><strong>OpenR1-Math conversion</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_math_traces.py</td>
+                    <td>3-4 days</td><td>#1, #2</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr>
+                    <td>7</td><td>GSM8K + MATH conversion</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_math_traces.py</td>
+                    <td>1-2 days</td><td>#6</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr>
+                    <td>8</td><td>SYNTHETIC-1 code conversion</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_code_traces.py</td>
+                    <td>2 days</td><td>#1, #2</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr>
+                    <td>9</td><td>Science/STEM conversion</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_science_traces.py</td>
+                    <td>2 days</td><td>#1, #2</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr>
+                    <td>10</td><td>Reward function updates</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">reward.py</td>
+                    <td>1 day</td><td>#1</td>
+                    <td><span class="badge b-amber">Partial</span></td>
+                </tr>
+                <tr style="background: #fefce8;">
+                    <td><strong>11</strong></td><td><strong>Assembly + balancing</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">assemble_proof_bank.py</td>
+                    <td>1 day</td><td>#3-9</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr style="background: #fefce8;">
+                    <td><strong>12</strong></td><td><strong>SFT training</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">configs/</td>
+                    <td>0.5 day</td><td>#11</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+                <tr style="background: #fefce8;">
+                    <td><strong>13</strong></td><td><strong>GRPO multi-domain reward</strong></td>
+                    <td style="font-size:0.75rem; font-family: monospace;">train_experiment.py, reward.py</td>
+                    <td>1-2 days</td><td>#10, #12</td>
+                    <td><span class="badge b-gray">Todo</span></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== VERIFICATION PLAN ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-green">V</div>
+        <div class="section-title-text">Verification Plan</div>
+    </div>
+    <div class="card">
+        <ul class="task-list">
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Format test: 100 random traces per domain parse correctly</div>
+                    <div class="task-desc">Run parse_think_steps() on random sample from each domain</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Domain verification: 50 traces per domain through verification backend</div>
+                    <div class="task-desc">SAT for logic, SymPy for math, sandbox for code, NLI for science</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Existing test suite passes after reward.py changes</div>
+                    <div class="task-desc">Run test_consistency_reward.py (40 tests)</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">SFT smoke test: 50 steps on small subset, loss decreases</div>
+                    <div class="task-desc">Verify formatted outputs after short training</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Eval regression: LogicBench does NOT regress, FOLIO IMPROVES</div>
+                    <div class="task-desc">Primary success metric for the Proof Bank expansion</div>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-check check-todo">&middot;</div>
+                <div class="task-content">
+                    <div class="task-title">Math eval: Baseline GSM8K/MATH performance after SFT</div>
+                    <div class="task-desc">Cross-domain transfer evaluation</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="footer">
+    RAILS &middot; Proof Bank Plan &middot; Last updated: <span id="last-updated"></span>
+    <br>Source: <a href="https://github.com/hs40vahe/ProofContinuity">ProofContinuity</a>
+</div>
+<script>document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});</script>
+
+</body>
+</html>
