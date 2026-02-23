@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 19:25 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 19:15 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -739,10 +739,10 @@ tr:hover { background: #fafbff; }
                 <strong>The accuracy gap is largely driven by answer production, not reasoning quality.</strong>
             </div>
             <div class="finding finding-positive" style="border-left-color:#2563eb;">
-                <strong>ACTION NEEDED: Re-run eval with max_new_tokens=4096 or 8192.</strong>
-                The current results conflate two effects: (1) genuine error compounding in formal reasoning
-                and (2) token budget truncation preventing answer output.
-                Only a re-run with sufficient tokens can separate these effects.
+                <strong>FIX SUBMITTED: Re-running with max_new_tokens=4096.</strong>
+                Jobs 86524 (Qwen Base), 86525 (Qwen GRPO), 86527 (DS GRPO) now running with doubled token budget.
+                This will separate genuine error compounding from token budget truncation.
+                ETA: ~6&ndash;8 hours per job.
             </div>
             <div class="finding finding-insight">
                 <strong>Training-distribution gap is also real.</strong>
