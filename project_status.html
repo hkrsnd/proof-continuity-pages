@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 16:21 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 16:59 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -521,8 +521,8 @@ tr:hover { background: #fafbff; }
 
 <!-- Live eval jobs -->
 <div class="card">
-    <h2>Live Evaluation Jobs <span class="badge badge-blue" style="font-size:0.65rem; vertical-align:middle;">2/6 COMPLETE</span></h2>
-    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model). Progress as of 16:21 UTC.</p>
+    <h2>Live Evaluation Jobs <span class="badge badge-blue" style="font-size:0.65rem; vertical-align:middle;">3/6 COMPLETE</span></h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model). Progress as of 16:59 UTC.</p>
     <div class="table-wrapper">
     <table>
         <thead>
@@ -552,19 +552,19 @@ tr:hover { background: #fafbff; }
                 <td><span class="badge badge-green">Complete</span></td>
                 <td><strong>56.6%</strong></td>
             </tr>
-            <tr>
+            <tr style="background:#f0fdf4;">
                 <td style="text-align:left">86462</td>
                 <td>Qwen-8B</td>
                 <td>Base</td>
-                <td>741/800 (93%)</td>
-                <td><span class="badge badge-blue">Running</span></td>
-                <td>&mdash;</td>
+                <td><strong>800/800 (100%)</strong></td>
+                <td><span class="badge badge-green">Complete</span></td>
+                <td><strong>81.6%</strong></td>
             </tr>
             <tr>
                 <td style="text-align:left">86466</td>
                 <td>DS-7B</td>
                 <td>SFT</td>
-                <td>707/800 (88%)</td>
+                <td>767/800 (96%)</td>
                 <td><span class="badge badge-blue">Running</span></td>
                 <td>&mdash;</td>
             </tr>
@@ -572,7 +572,7 @@ tr:hover { background: #fafbff; }
                 <td style="text-align:left">86464</td>
                 <td>Qwen-8B</td>
                 <td>GRPO <span class="badge badge-green" style="font-size:0.6rem;">RAILS</span></td>
-                <td>690/800 (86%)</td>
+                <td>729/800 (91%)</td>
                 <td><span class="badge badge-blue">Running</span></td>
                 <td>&mdash;</td>
             </tr>
@@ -580,7 +580,7 @@ tr:hover { background: #fafbff; }
                 <td style="text-align:left">86471</td>
                 <td>Qwen-8B</td>
                 <td>SFT</td>
-                <td>634/800 (79%)</td>
+                <td>673/800 (84%)</td>
                 <td><span class="badge badge-blue">Running</span></td>
                 <td>&mdash;</td>
             </tr>
@@ -595,7 +595,7 @@ tr:hover { background: #fafbff; }
 
 <!-- Incoming depth-scaling results -->
 <div class="card">
-    <h2>Depth-Scaling Results (Incoming) <span class="badge badge-purple" style="font-size:0.65rem; vertical-align:middle;">2/6 models</span></h2>
+    <h2>Depth-Scaling Results (Incoming) <span class="badge badge-purple" style="font-size:0.65rem; vertical-align:middle;">3/6 models</span></h2>
     <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
         Per-hop accuracy on Extended ProntoQA (100 samples per hop level). Results populate as jobs complete.
         <strong>This is the paper's central experiment.</strong>
@@ -623,9 +623,9 @@ tr:hover { background: #fafbff; }
                 <td class="best-overall">99.0</td><td class="best">96.0</td><td>89.0</td><td>72.0</td><td>47.0</td><td>30.0</td><td>13.0</td><td>7.0</td><td>56.6</td>
             </tr>
             <tr class="model-header"><td colspan="10">Qwen3-8B</td></tr>
-            <tr class="condition-row" style="opacity:0.3;">
-                <td>Base <span style="font-size:0.7rem; color:#aaa;">(pending)</span></td>
-                <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+            <tr class="condition-row">
+                <td>Base</td>
+                <td class="best-overall">100.0</td><td class="best-overall">100.0</td><td class="best-overall">100.0</td><td class="best-overall">96.0</td><td class="best-overall">97.0</td><td class="best-overall">81.0</td><td class="best-overall">51.0</td><td class="best-overall">28.0</td><td class="best-overall">81.6</td>
             </tr>
             <tr class="condition-row" style="opacity:0.3;">
                 <td>SFT <span style="font-size:0.7rem; color:#aaa;">(pending)</span></td>
