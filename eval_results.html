@@ -12,7 +12,7 @@ body {
     color: #1a1a2e;
     line-height: 1.6;
     padding: 2rem;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
@@ -51,7 +51,9 @@ tr:hover { background: #fafbff; }
 
 /* Highlight best value */
 .best { font-weight: 700; color: #16a34a; }
+.best-overall { font-weight: 700; color: #16a34a; background: #f0fdf4; }
 .improved { background: #f0fdf4; }
+.degraded { background: #fef2f2; }
 
 /* Badges */
 .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
@@ -59,6 +61,7 @@ tr:hover { background: #fafbff; }
 .badge-green { background: #dcfce7; color: #166534; }
 .badge-amber { background: #fef3c7; color: #92400e; }
 .badge-purple { background: #f3e8ff; color: #6b21a8; }
+.badge-red { background: #fee2e2; color: #991b1b; }
 
 /* Delta indicators */
 .delta-pos { color: #16a34a; font-size: 0.72rem; font-weight: 600; }
@@ -69,6 +72,7 @@ tr:hover { background: #fafbff; }
 .finding-positive { background: #f0fdf4; border-left: 4px solid #22c55e; }
 .finding-insight { background: #eff6ff; border-left: 4px solid #3b82f6; }
 .finding-caution { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.finding-negative { background: #fef2f2; border-left: 4px solid #ef4444; }
 .finding strong { color: #16213e; }
 
 /* Section labels */
@@ -86,6 +90,10 @@ tr:hover { background: #fafbff; }
 /* Footer */
 .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
 
+/* Two-column layout */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
 /* Responsive */
 @media (max-width: 768px) {
     body { padding: 1rem; }
@@ -96,20 +104,21 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Evaluation Results</h1>
-<p class="subtitle">Performance comparison &middot; DeepSeek-R1 &amp; Qwen3 &middot; Base / SFT / GRPO pipeline &middot; <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format</p>
+<p class="subtitle">Complete 8-model comparison &middot; Qwen3-8B &amp; DeepSeek-R1-7B &middot; Base / SFT / GRPO pipeline &middot; 4 benchmarks &middot; 2,624 eval samples</p>
 
 <!-- Overview Stats -->
 <div class="summary">
     <h2>Evaluation Overview</h2>
     <p style="font-size:0.88rem; color:#555; margin-bottom:1rem;">
-        Two thinking-capable model families evaluated across 7 benchmarks under 3 training conditions.
-        <strong>SFT</strong> provides format warmup on verified reasoning traces.
-        <strong>GRPO</strong> adds SAT-based consistency reward on top of SFT, producing the full RAILS pipeline.
+        Two model families evaluated across 4 benchmarks under 3 training conditions (Base, SFT, GRPO).
+        Includes beta ablation for DeepSeek (&beta;=0 vs &beta;=0.01).
+        All results use the corrected eval pipeline (max_new_tokens=2048, improved answer extraction, per-theory few-shot examples).
     </p>
     <div class="stats">
-        <div class="stat"><div class="stat-value">2</div><div class="stat-label">Models</div></div>
-        <div class="stat stat-green"><div class="stat-value">7</div><div class="stat-label">Benchmarks</div></div>
-        <div class="stat stat-purple"><div class="stat-value">3</div><div class="stat-label">Training Conditions</div></div>
+        <div class="stat"><div class="stat-value">8</div><div class="stat-label">Model Variants</div></div>
+        <div class="stat stat-green"><div class="stat-value">4</div><div class="stat-label">Benchmarks</div></div>
+        <div class="stat stat-purple"><div class="stat-value">2,624</div><div class="stat-label">Eval Samples</div></div>
+        <div class="stat stat-amber"><div class="stat-value">84.3%</div><div class="stat-label">Best Average</div></div>
     </div>
     <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div> Base (no training)</div>
@@ -118,183 +127,375 @@ tr:hover { background: #fafbff; }
     </div>
 </div>
 
-<!-- Main Accuracy Table -->
+<!-- ============================================================ -->
+<!-- MAIN COMPARISON TABLE -->
+<!-- ============================================================ -->
 <div class="card">
-    <h2>In-Domain Benchmark Accuracy</h2>
-    <p class="section-label">Higher is better &middot; Best per model in bold green</p>
+    <h2>Complete Model Comparison</h2>
+    <p class="section-label">Accuracy on 4 benchmarks &middot; Best per-column in bold green &middot; Sorted by average</p>
     <div class="table-wrapper">
     <table>
         <thead>
             <tr>
-                <th style="min-width:160px">Model / Condition</th>
-                <th>LogicBench</th>
-                <th>FOLIO</th>
-                <th>ProntoQA</th>
-                <th>ProofWriter</th>
-                <th>ACPBench</th>
+                <th style="min-width:200px">Model</th>
+                <th>LogicBench<br><span style="font-weight:400;text-transform:none;">(n=1520)</span></th>
+                <th>FOLIO<br><span style="font-weight:400;text-transform:none;">(n=204)</span></th>
+                <th>ProntoQA<br><span style="font-weight:400;text-transform:none;">(n=300)</span></th>
+                <th>ProofWriter<br><span style="font-weight:400;text-transform:none;">(n=600)</span></th>
+                <th>Average</th>
             </tr>
         </thead>
         <tbody>
-            <!-- DeepSeek -->
-            <tr class="model-header"><td colspan="6">DeepSeek-R1 (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.198</td><td>0.059</td><td>0.013</td><td>0.338</td><td>0.001</td></tr>
-            <tr class="condition-row"><td>SFT</td><td>0.082</td><td>0.324</td><td>0.030</td><td>0.355</td><td>0.000</td></tr>
-            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.284 <span class="delta-pos">+0.086</span></td><td class="best">0.431 <span class="delta-pos">+0.372</span></td><td class="best">0.053</td><td class="best">0.380</td><td>0.000</td></tr>
-
-            <!-- Qwen -->
-            <tr class="model-header"><td colspan="6">Qwen3 (8B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.080</td><td>0.093</td><td>0.000</td><td>0.378</td><td>0.007</td></tr>
-            <tr class="condition-row"><td>SFT</td><td>0.039</td><td>0.343</td><td>0.003</td><td>0.368</td><td>0.002</td></tr>
-            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.359 <span class="delta-pos">+0.279</span></td><td class="best">0.402 <span class="delta-pos">+0.309</span></td><td class="best">0.073</td><td class="best">0.385</td><td>0.001</td></tr>
-        </tbody>
-    </table>
-    </div>
-    <div class="finding finding-insight" style="margin-top:1rem;">
-        <strong>Note on SFT LogicBench dip:</strong> SFT teaches the <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> output format, which temporarily reduces LogicBench accuracy
-        (models must now produce structured proofs instead of free-text answers). GRPO then recovers and surpasses base accuracy
-        while maintaining structured output. FOLIO shows immediate and sustained improvement from SFT onward.
-    </div>
-</div>
-
-<!-- Transfer Benchmarks -->
-<div class="card">
-    <h2>Transfer Benchmarks &mdash; Out-of-Domain</h2>
-    <p class="section-label">Zero-shot transfer to legal reasoning (SARA) and constraint satisfaction (LSAT) &middot; CoT accuracy &middot; <a href="transfer_eval.html" style="color:#2563eb;">Full analysis &rarr;</a></p>
-    <div class="table-wrapper">
-    <table>
-        <thead>
-            <tr>
-                <th style="min-width:160px">Model / Condition</th>
-                <th>SARA CoT</th>
-                <th>LSAT CoT</th>
+            <!-- Qwen family -->
+            <tr class="model-header"><td colspan="6">Qwen3-8B</td></tr>
+            <tr class="condition-row">
+                <td>Base</td>
+                <td>83.6%</td>
+                <td class="best-overall">74.0%</td>
+                <td class="best-overall">98.7%</td>
+                <td>80.7%</td>
+                <td class="best-overall"><strong>84.3%</strong></td>
             </tr>
-        </thead>
-        <tbody>
-            <tr class="model-header"><td colspan="3">DeepSeek-R1 (7B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.350</td><td>0.152</td></tr>
-            <tr class="condition-row"><td>SFT</td><td>0.050</td><td>0.091</td></tr>
-            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.500 <span class="delta-pos">+0.150</span></td><td class="best">0.157</td></tr>
+            <tr class="condition-row">
+                <td>SFT <span class="badge badge-amber">85832</span></td>
+                <td class="best">87.7%</td>
+                <td>68.1% <span class="delta-neg">&minus;5.9</span></td>
+                <td>95.0% <span class="delta-neg">&minus;3.7</span></td>
+                <td>84.0%</td>
+                <td><strong>83.7%</strong></td>
+            </tr>
+            <tr class="condition-row improved">
+                <td>GRPO <span class="badge badge-green">85716</span></td>
+                <td>86.8%</td>
+                <td>57.4% <span class="delta-neg">&minus;16.6</span></td>
+                <td>96.3%</td>
+                <td class="best-overall">86.5%</td>
+                <td><strong>81.8%</strong></td>
+            </tr>
 
-            <tr class="model-header"><td colspan="3">Qwen3 (8B)</td></tr>
-            <tr class="condition-row"><td>Base</td><td>0.160</td><td>0.217</td></tr>
-            <tr class="condition-row"><td>SFT</td><td>0.110</td><td>0.161</td></tr>
-            <tr class="condition-row improved"><td>GRPO (RAILS)</td><td class="best">0.430</td><td class="best">0.283</td></tr>
+            <!-- DeepSeek family -->
+            <tr class="model-header"><td colspan="6">DeepSeek-R1-Distill-Qwen-7B</td></tr>
+            <tr class="condition-row">
+                <td>Base</td>
+                <td>63.4%</td>
+                <td>60.8%</td>
+                <td>70.7%</td>
+                <td>64.8%</td>
+                <td><strong>64.9%</strong></td>
+            </tr>
+            <tr class="condition-row">
+                <td>SFT <span class="badge badge-amber">85899</span></td>
+                <td>85.5% <span class="delta-pos">+22.1</span></td>
+                <td>47.1% <span class="delta-neg">&minus;13.7</span></td>
+                <td>64.0% <span class="delta-neg">&minus;6.7</span></td>
+                <td>60.3% <span class="delta-neg">&minus;4.5</span></td>
+                <td><strong>64.2%</strong></td>
+            </tr>
+            <tr class="condition-row improved">
+                <td>GRPO v2 <span class="badge badge-green">85855</span></td>
+                <td class="best-overall">86.6%</td>
+                <td>59.3%</td>
+                <td>69.3%</td>
+                <td>67.5%</td>
+                <td><strong>70.7%</strong></td>
+            </tr>
+
+            <!-- Beta ablation -->
+            <tr class="model-header"><td colspan="6">DeepSeek-R1-7B &mdash; Beta Ablation</td></tr>
+            <tr class="condition-row">
+                <td>GRPO &beta;=0.01 <span class="badge badge-blue">85931</span></td>
+                <td>79.4%</td>
+                <td>55.9%</td>
+                <td>63.3%</td>
+                <td>66.8%</td>
+                <td><strong>66.4%</strong></td>
+            </tr>
+            <tr class="condition-row degraded">
+                <td>GRPO &beta;=0 <span class="badge badge-red">85934</span></td>
+                <td>77.3%</td>
+                <td>42.2% <span class="delta-neg">&minus;13.7</span></td>
+                <td>52.3% <span class="delta-neg">&minus;11.0</span></td>
+                <td>44.3% <span class="delta-neg">&minus;22.5</span></td>
+                <td><strong>54.0%</strong></td>
+            </tr>
         </tbody>
     </table>
     </div>
     <div class="finding finding-caution" style="margin-top:1rem;">
-        <strong>SFT hurts transfer.</strong> SFT alone consistently degrades out-of-domain performance
-        (DeepSeek SARA: 35.0% base &rarr; 5.0% SFT; Qwen LSAT: 21.7% base &rarr; 16.1% SFT).
-        GRPO recovers and exceeds base performance &mdash; DeepSeek GRPO reaches 50.0% on SARA (+15pp over base), suggesting the consistency reward drives generalization.
+        <strong>Qwen3-8B Base is the overall best model (84.3% average).</strong>
+        Fine-tuning (SFT/GRPO) improves in-distribution LogicBench (+4.1pp) and ProofWriter (+5.8pp),
+        but consistently degrades FOLIO transfer (&minus;5.9pp SFT, &minus;16.6pp GRPO). The cost of specialization is reduced generalization.
     </div>
 </div>
 
-<!-- LogicBench Per-Theory Breakdown -->
+<!-- ============================================================ -->
+<!-- LOGICBENCH PER-LOGIC-TYPE BREAKDOWN -->
+<!-- ============================================================ -->
 <div class="card">
-    <h2>LogicBench &mdash; Per-Theory Breakdown (GRPO)</h2>
-    <p class="section-label">Propositional logic theories &middot; Best GRPO checkpoints</p>
+    <h2>LogicBench &mdash; Per-Logic-Type Breakdown</h2>
+    <p class="section-label">Propositional (n=560) &middot; First-Order (n=520) &middot; Non-Monotonic (n=440)</p>
     <div class="table-wrapper">
     <table>
         <thead>
             <tr>
-                <th rowspan="2" style="min-width:180px">Theory</th>
-                <th colspan="2">DeepSeek-R1 (7B)</th>
-                <th colspan="2">Qwen3 (8B)</th>
-            </tr>
-            <tr>
-                <th>Acc</th>
-                <th>Cons.</th>
-                <th>Acc</th>
-                <th>Cons.</th>
+                <th style="min-width:200px">Model</th>
+                <th>Propositional</th>
+                <th>First-Order</th>
+                <th>Non-Monotonic</th>
+                <th>Overall</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td style="text-align:left;">Disjunctive Syllogism</td><td class="best">0.850</td><td>0.775</td><td class="best">0.800</td><td>0.113</td></tr>
-            <tr><td style="text-align:left;">Modus Tollens</td><td>0.500</td><td>0.650</td><td class="best">0.700</td><td>0.100</td></tr>
-            <tr><td style="text-align:left;">Hypothetical Syllogism</td><td class="best">0.675</td><td>0.650</td><td>0.438</td><td>0.092</td></tr>
-            <tr><td style="text-align:left;">Material Implication</td><td>0.125</td><td>0.306</td><td class="best">0.500</td><td>0.238</td></tr>
-            <tr><td style="text-align:left;">Constructive Dilemma</td><td>0.013</td><td>0.063</td><td class="best">0.425</td><td>0.125</td></tr>
-            <tr><td style="text-align:left;">Commutation</td><td>0.113</td><td>0.219</td><td class="best">0.225</td><td>0.088</td></tr>
-            <tr><td style="text-align:left;">Destructive Dilemma</td><td>0.000</td><td>0.200</td><td class="best">0.163</td><td>0.000</td></tr>
-            <tr><td style="text-align:left;">Bidirectional Dilemma</td><td>0.000</td><td>0.250</td><td>0.013</td><td>0.000</td></tr>
+            <tr class="model-header"><td colspan="5">Qwen3-8B</td></tr>
+            <tr class="condition-row"><td>Base</td><td>86.6%</td><td>87.4%</td><td>76.4%</td><td>83.6%</td></tr>
+            <tr class="condition-row"><td>SFT</td><td class="best">89.8%</td><td>89.7%</td><td class="best">83.4%</td><td class="best">87.7%</td></tr>
+            <tr class="condition-row"><td>GRPO</td><td>88.6%</td><td class="best">90.1%</td><td>81.1%</td><td>86.8%</td></tr>
+
+            <tr class="model-header"><td colspan="5">DeepSeek-R1-7B</td></tr>
+            <tr class="condition-row"><td>Base</td><td>54.4%</td><td>71.4%</td><td>63.4%</td><td>63.4%</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>87.5%</td><td>85.7%</td><td>83.1%</td><td>85.5%</td></tr>
+            <tr class="condition-row"><td>GRPO v2</td><td class="best">89.4%</td><td class="best">88.7%</td><td class="best">81.4%</td><td class="best">86.6%</td></tr>
+            <tr class="condition-row"><td>GRPO &beta;=0.01</td><td>86.4%</td><td>80.3%</td><td>71.6%</td><td>79.4%</td></tr>
+            <tr class="condition-row"><td>GRPO &beta;=0</td><td>80.9%</td><td>70.6%</td><td>81.2%</td><td>77.3%</td></tr>
         </tbody>
     </table>
     </div>
     <div class="finding finding-insight" style="margin-top:1rem;">
-        <strong>Theory-specific strengths differ between models.</strong>
-        DeepSeek excels at hypothetical syllogism (0.675) and has higher consistency overall.
-        Qwen shows stronger accuracy on material implication (0.500) and constructive dilemma (0.425).
-        Both models achieve 0.70+ on simple inference types (disjunctive syllogism, modus tollens)
-        but struggle with complex dilemmas (&lt;0.25).
+        <strong>SFT provides the largest LogicBench gains for DeepSeek</strong> (+22.1pp overall),
+        while GRPO adds only +1.1pp more. For Qwen, SFT adds +4.1pp and GRPO is slightly lower (&minus;0.9pp from SFT).
+        The benefit of GRPO is in structured reasoning quality, not raw accuracy.
     </div>
 </div>
 
-<!-- Training Dynamics -->
+<!-- ============================================================ -->
+<!-- PROOFWRITER PER-DEPTH & PRONTOQA PER-HOP -->
+<!-- ============================================================ -->
+<div class="grid-2">
+
+<!-- ProofWriter per-depth -->
 <div class="card">
-    <h2>Training Dynamics</h2>
-    <p class="section-label">How rewards evolve during GRPO training (DeepSeek-R1 7B, beta=0, from SFT checkpoint)</p>
+    <h2>ProofWriter &mdash; By Proof Depth</h2>
+    <p class="section-label">Accuracy degrades with proof depth &middot; n=99 per depth (0&ndash;5)</p>
     <div class="table-wrapper">
     <table>
         <thead>
             <tr>
-                <th>Step</th>
-                <th>Total Reward</th>
-                <th>Consistency</th>
-                <th>Format</th>
-                <th>Answer</th>
-                <th>Grad Norm</th>
+                <th style="min-width:100px">Model</th>
+                <th>d0</th>
+                <th>d1</th>
+                <th>d2</th>
+                <th>d3</th>
+                <th>d4</th>
+                <th>d5</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td>40</td><td>0.20</td><td>-0.03</td><td>0.24</td><td>0.54</td><td>8.1</td></tr>
-            <tr><td>90</td><td>0.59</td><td>+0.08</td><td>0.27</td><td>0.61</td><td>5.2</td></tr>
-            <tr><td>180</td><td>1.63</td><td>+0.52</td><td>0.51</td><td>0.81</td><td>2.4</td></tr>
-            <tr><td>300</td><td>1.95</td><td>+0.52</td><td>0.66</td><td>0.89</td><td>1.3</td></tr>
-            <tr><td>600</td><td>2.40</td><td>+0.82</td><td>0.73</td><td>0.94</td><td>1.2</td></tr>
-            <tr class="improved"><td>1030</td><td class="best">2.66</td><td class="best">+0.84</td><td class="best">0.77</td><td class="best">1.00</td><td>0.8</td></tr>
+            <tr class="model-header"><td colspan="7">Qwen3-8B</td></tr>
+            <tr class="condition-row"><td>Base</td><td>87.9</td><td>90.9</td><td>84.8</td><td>80.8</td><td>74.7</td><td>64.6</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>90.9</td><td>89.9</td><td>88.9</td><td>79.8</td><td>78.8</td><td>74.7</td></tr>
+            <tr class="condition-row improved"><td>GRPO</td><td class="best">94.9</td><td class="best">93.9</td><td class="best">91.9</td><td class="best">82.8</td><td class="best">78.8</td><td class="best">76.8</td></tr>
+
+            <tr class="model-header"><td colspan="7">DeepSeek-R1-7B</td></tr>
+            <tr class="condition-row"><td>Base</td><td>83.8</td><td>78.8</td><td>64.6</td><td>64.6</td><td>51.5</td><td>44.4</td></tr>
+            <tr class="condition-row"><td>GRPO v2</td><td class="best">89.9</td><td class="best">80.8</td><td class="best">73.7</td><td class="best">65.7</td><td class="best">54.5</td><td>40.4</td></tr>
+            <tr class="condition-row degraded"><td>GRPO &beta;=0</td><td>68.7</td><td>56.6</td><td>44.4</td><td>38.4</td><td>31.3</td><td>28.3</td></tr>
         </tbody>
     </table>
     </div>
-    <div class="finding finding-positive" style="margin-top:1rem;">
-        <strong>Stable training with beta=0.</strong> With SFT warm-start and multi-signal reward (consistency + format + answer + length),
-        KL penalty is unnecessary. Consistency improves monotonically from -0.03 to +0.84.
-        Gradient norms decrease throughout, indicating stable convergence. See <a href="research_notes.html#beta-zero" style="color:#2563eb;">beta=0 research note</a> for details.
+    <div class="finding finding-positive" style="margin-top:0.6rem; font-size:0.82rem;">
+        <strong>Qwen GRPO degrades gracefully:</strong> 94.9% at d0 &rarr; 76.8% at d5 (&minus;18.1pp). DS &beta;=0 collapses: 68.7% &rarr; 28.3% (&minus;40.4pp).
     </div>
 </div>
 
-<!-- Key Findings -->
+<!-- ProntoQA per-hop -->
+<div class="card">
+    <h2>ProntoQA &mdash; By Hop Count</h2>
+    <p class="section-label">Multi-hop deductive reasoning &middot; n=100 per hop</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="min-width:100px">Model</th>
+                <th>1-hop</th>
+                <th>2-hop</th>
+                <th>3-hop</th>
+                <th>Overall</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="model-header"><td colspan="5">Qwen3-8B</td></tr>
+            <tr class="condition-row"><td>Base</td><td class="best">100.0</td><td class="best">98.0</td><td class="best">98.0</td><td class="best">98.7</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>99.0</td><td>97.0</td><td>89.0</td><td>95.0</td></tr>
+            <tr class="condition-row"><td>GRPO</td><td class="best">100.0</td><td>97.0</td><td>92.0</td><td>96.3</td></tr>
+
+            <tr class="model-header"><td colspan="5">DeepSeek-R1-7B</td></tr>
+            <tr class="condition-row"><td>Base</td><td class="best">82.0</td><td class="best">70.0</td><td class="best">60.0</td><td class="best">70.7</td></tr>
+            <tr class="condition-row"><td>GRPO v2</td><td class="best">82.0</td><td>77.0</td><td>49.0</td><td>69.3</td></tr>
+            <tr class="condition-row degraded"><td>GRPO &beta;=0</td><td>67.0</td><td>54.0</td><td>36.0</td><td>52.3</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-caution" style="margin-top:0.6rem; font-size:0.82rem;">
+        <strong>Qwen Base is near-perfect on ProntoQA</strong> (98.7%). Fine-tuning slightly degrades 3-hop performance (&minus;6pp to &minus;9pp).
+    </div>
+</div>
+
+</div><!-- end grid-2 -->
+
+<!-- ============================================================ -->
+<!-- BETA ABLATION -->
+<!-- ============================================================ -->
+<div class="card">
+    <h2>KL Penalty (&beta;) Ablation &mdash; DeepSeek-R1-7B</h2>
+    <p class="section-label">Effect of KL divergence penalty on in-distribution vs transfer performance</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="min-width:180px">Condition</th>
+                <th>LogicBench</th>
+                <th>FOLIO</th>
+                <th>ProntoQA</th>
+                <th>ProofWriter</th>
+                <th>Average</th>
+                <th>Training Reward</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="font-weight:600;">Base (no training)</td>
+                <td>63.4%</td>
+                <td>60.8%</td>
+                <td>70.7%</td>
+                <td>64.8%</td>
+                <td><strong>64.9%</strong></td>
+                <td>&mdash;</td>
+            </tr>
+            <tr class="improved">
+                <td style="font-weight:600;">GRPO v2 (&beta;=0.01)</td>
+                <td class="best">86.6% <span class="delta-pos">+23.2</span></td>
+                <td>59.3% <span class="delta-neg">&minus;1.5</span></td>
+                <td>69.3% <span class="delta-neg">&minus;1.4</span></td>
+                <td class="best">67.5% <span class="delta-pos">+2.7</span></td>
+                <td class="best"><strong>70.7%</strong> <span class="delta-pos">+5.8</span></td>
+                <td>~2.4</td>
+            </tr>
+            <tr>
+                <td style="font-weight:600;">GRPO &beta;=0.01</td>
+                <td>79.4% <span class="delta-pos">+16.0</span></td>
+                <td>55.9% <span class="delta-neg">&minus;4.9</span></td>
+                <td>63.3% <span class="delta-neg">&minus;7.4</span></td>
+                <td>66.8% <span class="delta-pos">+2.0</span></td>
+                <td><strong>66.4%</strong> <span class="delta-pos">+1.5</span></td>
+                <td>~2.35</td>
+            </tr>
+            <tr class="degraded">
+                <td style="font-weight:600;">GRPO &beta;=0</td>
+                <td>77.3% <span class="delta-pos">+13.9</span></td>
+                <td>42.2% <span class="delta-neg">&minus;18.6</span></td>
+                <td>52.3% <span class="delta-neg">&minus;18.4</span></td>
+                <td>44.3% <span class="delta-neg">&minus;20.5</span></td>
+                <td><strong>54.0%</strong> <span class="delta-neg">&minus;10.9</span></td>
+                <td>2.89</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-negative" style="margin-top:1rem;">
+        <strong>&beta;=0 achieves the highest training reward (2.89) but the worst eval performance (54.0%).</strong>
+        Without KL penalty, the model overfits to the SAT reward signal &mdash; it learns to produce SAT-valid chains
+        that don't transfer to new problems. The &beta;=0.01 penalty acts as a crucial regularizer:
+        FOLIO +13.7pp, ProntoQA +11.0pp, ProofWriter +22.5pp compared to &beta;=0.
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- REASONING QUALITY METRICS -->
+<!-- ============================================================ -->
+<div class="card">
+    <h2>Reasoning Quality Metrics</h2>
+    <p class="section-label">Consistency = % steps passing SAT verification &middot; Faithfulness = % correct answers with valid chains &middot; Parse = % outputs parseable to structured format</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2" style="min-width:160px">Model</th>
+                <th colspan="3">LogicBench</th>
+                <th colspan="2">FOLIO</th>
+                <th colspan="2">ProofWriter</th>
+            </tr>
+            <tr>
+                <th>Cons.</th>
+                <th>Faith.</th>
+                <th>Parse</th>
+                <th>Cons.</th>
+                <th>Faith.</th>
+                <th>Cons.</th>
+                <th>Faith.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="model-header"><td colspan="8">Qwen3-8B</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.1%</td><td>1.4%</td><td>1.6%</td><td>0.0%</td><td>1.0%</td><td>0.0%</td><td>0.0%</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>28.3%</td><td>51.2%</td><td>99.7%</td><td>12.3%</td><td>24.5%</td><td>7.5%</td><td>20.2%</td></tr>
+            <tr class="condition-row improved"><td>GRPO</td><td class="best">33.3%</td><td class="best">52.6%</td><td class="best">100%</td><td class="best">20.7%</td><td class="best">24.0%</td><td class="best">9.3%</td><td class="best">24.7%</td></tr>
+
+            <tr class="model-header"><td colspan="8">DeepSeek-R1-7B</td></tr>
+            <tr class="condition-row"><td>Base</td><td>0.2%</td><td>0.9%</td><td>6.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td></tr>
+            <tr class="condition-row"><td>SFT</td><td>23.2%</td><td>48.7%</td><td>96.3%</td><td>6.7%</td><td>40.2%</td><td>6.6%</td><td>42.7%</td></tr>
+            <tr class="condition-row"><td>GRPO v2</td><td>21.5%</td><td>34.5%</td><td>97.4%</td><td>6.0%</td><td>33.3%</td><td>5.9%</td><td>31.5%</td></tr>
+            <tr class="condition-row"><td>GRPO &beta;=0.01</td><td class="best">35.3%</td><td>37.2%</td><td>99.9%</td><td class="best">13.7%</td><td>24.0%</td><td class="best">14.3%</td><td class="best">38.3%</td></tr>
+            <tr class="condition-row"><td>GRPO &beta;=0</td><td class="best">38.2%</td><td class="best">53.0%</td><td>98.1%</td><td>15.0%</td><td class="best">58.3%</td><td>11.0%</td><td class="best">54.2%</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-insight" style="margin-top:1rem;">
+        <strong>Higher consistency doesn't mean better accuracy.</strong>
+        DS &beta;=0 has the highest consistency (38.2%) and faithfulness (53.0%) on LogicBench,
+        but the worst transfer accuracy. It produces highly structured, SAT-valid proofs that are
+        overfit to in-distribution patterns. The base models have near-zero consistency because
+        they don't produce the <code>&lt;step&gt;</code> format.
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- KEY FINDINGS -->
+<!-- ============================================================ -->
 <div class="card">
     <h2>Key Findings</h2>
 
     <div class="finding finding-positive">
-        <strong>GRPO with consistency reward produces the largest gains.</strong>
-        Qwen3 improves from 0.080 to 0.359 on LogicBench (+349%). Both models show 3&ndash;7x improvement on FOLIO.
-        The consistency signal teaches models to produce structured, terminating proofs.
-    </div>
-
-    <div class="finding finding-positive">
-        <strong>SFT warmup is essential for format learning.</strong>
-        Without SFT, thinking models cannot produce the structured <code>&lt;step&gt;</code> format.
-        SFT teaches the output format; GRPO then improves reasoning quality within that format.
-    </div>
-
-    <div class="finding finding-insight">
-        <strong>GRPO generalizes to unseen domains.</strong>
-        On SARA (legal reasoning) and LSAT (constraint satisfaction), GRPO models outperform both base and SFT models.
-        DeepSeek GRPO reaches 50.0% on SARA (vs 35.0% base) and Qwen3 GRPO reaches 43.0% on SARA (vs 16.0% base) and 28.3% on LSAT (vs 21.7% base).
+        <strong>RAILS pipeline produces the best in-distribution reasoning.</strong>
+        Qwen GRPO achieves the highest ProofWriter (86.5%, +5.8pp over base) with graceful depth scaling (94.9% at d0 &rarr; 76.8% at d5).
+        DeepSeek improves +23.2pp on LogicBench through the SFT &rarr; GRPO pipeline.
     </div>
 
     <div class="finding finding-caution">
-        <strong>SFT alone hurts out-of-domain transfer.</strong>
-        SFT models perform worse than base on SARA and LSAT, likely due to format overfitting on logic-specific training data.
-        The consistency reward during GRPO prevents this overfitting by rewarding valid reasoning regardless of domain.
+        <strong>Fine-tuning trades transfer for specialization.</strong>
+        FOLIO degrades with every training stage: Qwen Base 74.0% &rarr; SFT 68.1% &rarr; GRPO 57.4%.
+        ProntoQA is similar: Qwen Base 98.7% &rarr; SFT 95.0% &rarr; GRPO 96.3%.
+        The models specialize on LogicBench-style reasoning at the cost of FOLIO-style natural language inference.
+    </div>
+
+    <div class="finding finding-negative">
+        <strong>&beta;=0 causes reward hacking.</strong>
+        Removing the KL penalty produces the highest training reward (2.89) but the worst eval performance (54.0% average).
+        Transfer benchmarks collapse: FOLIO &minus;18.6pp, ProntoQA &minus;18.4pp, ProofWriter &minus;20.5pp vs base.
+        The model learns to exploit the SAT reward without developing generalizable reasoning.
     </div>
 
     <div class="finding finding-insight">
-        <strong>Models show complementary strengths.</strong>
-        DeepSeek excels at theories requiring chain-building (hypothetical syllogism: 0.675) with high consistency (34% overall).
-        Qwen achieves higher accuracy (LogicBench 0.359 vs 0.284) but lower faithfulness (16% vs 91%),
-        suggesting different strategies for leveraging the consistency signal.
+        <strong>Qwen3-8B dominates DeepSeek-R1-7B across the board.</strong>
+        Qwen outperforms DeepSeek on every benchmark in every training condition.
+        The gap is largest on ProntoQA (98.7% vs 70.7% base) and ProofWriter (86.5% vs 67.5% best GRPO).
+        Qwen's stronger base capabilities amplify the benefits of the RAILS pipeline.
+    </div>
+
+    <div class="finding finding-insight">
+        <strong>SFT is essential for format learning, but GRPO adds reasoning quality.</strong>
+        SFT raises parse success from &lt;6% to 96&ndash;100% and teaches the <code>&lt;step&gt;</code> output structure.
+        GRPO then improves consistency (23.2% &rarr; 33.3% for Qwen) and ProofWriter depth scaling,
+        demonstrating that the SAT consistency reward teaches more robust proof construction.
     </div>
 </div>
 
@@ -304,22 +505,45 @@ tr:hover { background: #fafbff; }
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:0.8rem;">
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #94a3b8;">
             <strong style="font-size:0.85rem;">Base</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Pretrained thinking model with no additional training. Evaluated zero-shot with the structured reasoning prompt.</p>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Pretrained model with no additional training. Evaluated zero-shot with the structured reasoning prompt and per-theory few-shot examples.</p>
         </div>
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #f59e0b;">
             <strong style="font-size:0.85rem;">SFT (Format Warmup)</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Supervised fine-tuning on 6,033 verified reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format. Teaches the model the output structure before RL. QLoRA, 10 epochs.</p>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Supervised fine-tuning on ~6k verified reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format. Teaches output structure before RL. QLoRA, 2 epochs, LR 1.5e-4.</p>
         </div>
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #22c55e;">
             <strong style="font-size:0.85rem;">GRPO (RAILS)</strong>
-            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Group Relative Policy Optimization from SFT checkpoint with SAT consistency reward. Each derived step is checked by a SAT solver. Invalid reasoning chains receive zero answer credit.</p>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Group Relative Policy Optimization from SFT checkpoint. SAT consistency reward checks each derived step. Invalid chains get zero answer credit. &beta;=0.01 KL penalty prevents reward hacking.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Benchmarks Legend -->
+<div class="card">
+    <h2>Benchmark Descriptions</h2>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:0.8rem;">
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px;">
+            <strong style="font-size:0.85rem;">LogicBench (n=1520)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">In-distribution. Binary QA across 25 theories: propositional logic (8), first-order logic (9), non-monotonic logic (8). Training uses Aug split; eval uses Eval split.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px;">
+            <strong style="font-size:0.85rem;">FOLIO (n=204)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Transfer. Expert-written FOL problems with natural language premises and conclusions. Tests logical reasoning in realistic language.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px;">
+            <strong style="font-size:0.85rem;">ProntoQA (n=300)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Transfer. Synthetic multi-hop deductive reasoning. 1/2/3-hop chains requiring transitive inference over category hierarchies.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f9fafb; border-radius:8px;">
+            <strong style="font-size:0.85rem;">ProofWriter (n=600)</strong>
+            <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Transfer. 3-class (True/False/Unknown) reasoning with proof depths 0&ndash;5. Tests systematic deduction over rule sets.</p>
         </div>
     </div>
 </div>
 
 <div class="footer">
-    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 2026<br>
-    <a href="qualitative_comparison.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Qualitative Analysis &rarr;</a>
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 23, 2026<br>
+    <a href="qualitative_examples.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Qualitative Examples &rarr;</a>
     &middot;
     <a href="transfer_eval.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Transfer Evaluation &rarr;</a>
 </div>

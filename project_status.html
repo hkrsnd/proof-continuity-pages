@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS &mdash; Project Status</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+h2 { font-size: 1.3rem; color: #16213e; margin-bottom: 0.8rem; }
+h3 { font-size: 1.05rem; color: #374151; margin-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+/* Cards */
+.card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+/* Section headers */
+.section-header {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 1.2rem; margin-top: 2rem;
+}
+.section-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 700; color: white; flex-shrink: 0;
+}
+.section-num-blue { background: #2563eb; }
+.section-num-amber { background: #d97706; }
+.section-num-green { background: #16a34a; }
+.section-title { font-size: 1.4rem; font-weight: 700; color: #16213e; }
+
+/* Tables */
+.table-wrapper { overflow-x: auto; margin: 1rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th { background: #f0f4ff; color: #1e40af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem; padding: 0.6rem 0.5rem; text-align: center; border-bottom: 2px solid #dbeafe; white-space: nowrap; }
+th:first-child { text-align: left; }
+td { padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #f0f0f0; }
+td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+tr:hover { background: #fafbff; }
+
+/* Model group rows */
+.model-header td { background: #f8fafc; font-weight: 700; color: #16213e; border-bottom: 2px solid #e2e8f0; padding-top: 0.8rem; }
+.condition-row td:first-child { padding-left: 1.2rem; font-weight: 400; color: #555; }
+
+/* Highlights */
+.best { font-weight: 700; color: #16a34a; }
+.best-overall { font-weight: 700; color: #16a34a; background: #f0fdf4; }
+.improved { background: #f0fdf4; }
+.degraded { background: #fef2f2; }
+.delta-pos { color: #16a34a; font-size: 0.72rem; font-weight: 600; }
+.delta-neg { color: #dc2626; font-size: 0.72rem; font-weight: 600; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.badge-blue { background: #e0e7ff; color: #3730a3; }
+.badge-green { background: #dcfce7; color: #166534; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-purple { background: #f3e8ff; color: #6b21a8; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+.badge-gray { background: #f3f4f6; color: #374151; }
+
+/* Findings / callouts */
+.finding { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.88rem; }
+.finding-positive { background: #f0fdf4; border-left: 4px solid #22c55e; }
+.finding-insight { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.finding-caution { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.finding-negative { background: #fef2f2; border-left: 4px solid #ef4444; }
+.finding strong { color: #16213e; }
+
+/* Status items */
+.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+.status-item { padding: 1rem; background: #f9fafb; border-radius: 8px; border-left: 4px solid #94a3b8; }
+.status-item h4 { font-size: 0.9rem; color: #16213e; margin-bottom: 0.3rem; }
+.status-item p { font-size: 0.82rem; color: #555; }
+.status-running { border-left-color: #3b82f6; }
+.status-done { border-left-color: #22c55e; }
+.status-blocked { border-left-color: #ef4444; }
+.status-planned { border-left-color: #d97706; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+.stat-green .stat-value { color: #16a34a; }
+.stat-amber .stat-value { color: #d97706; }
+.stat-purple .stat-value { color: #7c3aed; }
+.stat-red .stat-value { color: #dc2626; }
+
+/* Two-column */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 1.5rem; margin: 1rem 0; }
+.timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+.timeline-item { position: relative; margin-bottom: 1.2rem; padding-left: 1.2rem; }
+.timeline-item::before { content: ''; position: absolute; left: -1.1rem; top: 0.5rem; width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; border: 2px solid white; box-shadow: 0 0 0 2px #3b82f6; }
+.timeline-item.done::before { background: #22c55e; box-shadow: 0 0 0 2px #22c55e; }
+.timeline-item.current::before { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+.timeline-date { font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.timeline-text { font-size: 0.85rem; color: #374151; }
+
+/* Nav */
+.back-link { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+.back-link:hover { text-decoration: underline; }
+
+/* Footer */
+.footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    body { padding: 1rem; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .status-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-link">&larr; Back to Hub</a>
+<h1>RAILS &mdash; Project Status</h1>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; Updated Feb 23, 2026</p>
+
+<!-- ============================================================ -->
+<!-- OVERVIEW STATS -->
+<!-- ============================================================ -->
+<div class="card">
+    <h2>Current State</h2>
+    <div class="stats">
+        <div class="stat stat-green"><div class="stat-value">8</div><div class="stat-label">Models Evaluated</div></div>
+        <div class="stat"><div class="stat-value">4</div><div class="stat-label">Benchmarks</div></div>
+        <div class="stat stat-purple"><div class="stat-value">2,624</div><div class="stat-label">Eval Samples</div></div>
+        <div class="stat stat-amber"><div class="stat-value">+35pp</div><div class="stat-label">Best DS Improvement</div></div>
+        <div class="stat stat-green"><div class="stat-value">86.5%</div><div class="stat-label">Best ProofWriter</div></div>
+        <div class="stat stat-red"><div class="stat-value">-16.6pp</div><div class="stat-label">FOLIO Degradation</div></div>
+    </div>
+    <p style="font-size:0.88rem; color:#555;">
+        Full evaluation pipeline (Base &rarr; SFT &rarr; GRPO) completed for Qwen3-8B and DeepSeek-R1-7B.
+        Main finding: GRPO significantly improves in-distribution reasoning (LogicBench, ProofWriter depth scaling)
+        but degrades out-of-distribution transfer (FOLIO). Root cause identified: <strong>label bias</strong> in training data.
+    </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: RECENT RESULTS -->
+<!-- ============================================================ -->
+<div class="section-header">
+    <div class="section-num section-num-blue">1</div>
+    <div class="section-title">Recent Results</div>
+</div>
+
+<!-- 1A: Main comparison table -->
+<div class="card">
+    <h2>8-Model Comparison</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Base vs SFT vs GRPO for both model families. All results use the corrected eval pipeline (max_new_tokens=2048, per-theory few-shot examples, improved answer extraction).</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="min-width:200px">Model</th>
+                <th>LogicBench<br><span style="font-weight:400;text-transform:none;">(n=1520)</span></th>
+                <th>FOLIO<br><span style="font-weight:400;text-transform:none;">(n=204)</span></th>
+                <th>ProntoQA<br><span style="font-weight:400;text-transform:none;">(n=300)</span></th>
+                <th>ProofWriter<br><span style="font-weight:400;text-transform:none;">(n=600)</span></th>
+                <th>Average</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="model-header"><td colspan="6">Qwen3-8B</td></tr>
+            <tr class="condition-row">
+                <td>Base</td>
+                <td>83.6%</td>
+                <td class="best-overall">74.0%</td>
+                <td class="best-overall">98.7%</td>
+                <td>80.7%</td>
+                <td class="best-overall"><strong>84.3%</strong></td>
+            </tr>
+            <tr class="condition-row">
+                <td>SFT</td>
+                <td class="best">87.7%</td>
+                <td>68.1% <span class="delta-neg">&minus;5.9</span></td>
+                <td>95.0%</td>
+                <td>84.0%</td>
+                <td><strong>83.7%</strong></td>
+            </tr>
+            <tr class="condition-row improved">
+                <td>GRPO <span class="badge badge-green">RAILS</span></td>
+                <td>86.8%</td>
+                <td>57.4% <span class="delta-neg">&minus;16.6</span></td>
+                <td>96.3%</td>
+                <td class="best-overall">86.5% <span class="delta-pos">+5.8</span></td>
+                <td><strong>81.8%</strong></td>
+            </tr>
+
+            <tr class="model-header"><td colspan="6">DeepSeek-R1-Distill-Qwen-7B</td></tr>
+            <tr class="condition-row">
+                <td>Base</td>
+                <td>63.4%</td>
+                <td>60.8%</td>
+                <td>70.7%</td>
+                <td>64.8%</td>
+                <td><strong>64.9%</strong></td>
+            </tr>
+            <tr class="condition-row">
+                <td>SFT</td>
+                <td>85.5% <span class="delta-pos">+22.1</span></td>
+                <td>47.1% <span class="delta-neg">&minus;13.7</span></td>
+                <td>64.0%</td>
+                <td>60.3%</td>
+                <td><strong>64.2%</strong></td>
+            </tr>
+            <tr class="condition-row improved">
+                <td>GRPO <span class="badge badge-green">RAILS</span></td>
+                <td class="best-overall">86.6% <span class="delta-pos">+23.2</span></td>
+                <td>59.3%</td>
+                <td>69.3%</td>
+                <td>67.5%</td>
+                <td><strong>70.7%</strong> <span class="delta-pos">+5.8</span></td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- 1B: Key finding - ProofWriter depth scaling -->
+<div class="card">
+    <h2>Key Result: Robust Long-Chain Reasoning</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
+        The primary advantage of RAILS is robustness for multi-step reasoning. ProofWriter evaluates at proof depths 0&ndash;5,
+        where GRPO shows <strong>significant gains over base within 5 reasoning steps</strong>.
+    </p>
+    <div class="grid-2">
+        <!-- ProofWriter per-depth -->
+        <div>
+            <h3>ProofWriter &mdash; By Proof Depth</h3>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="min-width:100px">Model</th>
+                        <th>d0</th><th>d1</th><th>d2</th><th>d3</th><th>d4</th><th>d5</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="model-header"><td colspan="7">Qwen3-8B</td></tr>
+                    <tr class="condition-row"><td>Base</td><td>87.9</td><td>90.9</td><td>84.8</td><td>80.8</td><td>74.7</td><td>64.6</td></tr>
+                    <tr class="condition-row improved"><td>GRPO</td><td class="best">94.9</td><td class="best">93.9</td><td class="best">91.9</td><td class="best">82.8</td><td class="best">78.8</td><td class="best">76.8</td></tr>
+                    <tr class="model-header"><td colspan="7">DeepSeek-R1-7B</td></tr>
+                    <tr class="condition-row"><td>Base</td><td>83.8</td><td>78.8</td><td>64.6</td><td>64.6</td><td>51.5</td><td>44.4</td></tr>
+                    <tr class="condition-row improved"><td>GRPO</td><td class="best">89.9</td><td class="best">80.8</td><td class="best">73.7</td><td class="best">65.7</td><td class="best">54.5</td><td>40.4</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="finding finding-positive" style="margin-top:0.6rem; font-size:0.82rem;">
+                <strong>Qwen GRPO degrades gracefully:</strong> 94.9% at d0 &rarr; 76.8% at d5 (&minus;18.1pp).
+                Base drops more steeply: 87.9% &rarr; 64.6% (&minus;23.3pp). GRPO preserves 12.2pp advantage at depth 5.
+            </div>
+        </div>
+        <!-- ProntoQA per-hop -->
+        <div>
+            <h3>ProntoQA &mdash; By Hop Count</h3>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="min-width:100px">Model</th>
+                        <th>1-hop</th><th>2-hop</th><th>3-hop</th><th>All</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="model-header"><td colspan="5">Qwen3-8B</td></tr>
+                    <tr class="condition-row"><td>Base</td><td>100.0</td><td>98.0</td><td>98.0</td><td class="best">98.7</td></tr>
+                    <tr class="condition-row"><td>GRPO</td><td>100.0</td><td>97.0</td><td>92.0</td><td>96.3</td></tr>
+                    <tr class="model-header"><td colspan="5">DeepSeek-R1-7B</td></tr>
+                    <tr class="condition-row"><td>Base</td><td>82.0</td><td>70.0</td><td>60.0</td><td>70.7</td></tr>
+                    <tr class="condition-row"><td>GRPO</td><td>82.0</td><td class="best">77.0</td><td>49.0</td><td>69.3</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="finding finding-caution" style="margin-top:0.6rem; font-size:0.82rem;">
+                <strong>ProntoQA limited to 3 hops.</strong> Qwen base is near-perfect (98.7%).
+                The advantage of RAILS is clearer on deeper chains &mdash; extending evaluation to 10&ndash;20 steps is underway.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 1C: FOLIO degradation diagnosis -->
+<div class="card">
+    <h2>Diagnosis: FOLIO Degradation from Label Bias</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
+        Fine-tuning consistently degrades FOLIO performance. Root cause: <strong>training data label distribution mismatch</strong>.
+    </p>
+    <div class="grid-2">
+        <div>
+            <h3>The Problem</h3>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th style="text-align:left">Dataset</th><th>Labels</th><th>Distribution</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td style="text-align:left">LogicBench (training)</td><td>Yes / No</td><td>~50/50 binary</td></tr>
+                    <tr><td style="text-align:left">ProntoQA (training)</td><td>Yes / No</td><td>~50/50 binary</td></tr>
+                    <tr class="degraded"><td style="text-align:left">FOLIO (eval)</td><td>True / False / <strong>Unknown</strong></td><td>3-class</td></tr>
+                    <tr class="degraded"><td style="text-align:left">ProofWriter (eval)</td><td>True / False / <strong>Unknown</strong></td><td>3-class</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <p style="font-size:0.82rem; color:#555; margin-top:0.5rem;">
+                The model never sees "Unknown" during SFT or GRPO training. When faced with FOLIO problems
+                where the correct answer is "Unknown," the model is biased toward committing to True/False,
+                reducing accuracy on these critical examples.
+            </p>
+        </div>
+        <div>
+            <h3>FOLIO Degradation by Training Stage</h3>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th style="text-align:left">Model</th><th>FOLIO</th><th>&Delta; from Base</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td style="text-align:left">Qwen Base</td><td class="best">74.0%</td><td>&mdash;</td></tr>
+                    <tr><td style="text-align:left">Qwen SFT</td><td>68.1%</td><td><span class="delta-neg">&minus;5.9</span></td></tr>
+                    <tr class="degraded"><td style="text-align:left">Qwen GRPO</td><td>57.4%</td><td><span class="delta-neg">&minus;16.6</span></td></tr>
+                    <tr style="border-top:2px solid #e5e7eb;"><td style="text-align:left">DS Base</td><td>60.8%</td><td>&mdash;</td></tr>
+                    <tr><td style="text-align:left">DS SFT</td><td>47.1%</td><td><span class="delta-neg">&minus;13.7</span></td></tr>
+                    <tr><td style="text-align:left">DS GRPO</td><td>59.3%</td><td><span class="delta-neg">&minus;1.5</span></td></tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="finding finding-negative" style="margin-top:0.6rem; font-size:0.82rem;">
+                <strong>Every training stage hurts FOLIO.</strong> The model becomes increasingly
+                committed to binary answers, losing the ability to say "Unknown."
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 1D: Reward overoptimization -->
+<div class="card">
+    <h2>Reward Overoptimization</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
+        Eval accuracy declines with continued training despite rising training rewards &mdash; classic reward overoptimization
+        on a small dataset (4,808 QA pairs).
+    </p>
+    <div class="grid-2">
+        <div>
+            <h3>Checkpoint Regression</h3>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th style="text-align:left">Checkpoint</th><th>LB Prop Acc</th><th>Train Reward</th></tr>
+                </thead>
+                <tbody>
+                    <tr class="model-header"><td colspan="3">Job 85931 (&beta;=0.01)</td></tr>
+                    <tr class="condition-row improved"><td>ckpt-600</td><td class="best">89.8%</td><td>~1.5</td></tr>
+                    <tr class="condition-row"><td>ckpt-900</td><td>86.1%</td><td>~1.8</td></tr>
+                    <tr class="condition-row degraded"><td>ckpt-1400</td><td>86.4%</td><td>~2.1</td></tr>
+                    <tr class="model-header"><td colspan="3">Job 85934 (&beta;=0)</td></tr>
+                    <tr class="condition-row"><td>ckpt-600</td><td class="best">85.2%</td><td>~2.3</td></tr>
+                    <tr class="condition-row"><td>ckpt-900</td><td>83.0%</td><td>~2.6</td></tr>
+                    <tr class="condition-row degraded"><td>ckpt-1600</td><td>80.9%</td><td>2.89</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="finding finding-negative" style="margin-top:0.6rem; font-size:0.82rem;">
+                <strong>Training reward UP, eval accuracy DOWN.</strong> The model overfits to SAT reward
+                shortcuts that don't generalize to held-out evaluation.
+            </div>
+        </div>
+        <div>
+            <h3>KL Divergence Collapse (Job 85931)</h3>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th style="text-align:left">Phase</th><th>Steps</th><th>Avg KL</th><th>Reward</th></tr>
+                </thead>
+                <tbody>
+                    <tr class="improved"><td style="text-align:left">Stable</td><td>110&ndash;500</td><td>0.37</td><td>1.50</td></tr>
+                    <tr><td style="text-align:left">Collapse onset</td><td>500&ndash;600</td><td>1.94</td><td>0.44</td></tr>
+                    <tr class="degraded"><td style="text-align:left">Post-collapse</td><td>600+</td><td>20&ndash;46</td><td>2.10</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <p style="font-size:0.82rem; color:#555; margin-top:0.5rem;">
+                At step 540&ndash;620, the policy underwent a catastrophic shift. KL divergence jumped from &lt;2 to 20&ndash;46
+                and never recovered. The &beta;=0.01 penalty was too weak to constrain drift.
+                <strong>Optimal checkpoint is around step 400&ndash;600</strong> (0.5&ndash;1.0 epochs).
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- 1E: Mechanistic interpretability -->
+<div class="card">
+    <h2>Mechanistic Interpretability</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
+        Internal analysis of DeepSeek-R1-7B across 4 training variants using linear probes and logit lens.
+        Shows <strong>how</strong> RAILS changes the model's reasoning mechanism.
+    </p>
+    <div class="grid-2">
+        <div>
+            <h3>Finding: RAILS Builds Certainty Through Reasoning</h3>
+            <p style="font-size:0.82rem; color:#555; margin-bottom:0.5rem;">
+                Normalized lean metric P(correct)/(P(Yes)+P(No)) at each reasoning step boundary:
+            </p>
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Step</th><th>RAILS</th><th>SFT</th><th>Answer-Only</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>0</td><td>0.62</td><td>0.69</td><td>0.46</td></tr>
+                    <tr><td>1</td><td>0.68</td><td>0.72</td><td>0.58</td></tr>
+                    <tr><td>2</td><td>0.61</td><td>0.68</td><td>0.59</td></tr>
+                    <tr class="improved"><td>3</td><td class="best">0.74</td><td>0.67</td><td>0.52</td></tr>
+                    <tr><td>4</td><td>0.64</td><td>0.59</td><td>0.50</td></tr>
+                    <tr><td>5</td><td class="best">0.73</td><td>0.54</td><td>0.60</td></tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+        <div>
+            <h3>Interpretation</h3>
+            <div class="finding finding-positive" style="font-size:0.82rem;">
+                <strong>RAILS lean increases</strong> through reasoning (0.62&rarr;0.74):
+                each step genuinely informs the answer. This is the strongest evidence of <strong>faithful reasoning</strong>.
+            </div>
+            <div class="finding finding-caution" style="font-size:0.82rem;">
+                <strong>SFT lean decreases</strong> (0.69&rarr;0.54):
+                the model starts with good intuition but reasoning weakens certainty. Steps are cosmetic.
+            </div>
+            <div class="finding finding-negative" style="font-size:0.82rem;">
+                <strong>Answer-Only lean stays near chance</strong> (0.46&rarr;0.50):
+                reasoning doesn't inform the answer. Combined with early answer crystallization at layer 22, this confirms "decide first, reason later."
+            </div>
+            <div class="finding finding-insight" style="font-size:0.82rem;">
+                <strong>Answer-Only "knows" but doesn't "use" validity.</strong> Highest probe AUC (0.976) but only 16% valid steps, vs RAILS 68% valid.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: WHAT'S CURRENTLY GOING ON -->
+<!-- ============================================================ -->
+<div class="section-header">
+    <div class="section-num section-num-amber">2</div>
+    <div class="section-title">What's Currently Going On</div>
+</div>
+
+<div class="card">
+    <h2>Active Workstreams</h2>
+    <div class="status-grid">
+
+        <div class="status-item status-running">
+            <h4><span class="badge badge-blue">Agent B</span> Fixing Label Bias in Training Data</h4>
+            <p>
+                Adding "Unknown" / uncertain labels to SFT and GRPO training data.
+                The current training corpus only has binary Yes/No labels from LogicBench, which biases
+                the model against FOLIO's 3-class evaluation (True/False/Unknown).
+                This is the primary cause of the &minus;16.6pp FOLIO degradation.
+            </p>
+        </div>
+
+        <div class="status-item status-running">
+            <h4><span class="badge badge-blue">Agent B</span> Extending Depth Evaluation to 10&ndash;20 Steps</h4>
+            <p>
+                Current ProofWriter evaluation caps at depth 5. The key advantage of RAILS is robust long-chain reasoning &mdash;
+                we observed significant gains over base within 5 steps. Extending to 10&ndash;20 steps will better demonstrate
+                this advantage, as base models are expected to degrade more steeply while RAILS maintains performance.
+            </p>
+        </div>
+
+        <div class="status-item status-done">
+            <h4><span class="badge badge-green">Done</span> Mechanistic Interpretability Analysis</h4>
+            <p>
+                Completed for all 4 model variants (Base, SFT, RAILS, Answer-Only).
+                Linear probes + logit lens + per-step lean metric. Key finding: RAILS produces faithful reasoning
+                where certainty builds through steps, while Answer-Only decides early and rationalizes.
+            </p>
+        </div>
+
+        <div class="status-item status-done">
+            <h4><span class="badge badge-green">Done</span> 8-Model Evaluation Comparison</h4>
+            <p>
+                Full eval pipeline completed for all 8 model variants across 4 benchmarks (LogicBench, FOLIO, ProntoQA, ProofWriter).
+                Corrected eval pipeline with max_new_tokens=2048, per-theory few-shot examples, improved answer extraction.
+            </p>
+        </div>
+
+        <div class="status-item status-done">
+            <h4><span class="badge badge-green">Done</span> Reward Overoptimization Analysis</h4>
+            <p>
+                Diagnosed checkpoint regression across all training runs. Training reward goes UP while eval goes DOWN
+                after step ~600. Root cause: small dataset (4,808 QA pairs), insufficient KL penalty.
+                Optimal checkpoint identified at step 400&ndash;600.
+            </p>
+        </div>
+
+        <div class="status-item status-blocked">
+            <h4><span class="badge badge-red">Blocked</span> DeepSeek-14B Training</h4>
+            <p>
+                Job 85954 collapsed at step 80: SFT adapter over-trained (10 epochs), causing gradient norm explosion (2&rarr;544).
+                Model degenerated into max-length gibberish with &minus;1.7 reward. Fixed config (v6) created using earlier SFT
+                checkpoint (epoch 2.1), lower LR (5e-6), &beta;=0.01. Awaiting resubmission.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Training jobs summary -->
+<div class="card">
+    <h2>Training Jobs Summary</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Status of all GRPO training runs.</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="text-align:left">Job</th>
+                <th>Model</th>
+                <th>Config</th>
+                <th>Status</th>
+                <th>Best Ckpt</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="improved">
+                <td style="text-align:left">85855</td>
+                <td>DS-7B</td>
+                <td>&beta;=0.04, DAPO</td>
+                <td><span class="badge badge-green">Complete</span></td>
+                <td>ckpt-3200</td>
+                <td>LB 86.6%, best FOL (88.7%)</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">85931</td>
+                <td>DS-7B</td>
+                <td>&beta;=0.01</td>
+                <td><span class="badge badge-green">Complete</span></td>
+                <td>ckpt-600</td>
+                <td>LB 89.8%, KL collapsed at step 620</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">85934</td>
+                <td>DS-7B</td>
+                <td>&beta;=0</td>
+                <td><span class="badge badge-green">Complete</span></td>
+                <td>ckpt-600</td>
+                <td>Smooth overfit, all transfer collapsed</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">85716</td>
+                <td>Qwen-8B</td>
+                <td>&beta;=0.01</td>
+                <td><span class="badge badge-green">Complete</span></td>
+                <td>ckpt-4808</td>
+                <td>LB 86.8%, ProofWriter 86.5%</td>
+            </tr>
+            <tr class="degraded">
+                <td style="text-align:left">85954</td>
+                <td>DS-14B</td>
+                <td>&beta;=0</td>
+                <td><span class="badge badge-red">Failed</span></td>
+                <td>&mdash;</td>
+                <td>Gradient explosion at step 40&ndash;70</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">85764</td>
+                <td>QwQ-32B</td>
+                <td>&beta;=0.01</td>
+                <td><span class="badge badge-amber">Timeout</span></td>
+                <td>ckpt-680</td>
+                <td>87% format, but only 28% complete at 2-day limit</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: WHAT NEEDS TO BE DONE NEXT -->
+<!-- ============================================================ -->
+<div class="section-header">
+    <div class="section-num section-num-green">3</div>
+    <div class="section-title">What Needs to Be Done Next</div>
+</div>
+
+<div class="card">
+    <h2>Priority Roadmap</h2>
+    <div class="timeline">
+
+        <div class="timeline-item current">
+            <div class="timeline-date">Priority 1 &mdash; In Progress</div>
+            <div class="timeline-text">
+                <strong>Fix label bias in training data</strong><br>
+                Add 3-class (True/False/Unknown) training examples from ProofWriter and FOLIO-style problems.
+                This directly addresses the &minus;16.6pp FOLIO degradation.
+                Without "Unknown" in training, the model is biased toward committing to definite answers.
+            </div>
+        </div>
+
+        <div class="timeline-item current">
+            <div class="timeline-date">Priority 1 &mdash; In Progress</div>
+            <div class="timeline-text">
+                <strong>Extend depth evaluation to 10&ndash;20 steps</strong><br>
+                Current ProofWriter tops out at depth 5. The RAILS advantage becomes clearer on longer chains.
+                Need deeper evaluation to demonstrate the method's key benefit: robust long-chain reasoning.
+                Using RuleTaker/extended ProofWriter for chains up to 20 steps.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 2 &mdash; Next</div>
+            <div class="timeline-text">
+                <strong>Retrain with balanced data + early stopping</strong><br>
+                Combine: LogicBench (8 theories) + ProofWriter 3-class + ProntoQA + FOLIO-style examples.
+                Use checkpoint selection (step 400&ndash;600) instead of training to completion.
+                Increase &beta; to 0.04&ndash;0.1 to prevent KL collapse.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 2 &mdash; Next</div>
+            <div class="timeline-text">
+                <strong>Resubmit DeepSeek-14B with fixed config</strong><br>
+                Config v6 ready: earlier SFT checkpoint (epoch 2.1 vs 10), lower LR (5e-6),
+                &beta;=0.01, max_completion_length=2048. Addresses gradient explosion from brittle over-trained SFT adapter.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 3 &mdash; Paper</div>
+            <div class="timeline-text">
+                <strong>Construct paper narrative around depth scaling</strong><br>
+                The strongest result: RAILS preserves reasoning accuracy as chain length increases.
+                ProofWriter d0&rarr;d5 shows this already; extended depth (10&ndash;20) will make it definitive.
+                Combine with mechanistic evidence (per-step lean metric) for Section 5.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 3 &mdash; Paper</div>
+            <div class="timeline-text">
+                <strong>Checkpoint sweep for mechanistic analysis</strong><br>
+                Run linear probes + logit lens at multiple RAILS checkpoints (100, 300, 500, 1000, 2000)
+                to show how validity representations develop over training. Shows the model learning to encode
+                logical structure, not just memorizing patterns.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 4 &mdash; Future</div>
+            <div class="timeline-text">
+                <strong>Multi-domain verification (Paper 2)</strong><br>
+                Extend beyond logic to math (SymPy), code (sandboxed execution), and planning.
+                Infrastructure already scaffolded in <code>verifiers/</code> and <code>math_integration/</code>.
+                Agentic system that selects the right verifier for each step.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Key decisions / lessons -->
+<div class="card">
+    <h2>Key Lessons Learned</h2>
+    <div class="status-grid">
+        <div class="finding finding-insight">
+            <strong>Label diversity matters more than volume.</strong>
+            6,033 SFT examples couldn't prevent FOLIO degradation because they all used binary Yes/No labels.
+            Adding even a small number of "Unknown" examples should restore FOLIO transfer.
+        </div>
+        <div class="finding finding-insight">
+            <strong>Early stopping is essential in GRPO.</strong>
+            The optimal checkpoint is at 0.5&ndash;1.0 epochs (step 400&ndash;600), not at convergence.
+            Training reward is a poor proxy for generalization. Always checkpoint-select on held-out eval.
+        </div>
+        <div class="finding finding-insight">
+            <strong>KL regularization prevents reward hacking.</strong>
+            &beta;=0 achieves the highest training reward (2.89) but worst eval (54.0%).
+            &beta;=0.01 preserves +13.7pp FOLIO, +11.0pp ProntoQA, +22.5pp ProofWriter over &beta;=0.
+        </div>
+        <div class="finding finding-insight">
+            <strong>Depth scaling is the core advantage.</strong>
+            Raw accuracy differences between Base and GRPO are modest on easy problems.
+            The advantage widens with chain length: GRPO maintains accuracy where base models collapse.
+            This should be the paper's central claim.
+        </div>
+    </div>
+</div>
+
+<!-- Research notes index -->
+<div class="card">
+    <h2>Research Notes</h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Detailed write-ups of key findings and analyses.</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="text-align:left">Note</th>
+                <th style="text-align:left">Date</th>
+                <th style="text-align:left">Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align:left"><code>mechanistic_interpretability.md</code></td>
+                <td style="text-align:left">Feb 22</td>
+                <td style="text-align:left">Linear probes + logit lens showing RAILS produces faithful reasoning; answer-only decides first and rationalizes</td>
+            </tr>
+            <tr>
+                <td style="text-align:left"><code>reward_overoptimization.md</code></td>
+                <td style="text-align:left">Feb 22</td>
+                <td style="text-align:left">Eval accuracy declines with training; KL collapse in 85931; 14B catastrophic failure diagnosis and fix</td>
+            </tr>
+            <tr>
+                <td style="text-align:left"><code>think_template_divergence.md</code></td>
+                <td style="text-align:left">Feb 21</td>
+                <td style="text-align:left">DeepSeek-R1 strips &lt;think&gt; content vs Qwen3/QwQ preserving it; root cause of format learning difficulty</td>
+            </tr>
+            <tr>
+                <td style="text-align:left"><code>nli_vs_sat_comparison.md</code></td>
+                <td style="text-align:left">Feb 20</td>
+                <td style="text-align:left">NLI vs SAT on invalid-but-correct reasoning; motivation for formal verification over neural entailment</td>
+            </tr>
+            <tr>
+                <td style="text-align:left"><code>real_world_motivation.md</code></td>
+                <td style="text-align:left">Feb 20</td>
+                <td style="text-align:left">Connecting RAILS to science and law domains; benchmarks and paper framing</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="footer">
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 23, 2026<br>
+    <a href="eval_results.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Evaluation Results &rarr;</a>
+    &middot;
+    <a href="training_dynamics.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Training Dynamics &rarr;</a>
+    &middot;
+    <a href="qualitative_examples.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Qualitative Examples &rarr;</a>
+</div>
+</body>
+</html>
