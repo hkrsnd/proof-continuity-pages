@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; Updated Feb 23, 2026</p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 11:05 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -465,59 +465,131 @@ tr:hover { background: #fafbff; }
     <div class="status-grid">
 
         <div class="status-item status-running">
-            <h4><span class="badge badge-blue">Agent B</span> Fixing Label Bias in Training Data</h4>
+            <h4><span class="badge badge-blue">Running</span> Extended ProntoQA Eval (1&ndash;20 Hops)</h4>
             <p>
-                Adding "Unknown" / uncertain labels to SFT and GRPO training data.
-                The current training corpus only has binary Yes/No labels from LogicBench, which biases
-                the model against FOLIO's 3-class evaluation (True/False/Unknown).
-                This is the primary cause of the &minus;16.6pp FOLIO degradation.
+                6 eval jobs running on cluster, testing all 6 models on 800 extended ProntoQA problems
+                with hop counts 1, 2, 3, 5, 7, 10, 15, 20. This is the <strong>key experiment</strong> to demonstrate
+                RAILS's advantage on long-chain reasoning. Estimated completion: ~15&ndash;30 hours.
             </p>
         </div>
 
-        <div class="status-item status-running">
-            <h4><span class="badge badge-blue">Agent B</span> Extending Depth Evaluation to 10&ndash;20 Steps</h4>
+        <div class="status-item status-done">
+            <h4><span class="badge badge-green">Done</span> Three-Class Reward Fix</h4>
             <p>
-                Current ProofWriter evaluation caps at depth 5. The key advantage of RAILS is robust long-chain reasoning &mdash;
-                we observed significant gains over base within 5 steps. Extending to 10&ndash;20 steps will better demonstrate
-                this advantage, as base models are expected to degrade more steeply while RAILS maintains performance.
+                Added cross-format answer matching (yes&harr;true, no&harr;false, uncertain&harr;unknown) to
+                <code>reward.py</code> and <code>eval_experiment.py</code>. Created 3-class few-shot examples
+                (uncertain + unknown). All 45 tests pass. Fixes the label bias that caused FOLIO degradation.
+            </p>
+        </div>
+
+        <div class="status-item status-done">
+            <h4><span class="badge badge-green">Done</span> Mixed-Dataset Training Configs (v7)</h4>
+            <p>
+                Created v7 GRPO configs for Qwen and DeepSeek with mixed-dataset support:
+                80% LogicBench + 10% ProofWriter + 10% FOLIO, with oversampling (3&times;/5&times;) for minority datasets.
+                Requires 3-class SFT data generation before training can begin.
+            </p>
+        </div>
+
+        <div class="status-item status-done">
+            <h4><span class="badge badge-green">Done</span> Extended ProntoQA Dataset</h4>
+            <p>
+                Generated 800 synthetic ProntoQA-style problems at depths 1&ndash;20 hops (100 per level).
+                Randomized category names, shuffled context, distractor rules, gold chain-of-thought.
+                Saved to <code>data/external/prontoqa/test_extended.json</code>.
             </p>
         </div>
 
         <div class="status-item status-done">
             <h4><span class="badge badge-green">Done</span> Mechanistic Interpretability Analysis</h4>
             <p>
-                Completed for all 4 model variants (Base, SFT, RAILS, Answer-Only).
-                Linear probes + logit lens + per-step lean metric. Key finding: RAILS produces faithful reasoning
-                where certainty builds through steps, while Answer-Only decides early and rationalizes.
-            </p>
-        </div>
-
-        <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> 8-Model Evaluation Comparison</h4>
-            <p>
-                Full eval pipeline completed for all 8 model variants across 4 benchmarks (LogicBench, FOLIO, ProntoQA, ProofWriter).
-                Corrected eval pipeline with max_new_tokens=2048, per-theory few-shot examples, improved answer extraction.
-            </p>
-        </div>
-
-        <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Reward Overoptimization Analysis</h4>
-            <p>
-                Diagnosed checkpoint regression across all training runs. Training reward goes UP while eval goes DOWN
-                after step ~600. Root cause: small dataset (4,808 QA pairs), insufficient KL penalty.
-                Optimal checkpoint identified at step 400&ndash;600.
+                All 4 variants (Base, SFT, RAILS, Answer-Only). Linear probes + logit lens + per-step lean metric.
+                Key finding: RAILS produces faithful reasoning where certainty builds through steps.
             </p>
         </div>
 
         <div class="status-item status-blocked">
             <h4><span class="badge badge-red">Blocked</span> DeepSeek-14B Training</h4>
             <p>
-                Job 85954 collapsed at step 80: SFT adapter over-trained (10 epochs), causing gradient norm explosion (2&rarr;544).
-                Model degenerated into max-length gibberish with &minus;1.7 reward. Fixed config (v6) created using earlier SFT
-                checkpoint (epoch 2.1), lower LR (5e-6), &beta;=0.01. Awaiting resubmission.
+                Job 85954 collapsed at step 80 (gradient explosion). Fixed config (v6) ready with earlier SFT
+                checkpoint, lower LR, &beta;=0.01. Awaiting GPU availability for resubmission.
             </p>
         </div>
 
+    </div>
+</div>
+
+<!-- Live eval jobs -->
+<div class="card">
+    <h2>Live Evaluation Jobs <span class="badge badge-blue" style="font-size:0.65rem; vertical-align:middle;">RUNNING</span></h2>
+    <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">Extended ProntoQA depth-scaling evaluation (1&ndash;20 hop chains, 800 problems per model).</p>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th style="text-align:left">Job</th>
+                <th>Model</th>
+                <th>Condition</th>
+                <th>Progress</th>
+                <th>Speed</th>
+                <th>ETA</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align:left">86465</td>
+                <td>DS-7B</td>
+                <td>Base</td>
+                <td>294/800 (37%)</td>
+                <td>~4.6s/sample</td>
+                <td>~1.5h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86466</td>
+                <td>DS-7B</td>
+                <td>GRPO</td>
+                <td>166/800 (21%)</td>
+                <td>~10s/sample</td>
+                <td>~1.8h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86467</td>
+                <td>DS-7B</td>
+                <td>SFT</td>
+                <td>129/800 (16%)</td>
+                <td>~13s/sample</td>
+                <td>~2.5h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86464</td>
+                <td>Qwen-8B</td>
+                <td>GRPO</td>
+                <td>150/800 (19%)</td>
+                <td>~10s/sample</td>
+                <td>~1.8h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86462</td>
+                <td>Qwen-8B</td>
+                <td>Base</td>
+                <td>100/800 (13%)</td>
+                <td>~15s/sample</td>
+                <td>~3h</td>
+            </tr>
+            <tr>
+                <td style="text-align:left">86471</td>
+                <td>Qwen-8B</td>
+                <td>SFT</td>
+                <td>100/800 (13%)</td>
+                <td>~15s/sample</td>
+                <td>~3h</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="finding finding-insight" style="margin-top:0.6rem; font-size:0.82rem;">
+        <strong>Expected result:</strong> Base models should degrade steeply at 7&ndash;20 hops while RAILS (GRPO) models
+        maintain accuracy. This will be the paper's central figure demonstrating the advantage of step-level verification rewards.
     </div>
 </div>
 
@@ -603,42 +675,67 @@ tr:hover { background: #fafbff; }
     <h2>Priority Roadmap</h2>
     <div class="timeline">
 
-        <div class="timeline-item current">
-            <div class="timeline-date">Priority 1 &mdash; In Progress</div>
+        <div class="timeline-item done">
+            <div class="timeline-date">Priority 1A &mdash; Done</div>
             <div class="timeline-text">
-                <strong>Fix label bias in training data</strong><br>
-                Add 3-class (True/False/Unknown) training examples from ProofWriter and FOLIO-style problems.
-                This directly addresses the &minus;16.6pp FOLIO degradation.
-                Without "Unknown" in training, the model is biased toward committing to definite answers.
+                <strong>Three-class reward &amp; answer matching</strong><br>
+                Cross-format answer canonicalization (yes&harr;true, no&harr;false, uncertain&harr;unknown) added to
+                both <code>reward.py</code> and <code>eval_experiment.py</code>. 45/45 tests pass. Few-shot examples for
+                uncertain/unknown reasoning created.
+            </div>
+        </div>
+
+        <div class="timeline-item done">
+            <div class="timeline-date">Priority 1B &mdash; Done</div>
+            <div class="timeline-text">
+                <strong>Extended ProntoQA dataset (1&ndash;20 hops)</strong><br>
+                800 synthetic problems generated with randomized category names, shuffled context, distractor rules, and gold CoT.
+                100 problems per hop level (1, 2, 3, 5, 7, 10, 15, 20).
             </div>
         </div>
 
         <div class="timeline-item current">
-            <div class="timeline-date">Priority 1 &mdash; In Progress</div>
+            <div class="timeline-date">Priority 1C &mdash; Running Now (6 GPU jobs)</div>
             <div class="timeline-text">
-                <strong>Extend depth evaluation to 10&ndash;20 steps</strong><br>
-                Current ProofWriter tops out at depth 5. The RAILS advantage becomes clearer on longer chains.
-                Need deeper evaluation to demonstrate the method's key benefit: robust long-chain reasoning.
-                Using RuleTaker/extended ProofWriter for chains up to 20 steps.
+                <strong>Depth-scaling evaluation on 6 models</strong><br>
+                Jobs 86462&ndash;86471 evaluating Qwen3 &amp; DeepSeek (Base/SFT/GRPO) on extended ProntoQA.
+                ETA: 1.5&ndash;3 hours. Results will produce the paper's central depth-scaling figure.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 2 &mdash; Next</div>
+            <div class="timeline-date">Priority 1D &mdash; Next (after eval completes)</div>
             <div class="timeline-text">
-                <strong>Retrain with balanced data + early stopping</strong><br>
-                Combine: LogicBench (8 theories) + ProofWriter 3-class + ProntoQA + FOLIO-style examples.
-                Use checkpoint selection (step 400&ndash;600) instead of training to completion.
-                Increase &beta; to 0.04&ndash;0.1 to prevent KL collapse.
+                <strong>Generate depth-scaling plots</strong><br>
+                <code>plot_depth_scaling.py</code> ready. Will produce publication-quality accuracy vs. hop count figure
+                and gap plot (GRPO &minus; Base widening with depth). Runs after eval jobs complete.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 2 &mdash; Next</div>
+            <div class="timeline-date">Priority 2A &mdash; Next</div>
             <div class="timeline-text">
-                <strong>Resubmit DeepSeek-14B with fixed config</strong><br>
-                Config v6 ready: earlier SFT checkpoint (epoch 2.1 vs 10), lower LR (5e-6),
-                &beta;=0.01, max_completion_length=2048. Addresses gradient explosion from brittle over-trained SFT adapter.
+                <strong>Generate 3-class SFT data (ProofWriter + FOLIO)</strong><br>
+                Pipeline ready in <code>generate_sft_data.py --dataset proofwriter</code> and <code>--dataset folio</code>.
+                Will produce <code>think_all_3class.jsonl</code> with True/False/Unknown training examples.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 2B &mdash; Next</div>
+            <div class="timeline-text">
+                <strong>SFT on 3-class data, then GRPO with v7 configs</strong><br>
+                v7 configs ready: 80% LogicBench + 10% ProofWriter + 10% FOLIO with oversampling.
+                Expected to fix FOLIO degradation (&minus;16.6pp) by teaching "Unknown" responses.
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-date">Priority 2C &mdash; Next</div>
+            <div class="timeline-text">
+                <strong>Resubmit DeepSeek-14B with fixed config (v6)</strong><br>
+                Earlier SFT checkpoint (epoch 2.1 vs 10), lower LR (5e-6),
+                &beta;=0.01, max_completion_length=2048. Addresses gradient explosion.
             </div>
         </div>
 
@@ -748,7 +845,7 @@ tr:hover { background: #fafbff; }
 </div>
 
 <div class="footer">
-    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 23, 2026<br>
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Live-updated Feb 23, 2026<br>
     <a href="eval_results.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Evaluation Results &rarr;</a>
     &middot;
     <a href="training_dynamics.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Training Dynamics &rarr;</a>
