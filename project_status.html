@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 24, 2026 00:30 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Two-stage publication strategy active</strong> &middot; Last refresh: <span id="last-update">Feb 24, 2026 15:55 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -147,6 +147,7 @@ tr:hover { background: #fafbff; }
         Full evaluation pipeline (Base &rarr; SFT &rarr; GRPO) completed for Qwen3-8B and DeepSeek-R1-7B.
         Main finding: GRPO significantly improves in-distribution reasoning (LogicBench, ProofWriter depth scaling)
         but degrades out-of-distribution transfer (FOLIO). Root cause identified: <strong>label bias</strong> in training data.
+        Current publication strategy is now <strong>two-stage</strong>: Stage 1 rapid logic-focused preprint, Stage 2 scaled generalized reasoning model paper.
     </p>
 </div>
 
@@ -465,66 +466,59 @@ tr:hover { background: #fafbff; }
     <div class="status-grid">
 
         <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Extended ProntoQA Eval (1&ndash;20 Hops, 2048 tokens)</h4>
+            <h4><span class="badge badge-green">Done</span> Two-Stage Strategy Defined</h4>
             <p>
-                All 6 models evaluated on 800 extended ProntoQA problems (hops 1&ndash;20).
-                GRPO excels at 1&ndash;10 hops, but collapses at 15&ndash;20 hops.
-                <strong>Token budget diagnosis:</strong> collapse partly caused by max_new_tokens=2048 truncating
-                GRPO's verbose formal reasoning before the answer is generated.
+                Project direction is now explicitly split into: <strong>Stage 1</strong> rapid logic-focused preprint
+                and <strong>Stage 2</strong> scaled proof-of-concept toward a generalized reasoning model.
+                This strategy is now the anchor for planning, execution, and writing.
             </p>
         </div>
 
         <div class="status-item status-running">
-            <h4><span class="badge badge-blue">Running</span> Re-Run: Extended ProntoQA with 4096 Tokens</h4>
+            <h4><span class="badge badge-blue">Running</span> Stage 1 Preprint Drafting (Logic-Focused)</h4>
             <p>
-                4 models re-running with doubled token budget. <strong>DS Base (86528) completed but BROKEN: 5.8% accuracy.</strong>
-                With 4096 tokens, the base model generates endless reasoning without concluding — <code>extract_answer</code>
-                can't find a "Yes"/"No" in the last 20 words, defaulting to "unknown."
-                <strong>Base models need shorter token budgets; only GRPO re-runs (86525, 86527) are meaningful.</strong>
-                Qwen GRPO (86525): 78%, DS GRPO (86527): 75%, Qwen Base (86524): 81%.
+                Writing has started for a fast preprint centered on LogicBench + natural language reasoning.
+                The goal is a concise paper with current logic-centric results and clear training methodology insights.
             </p>
         </div>
 
-        <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Three-Class Reward Fix</h4>
+        <div class="status-item status-running">
+            <h4><span class="badge badge-blue">Running</span> Logic Benchmark Consolidation</h4>
             <p>
-                Added cross-format answer matching (yes&harr;true, no&harr;false, uncertain&harr;unknown) to
-                <code>reward.py</code> and <code>eval_experiment.py</code>. Created 3-class few-shot examples
-                (uncertain + unknown). All 45 tests pass. Fixes the label bias that caused FOLIO degradation.
+                Benchmarking is being consolidated around reproducible logic-first evaluation:
+                stable scripts, fixed reporting tables, and a consistent comparison protocol for Base/SFT/GRPO.
             </p>
         </div>
 
-        <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Mixed-Dataset Training Configs (v7)</h4>
+        <div class="status-item status-running">
+            <h4><span class="badge badge-blue">Running</span> Training Pipeline Hardening (Stage 1)</h4>
             <p>
-                Created v7 GRPO configs for Qwen and DeepSeek with mixed-dataset support:
-                80% LogicBench + 10% ProofWriter + 10% FOLIO, with oversampling (3&times;/5&times;) for minority datasets.
-                Requires 3-class SFT data generation before training can begin.
+                Pipeline work is focused on robust logic training and analysis quality:
+                reward behavior, label-format consistency, and repeatable training configs for paper-ready results.
             </p>
         </div>
 
-        <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Extended ProntoQA Dataset</h4>
+        <div class="status-item status-planned">
+            <h4><span class="badge badge-amber">Planned</span> SOFI-Oriented Result Packaging</h4>
             <p>
-                Generated 800 synthetic ProntoQA-style problems at depths 1&ndash;20 hops (100 per level).
-                Randomized category names, shuffled context, distractor rules, gold chain-of-thought.
-                Saved to <code>data/external/prontoqa/test_extended.json</code>.
+                Stage 1 outputs will be packaged as reusable artifacts for adjacent efforts (including SOFI):
+                benchmark tables, ablations, and clear methodology notes.
             </p>
         </div>
 
-        <div class="status-item status-done">
-            <h4><span class="badge badge-green">Done</span> Mechanistic Interpretability Analysis</h4>
+        <div class="status-item status-planned">
+            <h4><span class="badge badge-amber">Planned</span> Stage 2 Scaling Blueprint</h4>
             <p>
-                All 4 variants (Base, SFT, RAILS, Answer-Only). Linear probes + logit lens + per-step lean metric.
-                Key finding: RAILS produces faithful reasoning where certainty builds through steps.
+                In parallel (or immediately after Stage 1), define the scale-up plan:
+                larger training data, larger training runs, and broader verification across logic/math/code/science.
             </p>
         </div>
 
-        <div class="status-item status-blocked">
-            <h4><span class="badge badge-red">Blocked</span> DeepSeek-14B Training</h4>
+        <div class="status-item status-planned">
+            <h4><span class="badge badge-amber">Planned</span> Stage 2 Core Model Demonstration</h4>
             <p>
-                Job 85954 collapsed at step 80 (gradient explosion). Fixed config (v6) ready with earlier SFT
-                checkpoint, lower LR, &beta;=0.01. Awaiting GPU availability for resubmission.
+                The second paper will present the main project contribution: a scaled reasoning model and
+                empirical scaling results toward generalized reasoning capability.
             </p>
         </div>
 
@@ -843,100 +837,60 @@ tr:hover { background: #fafbff; }
 </div>
 
 <div class="card">
-    <h2>Priority Roadmap</h2>
+    <h2>Two-Stage Roadmap</h2>
     <div class="timeline">
 
-        <div class="timeline-item done">
-            <div class="timeline-date">Priority 1A &mdash; Done</div>
-            <div class="timeline-text">
-                <strong>Three-class reward &amp; answer matching</strong><br>
-                Cross-format answer canonicalization (yes&harr;true, no&harr;false, uncertain&harr;unknown) added to
-                both <code>reward.py</code> and <code>eval_experiment.py</code>. 45/45 tests pass. Few-shot examples for
-                uncertain/unknown reasoning created.
-            </div>
-        </div>
-
-        <div class="timeline-item done">
-            <div class="timeline-date">Priority 1B &mdash; Done</div>
-            <div class="timeline-text">
-                <strong>Extended ProntoQA dataset (1&ndash;20 hops)</strong><br>
-                800 synthetic problems generated with randomized category names, shuffled context, distractor rules, and gold CoT.
-                100 problems per hop level (1, 2, 3, 5, 7, 10, 15, 20).
-            </div>
-        </div>
-
         <div class="timeline-item current">
-            <div class="timeline-date">Priority 1C &mdash; Running Now (6 GPU jobs)</div>
+            <div class="timeline-date">Stage 1 &mdash; Immediate (Preprint)</div>
             <div class="timeline-text">
-                <strong>Depth-scaling evaluation on 6 models</strong><br>
-                Jobs 86462&ndash;86471 evaluating Qwen3 &amp; DeepSeek (Base/SFT/GRPO) on extended ProntoQA.
-                ETA: 1.5&ndash;3 hours. Results will produce the paper's central depth-scaling figure.
+                <strong>Logic-first write-up with current results</strong><br>
+                Produce a fast preprint focused on LogicBench + natural language reasoning, using already available
+                benchmark outputs as the first paper's core empirical base.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 1D &mdash; Next (after eval completes)</div>
+            <div class="timeline-date">Stage 1 &mdash; Pipeline</div>
             <div class="timeline-text">
-                <strong>Generate depth-scaling plots</strong><br>
-                <code>plot_depth_scaling.py</code> ready. Will produce publication-quality accuracy vs. hop count figure
-                and gap plot (GRPO &minus; Base widening with depth). Runs after eval jobs complete.
+                <strong>Consolidate training pipeline and logic benchmarking</strong><br>
+                Standardize configs, data flow, and evaluation scripts so the first paper reports reproducible, stable,
+                logic-centric findings rather than one-off experiment artifacts.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 2A &mdash; Next</div>
+            <div class="timeline-date">Stage 1 &mdash; Paper Scope</div>
             <div class="timeline-text">
-                <strong>Generate 3-class SFT data (ProofWriter + FOLIO)</strong><br>
-                Pipeline ready in <code>generate_sft_data.py --dataset proofwriter</code> and <code>--dataset folio</code>.
-                Will produce <code>think_all_3class.jsonl</code> with True/False/Unknown training examples.
+                <strong>Paper 1: methodology + logic/NL intersection</strong><br>
+                Emphasize how the model is trained, what worked, what failed, and why.
+                This paper should also provide reusable insights for related projects such as SOFI.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 2B &mdash; Next</div>
+            <div class="timeline-date">Stage 2 &mdash; Parallel or Next</div>
             <div class="timeline-text">
-                <strong>SFT on 3-class data, then GRPO with v7 configs</strong><br>
-                v7 configs ready: 80% LogicBench + 10% ProofWriter + 10% FOLIO with oversampling.
-                Expected to fix FOLIO degradation (&minus;16.6pp) by teaching "Unknown" responses.
+                <strong>Scale-up plan for generalized reasoning</strong><br>
+                Expand training data and training scale substantially (including multi-domain verification)
+                to test whether we can move from logic-focused gains to broader reasoning generalization.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 2C &mdash; Next</div>
+            <div class="timeline-date">Stage 2 &mdash; Core Deliverable</div>
             <div class="timeline-text">
-                <strong>Resubmit DeepSeek-14B with fixed config (v6)</strong><br>
-                Earlier SFT checkpoint (epoch 2.1 vs 10), lower LR (5e-6),
-                &beta;=0.01, max_completion_length=2048. Addresses gradient explosion.
+                <strong>Paper 2: scaled reasoning model demonstration</strong><br>
+                Present the main project contribution: a significantly scaled reasoning model with robust results
+                and a clear empirical scaling story.
             </div>
         </div>
 
         <div class="timeline-item">
-            <div class="timeline-date">Priority 3 &mdash; Paper</div>
+            <div class="timeline-date">Submission Strategy</div>
             <div class="timeline-text">
-                <strong>Construct paper narrative around depth scaling</strong><br>
-                The strongest result: RAILS preserves reasoning accuracy as chain length increases.
-                ProofWriter d0&rarr;d5 shows this already; extended depth (10&ndash;20) will make it definitive.
-                Combine with mechanistic evidence (per-step lean metric) for Section 5.
-            </div>
-        </div>
-
-        <div class="timeline-item">
-            <div class="timeline-date">Priority 3 &mdash; Paper</div>
-            <div class="timeline-text">
-                <strong>Checkpoint sweep for mechanistic analysis</strong><br>
-                Run linear probes + logit lens at multiple RAILS checkpoints (100, 300, 500, 1000, 2000)
-                to show how validity representations develop over training. Shows the model learning to encode
-                logical structure, not just memorizing patterns.
-            </div>
-        </div>
-
-        <div class="timeline-item">
-            <div class="timeline-date">Priority 4 &mdash; Future</div>
-            <div class="timeline-text">
-                <strong>Multi-domain verification (Paper 2)</strong><br>
-                Extend beyond logic to math (SymPy), code (sandboxed execution), and planning.
-                Infrastructure already scaffolded in <code>verifiers/</code> and <code>math_integration/</code>.
-                Agentic system that selects the right verifier for each step.
+                <strong>Venue selection after Stage 1 stabilization</strong><br>
+                Keep top-tier submission as the target, but finalize venue/timeline only after Stage 1 draft quality
+                and Stage 2 early scaling evidence are both in place.
             </div>
         </div>
 
@@ -986,6 +940,11 @@ tr:hover { background: #fafbff; }
         </thead>
         <tbody>
             <tr>
+                <td style="text-align:left"><code>two_stage_paper_strategy.md</code></td>
+                <td style="text-align:left">Feb 24</td>
+                <td style="text-align:left">Updated project strategy: Stage 1 fast logic-focused preprint, Stage 2 scaled proof-of-concept for generalized reasoning</td>
+            </tr>
+            <tr>
                 <td style="text-align:left"><code>mechanistic_interpretability.md</code></td>
                 <td style="text-align:left">Feb 22</td>
                 <td style="text-align:left">Linear probes + logit lens showing RAILS produces faithful reasoning; answer-only decides first and rationalizes</td>
@@ -1016,7 +975,7 @@ tr:hover { background: #fafbff; }
 </div>
 
 <div class="footer">
-    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Live-updated Feb 23, 2026<br>
+    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Live-updated Feb 24, 2026<br>
     <a href="eval_results.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Evaluation Results &rarr;</a>
     &middot;
     <a href="training_dynamics.html" style="color:#2563eb; text-decoration:none; font-weight:500;">Training Dynamics &rarr;</a>
