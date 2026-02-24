@@ -187,8 +187,8 @@
 <a class="back-link" href="index.html">&larr; Back to Hub</a>
 <h1>Compositional LogicBench Training Examples</h1>
 <p class="subtitle">
-Stage 1 logic-focused synthetic training set viewer. Examples below come from the
-new compositional generator and deterministic SFT conversion pipeline.
+Stage 1 logic-focused synthetic training set viewer (v2). Examples below use
+multi-entity contexts and predicate-level logical forms to keep language and logic aligned.
 </p>
 
 <div class="card">
@@ -272,6 +272,22 @@ new compositional generator and deterministic SFT conversion pipeline.
                 <div class="detail-text" id="d-question"></div>
             </div>
             <div class="detail-block">
+                <div class="detail-label">Query</div>
+                <div class="detail-text" id="d-query"></div>
+            </div>
+            <div class="detail-block">
+                <div class="detail-label">Entities</div>
+                <div class="detail-text" id="d-entities"></div>
+            </div>
+            <div class="detail-block">
+                <div class="detail-label">Facts (Ground Literals)</div>
+                <div class="detail-text completion" id="d-facts"></div>
+            </div>
+            <div class="detail-block">
+                <div class="detail-label">Rules (Universal Templates)</div>
+                <div class="detail-text completion" id="d-rules"></div>
+            </div>
+            <div class="detail-block">
                 <div class="detail-label">Completion (&lt;think&gt; + &lt;step&gt;)</div>
                 <div class="detail-text completion" id="d-completion"></div>
             </div>
@@ -284,7 +300,7 @@ new compositional generator and deterministic SFT conversion pipeline.
 </div>
 
 <script>
-const DATA_PATH = "logicbench_compositional_examples_data.json?v=20260224-203900";
+const DATA_PATH = "logicbench_compositional_examples_data.json?v=20260224-221500";
 const state = {
     data: null,
     filtered: [],
@@ -385,10 +401,20 @@ function renderDetail() {
     empty.style.display = "none";
     panel.style.display = "block";
     document.getElementById("d-title").textContent = rec.id;
+    const entities = Array.isArray(rec.entities) ? rec.entities.join(", ") : "";
+    const facts = Array.isArray(rec.facts) ? rec.facts : [];
+    const rules = Array.isArray(rec.rules) ? rec.rules : [];
     document.getElementById("d-meta").textContent =
-        `Label=${rec.expected_answer} | Profile=${rec.profile} | Split=${rec.split} | Steps=${rec.num_steps ?? "n/a"} | Theory=${rec.theory || "n/a"}`;
+        `Label=${rec.expected_answer} | Profile=${rec.profile} | Split=${rec.split} | Steps=${rec.num_steps ?? "n/a"} | Theory=${rec.theory || "n/a"} | Version=${rec.version || "n/a"}`;
     document.getElementById("d-context").textContent = rec.context || "";
     document.getElementById("d-question").textContent = rec.question || "";
+    document.getElementById("d-query").textContent = `${rec.query_text || ""} [${rec.query_literal || ""}]`;
+    document.getElementById("d-entities").textContent = entities;
+    document.getElementById("d-facts").textContent = facts.join("\n");
+    document.getElementById("d-rules").textContent = rules.map((r) => {
+        const body = Array.isArray(r.body) ? r.body.join(", ") : "";
+        return `${r.head} :- ${body}`;
+    }).join("\n");
     document.getElementById("d-completion").textContent = rec.completion || "";
 }
 
@@ -413,4 +439,3 @@ boot();
 </script>
 </body>
 </html>
-
