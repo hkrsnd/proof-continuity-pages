@@ -227,6 +227,69 @@ tr:hover { background: #fafbff; }
 .verify-card h4 { font-size: 0.85rem; color: #16213e; margin-bottom: 0.2rem; }
 .verify-card p { font-size: 0.78rem; color: #666; }
 
+/* Explorer */
+.explorer-controls {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.7rem; margin: 0.8rem 0 0.6rem;
+}
+.control label {
+    display: block; font-size: 0.72rem; color: #64748b; margin-bottom: 0.25rem;
+    text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;
+}
+.control input, .control select {
+    width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 0.45rem 0.55rem;
+    font-size: 0.82rem; background: white; color: #1a1a2e;
+}
+.explorer-meta { font-size: 0.8rem; color: #64748b; margin-bottom: 0.7rem; }
+.explorer-layout {
+    display: grid; grid-template-columns: 320px 1fr; gap: 0.8rem;
+}
+.example-list {
+    border: 1px solid #e5e7eb; border-radius: 10px; background: #fbfdff;
+    max-height: 680px; overflow-y: auto;
+}
+.example-row {
+    padding: 0.6rem 0.7rem; border-bottom: 1px solid #eef2f7; cursor: pointer;
+}
+.example-row:hover { background: #f1f5ff; }
+.example-row.active { background: #e9f0ff; border-left: 3px solid #2563eb; }
+.example-row:last-child { border-bottom: 0; }
+.row-id { font-size: 0.77rem; font-family: monospace; color: #334155; margin-bottom: 0.15rem; }
+.row-meta { font-size: 0.74rem; color: #64748b; display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.row-chip {
+    display: inline-block; padding: 0.1rem 0.35rem; border-radius: 10px; font-size: 0.68rem;
+    font-weight: 600;
+}
+.chip-dataset { background: #e0e7ff; color: #3730a3; }
+.chip-steps { background: #dcfce7; color: #166534; }
+.chip-verify { background: #fef3c7; color: #92400e; }
+.example-detail {
+    border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff;
+    padding: 0.9rem; max-height: 680px; overflow-y: auto;
+}
+.detail-title { font-size: 0.92rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+.detail-meta { font-size: 0.76rem; color: #64748b; margin-bottom: 0.65rem; }
+.detail-prompt {
+    background: #f8fafc; border-left: 3px solid #94a3b8; padding: 0.6rem 0.7rem;
+    border-radius: 0 6px 6px 0; font-size: 0.8rem; color: #374151; margin-bottom: 0.7rem;
+    white-space: pre-wrap;
+}
+.proof-step {
+    border-radius: 8px; padding: 0.55rem 0.7rem; margin-bottom: 0.45rem;
+}
+.proof-step.premise { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.proof-step.derived { background: #f0fdf4; border-left: 4px solid #22c55e; }
+.proof-head { font-size: 0.77rem; color: #374151; font-weight: 700; margin-bottom: 0.2rem; }
+.proof-text { font-size: 0.8rem; color: #475569; margin-bottom: 0.25rem; }
+.proof-logic {
+    background: rgba(0, 0, 0, 0.05); border-radius: 5px; padding: 0.35rem 0.45rem;
+    font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.76rem; color: #6d28d9;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.no-results {
+    padding: 0.75rem; color: #64748b; font-size: 0.82rem;
+}
+
 /* Timeline */
 .timeline { position: relative; padding-left: 2rem; margin: 1rem 0; }
 .timeline::before {
@@ -256,6 +319,10 @@ tr:hover { background: #fafbff; }
     body { padding: 1rem; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .donut-container { flex-direction: column; }
+}
+@media (max-width: 920px) {
+    .explorer-layout { grid-template-columns: 1fr; }
+    .example-list, .example-detail { max-height: 460px; }
 }
 </style>
 </head>
@@ -289,7 +356,7 @@ tr:hover { background: #fafbff; }
 </div>
 
 <!-- ===== CONTEXT ===== -->
-<div class="section">
+<div class="section" id="trace-explorer">
     <div class="section-header">
         <div class="section-num sn-slate">?</div>
         <div class="section-title-text">Why Proof Bank?</div>
@@ -308,6 +375,47 @@ tr:hover { background: #fafbff; }
             <div class="stat-card green"><div class="stat-val" style="font-size: 1.1rem;">111K</div><div class="stat-lbl">Proof Bank v5</div></div>
         </div>
         <p style="margin-top: 0.8rem;"><strong>Strategy</strong>: Convert existing open-source reasoning traces (OpenR1-Math, SYNTHETIC-1) to our <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format rather than generating from scratch &mdash; much faster and cheaper.</p>
+    </div>
+</div>
+
+<!-- ===== INTERACTIVE EXPLORER ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-num sn-indigo">E</div>
+        <div class="section-title-text">Generated Trace Explorer</div>
+    </div>
+    <div class="card">
+        <p>Inspect verified traces from different base datasets and review each proof tree step-by-step.</p>
+
+        <div class="explorer-controls">
+            <div class="control">
+                <label for="dataset-filter">Dataset</label>
+                <select id="dataset-filter">
+                    <option value="all">All datasets</option>
+                </select>
+            </div>
+            <div class="control">
+                <label for="search-filter">Search</label>
+                <input id="search-filter" type="text" placeholder="id, theory, logic text..." />
+            </div>
+            <div class="control">
+                <label for="min-steps">Min Steps</label>
+                <input id="min-steps" type="number" min="0" value="0" />
+            </div>
+            <div class="control">
+                <label for="limit-records">Max Results</label>
+                <input id="limit-records" type="number" min="1" max="500" value="120" />
+            </div>
+        </div>
+
+        <div class="explorer-meta" id="explorer-meta">Loading explorer data...</div>
+
+        <div class="explorer-layout">
+            <div class="example-list" id="example-list"></div>
+            <div class="example-detail" id="example-detail">
+                <div class="no-results">Select an example to inspect its proof tree.</div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1080,7 +1188,166 @@ train_on_responses_only: <span class="attr">true</span>
     RAILS &middot; Proof Bank Plan &middot; Last updated: <span id="last-updated"></span>
     <br>Source: <a href="https://github.com/hs40vahe/ProofContinuity">ProofContinuity</a>
 </div>
-<script>document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});</script>
+<script>
+document.getElementById("last-updated").textContent = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+});
+
+const EXPLORER_DATA_PATH = "proof_tree_explorer_data.json";
+const explorerState = {
+    data: null,
+    filtered: [],
+    activeId: null,
+};
+
+function esc(text) {
+    return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function getFilterValues() {
+    return {
+        dataset: document.getElementById("dataset-filter").value,
+        query: document.getElementById("search-filter").value.trim().toLowerCase(),
+        minSteps: Math.max(0, Number(document.getElementById("min-steps").value) || 0),
+        limit: Math.max(1, Number(document.getElementById("limit-records").value) || 120),
+    };
+}
+
+function hydrateDatasetSelect() {
+    const select = document.getElementById("dataset-filter");
+    const options = explorerState.data.datasets
+        .map((d) => `<option value="${esc(d.key)}">${esc(d.label)} (${d.count})</option>`)
+        .join("");
+    select.insertAdjacentHTML("beforeend", options);
+}
+
+function applyFilters() {
+    if (!explorerState.data) return;
+    const f = getFilterValues();
+    const records = explorerState.data.records.filter((r) => {
+        if (f.dataset !== "all" && r.dataset !== f.dataset) return false;
+        if ((r.num_steps || 0) < f.minSteps) return false;
+        if (!f.query) return true;
+        const haystack = [
+            r.id,
+            r.dataset,
+            r.theory,
+            r.context,
+            r.question,
+            r.expected_answer,
+            (r.steps || []).map((s) => `${s.text} ${s.logic}`).join(" "),
+        ].join(" ").toLowerCase();
+        return haystack.includes(f.query);
+    });
+
+    explorerState.filtered = records.slice(0, f.limit);
+    if (!explorerState.filtered.some((x) => x.id === explorerState.activeId)) {
+        explorerState.activeId = explorerState.filtered.length ? explorerState.filtered[0].id : null;
+    }
+    renderList();
+    renderDetail();
+    renderMeta(records.length, explorerState.filtered.length);
+}
+
+function renderMeta(totalMatches, shown) {
+    const total = explorerState.data.records.length;
+    document.getElementById("explorer-meta").textContent =
+        `Loaded ${total} traces across ${explorerState.data.datasets.length} datasets. ` +
+        `Showing ${shown} / ${totalMatches} matches.`;
+}
+
+function renderList() {
+    const root = document.getElementById("example-list");
+    if (!explorerState.filtered.length) {
+        root.innerHTML = '<div class="no-results">No traces match current filters.</div>';
+        return;
+    }
+    root.innerHTML = explorerState.filtered
+        .map((r) => {
+            const active = r.id === explorerState.activeId ? " active" : "";
+            const v = r.validation || {};
+            return `
+                <div class="example-row${active}" data-id="${esc(r.id)}">
+                    <div class="row-id">${esc(r.id)}</div>
+                    <div class="row-meta">
+                        <span class="row-chip chip-dataset">${esc(r.dataset)}</span>
+                        <span class="row-chip chip-steps">${esc(r.num_steps)} steps</span>
+                        <span class="row-chip chip-verify">${esc(v.verification_method || "n/a")}</span>
+                    </div>
+                </div>
+            `;
+        })
+        .join("");
+    root.querySelectorAll(".example-row").forEach((el) => {
+        el.addEventListener("click", () => {
+            explorerState.activeId = el.getAttribute("data-id");
+            renderList();
+            renderDetail();
+        });
+    });
+}
+
+function renderDetail() {
+    const root = document.getElementById("example-detail");
+    const rec = explorerState.filtered.find((r) => r.id === explorerState.activeId);
+    if (!rec) {
+        root.innerHTML = '<div class="no-results">Select an example to inspect its proof tree.</div>';
+        return;
+    }
+    const v = rec.validation || {};
+    const stepsHtml = (rec.steps || []).length
+        ? rec.steps.map((s) => `
+            <div class="proof-step ${esc(s.type || "derived")}">
+                <div class="proof-head">Step ${esc(s.n || "?")} &middot; ${esc(s.type || "derived")}${s.from ? ` &middot; from: ${esc(s.from)}` : ""}</div>
+                <div class="proof-text">${esc(s.text || "(no text)")}</div>
+                <div class="proof-logic">${esc(s.logic || "(no logic)")}</div>
+            </div>
+        `).join("")
+        : '<div class="no-results">No parsed <step> tags found in this completion.</div>';
+
+    root.innerHTML = `
+        <div class="detail-title">${esc(rec.id)}</div>
+        <div class="detail-meta">
+            Dataset: ${esc(rec.dataset)} &middot;
+            Theory: ${esc(rec.theory)} &middot;
+            Expected: ${esc(rec.expected_answer)} &middot;
+            Steps: ${esc(rec.num_steps)} &middot;
+            Verify: ${esc(v.verification_method || "n/a")} &middot;
+            Score: ${esc(v.code_score ?? v.consistency_score ?? "n/a")}
+        </div>
+        <div class="detail-prompt"><strong>Context</strong>\n${esc(rec.context || "")}</div>
+        <div class="detail-prompt"><strong>Question</strong>\n${esc(rec.question || "")}</div>
+        <div style="font-size:0.82rem; color:#475569; font-weight:600; margin-bottom:0.45rem;">Proof Tree</div>
+        ${stepsHtml}
+    `;
+}
+
+async function initExplorer() {
+    try {
+        const res = await fetch(EXPLORER_DATA_PATH);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        explorerState.data = await res.json();
+        hydrateDatasetSelect();
+        ["dataset-filter", "search-filter", "min-steps", "limit-records"].forEach((id) => {
+            document.getElementById(id).addEventListener("input", applyFilters);
+            document.getElementById(id).addEventListener("change", applyFilters);
+        });
+        applyFilters();
+    } catch (err) {
+        document.getElementById("explorer-meta").textContent =
+            `Failed to load explorer data (${err.message}).`;
+        document.getElementById("example-list").innerHTML =
+            '<div class="no-results">Could not load proof_tree_explorer_data.json</div>';
+    }
+}
+
+initExplorer();
+</script>
 
 </body>
 </html>
