@@ -330,26 +330,28 @@ tr:hover { background: #fafbff; }
 
 <p class="breadcrumb"><a href="index.html">RAILS Hub</a> / Proof Bank</p>
 <h1>Proof Bank</h1>
-<p class="subtitle">Verified SFT reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format &middot; currently tracking the first 5% pilot batch for newly introduced math and coding datasets</p>
+<p class="subtitle">Verified SFT reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format &middot; currently tracking the first 5% pilot batch across logic, math, and coding datasets</p>
 
 <!-- ===== PROGRESS OVERVIEW ===== -->
 <div class="progress-overview">
     <h2>Pilot Progress</h2>
     <div class="stats-grid">
         <div class="stat-card green"><div class="stat-val" id="pb-stat-total">-</div><div class="stat-lbl">Verified Traces (Pilot)</div></div>
-        <div class="stat-card"><div class="stat-val">1,000</div><div class="stat-lbl">Pilot Milestone (5%)</div></div>
+        <div class="stat-card"><div class="stat-val">5,000</div><div class="stat-lbl">Pilot Milestone (5%)</div></div>
         <div class="stat-card green"><div class="stat-val" id="pb-stat-progress">-</div><div class="stat-lbl">Milestone Coverage</div></div>
         <div class="stat-card"><div class="stat-val" id="pb-stat-datasets">-</div><div class="stat-lbl">Base Datasets</div></div>
         <div class="stat-card"><div class="stat-val" id="pb-stat-domains">-</div><div class="stat-lbl">Active Domains</div></div>
         <div class="stat-card"><div class="stat-val" id="pb-stat-avg-steps">-</div><div class="stat-lbl">Avg Steps / Trace</div></div>
     </div>
     <div class="progress-bar-container">
-        <div class="progress-segment seg-done" id="pb-seg-math" style="width: 50%;" title="Math datasets in pilot">Math</div>
-        <div class="progress-segment seg-done" id="pb-seg-code" style="width: 50%; background: #d97706;" title="Code datasets in pilot">Code</div>
+        <div class="progress-segment seg-done" id="pb-seg-logic" style="width: 34%; background: #7c3aed;" title="Logic datasets in pilot">Logic</div>
+        <div class="progress-segment seg-done" id="pb-seg-math" style="width: 33%; background: #2563eb;" title="Math datasets in pilot">Math</div>
+        <div class="progress-segment seg-done" id="pb-seg-code" style="width: 33%; background: #d97706;" title="Code datasets in pilot">Code</div>
     </div>
     <div class="progress-legend">
-        <span class="legend-item"><span class="legend-dot done"></span> <span id="pb-legend-math">Math: -</span></span>
-        <span class="legend-item"><span class="legend-dot active"></span> <span id="pb-legend-code">Code: -</span></span>
+        <span class="legend-item"><span class="legend-dot done"></span> <span id="pb-legend-logic">Logic: -</span></span>
+        <span class="legend-item"><span class="legend-dot active"></span> <span id="pb-legend-math">Math: -</span></span>
+        <span class="legend-item"><span class="legend-dot done" style="background:#d97706;"></span> <span id="pb-legend-code">Code: -</span></span>
         <span class="legend-item"><span class="legend-dot todo"></span> Explorer payload: <span id="pb-generated-at">-</span></span>
     </div>
 </div>
@@ -361,7 +363,7 @@ tr:hover { background: #fafbff; }
         <div class="section-title-text">Current Setup</div>
     </div>
     <div class="card">
-        <p>The active Proof Bank setup is a <strong>verified pilot batch</strong> for multi-dataset SFT. Instead of the old 100K expansion plan, this page now tracks generated traces from newly introduced <strong>math</strong> and <strong>coding</strong> datasets.</p>
+        <p>The active Proof Bank setup is a <strong>verified pilot batch</strong> for multi-dataset SFT. It includes the core logic benchmarks (<strong>LogicBench, FOLIO, ProofWriter</strong>) and extends to newly introduced <strong>math</strong> and <strong>coding</strong> datasets.</p>
         <ul style="font-size: 0.85rem; color: #555; padding-left: 1.2rem; margin: 0.5rem 0;">
             <li>Goal for this phase: validate quality before scaling to the full dataset.</li>
             <li>Every shown example includes parsed <code>&lt;step&gt;</code> proof trees and verification metadata.</li>
@@ -448,6 +450,13 @@ tr:hover { background: #fafbff; }
         <div class="section-title-text">Pilot Domain Split</div>
     </div>
     <div class="domain-grid">
+        <div class="domain-card" style="border-top-color: #7c3aed;">
+            <h3 style="color: #7c3aed;">Logic</h3>
+            <div class="target">Core benchmark domain</div>
+            <div class="current" style="color: #7c3aed;" id="pb-domain-logic-current">Current: -</div>
+            <div class="domain-progress"><div class="domain-progress-fill" id="pb-domain-logic-fill" style="width: 0%; background: #7c3aed;"></div></div>
+            <div class="domain-sources" id="pb-domain-logic-sources">Loading logic dataset breakdown...</div>
+        </div>
         <div class="domain-card" style="border-top-color: #2563eb;">
             <h3 style="color: #2563eb;">Math</h3>
             <div class="target">Active pilot domain</div>
@@ -1133,8 +1142,15 @@ document.getElementById("last-updated").textContent = new Date().toLocaleDateStr
 });
 
 const EXPLORER_DATA_PATH = "proof_tree_explorer_data.json";
-const PILOT_TARGET = 1000;
+const PILOT_TARGET = 5000;
 const DATASET_DOMAIN_MAP = {
+    logicbench_propositional: "logic",
+    logicbench_fol_nsfr: "logic",
+    logicbench_fol_asp: "logic",
+    logicbench_nm_asp: "logic",
+    logicbench_nm_asp_extra: "logic",
+    folio: "logic",
+    proofwriter: "logic",
     gsm8k: "math",
     openr1_math: "math",
     math_hendrycks: "math",
@@ -1225,7 +1241,7 @@ function buildPilotSummary(data) {
     });
 
     datasetRows.sort((a, b) => b.count - a.count);
-    const totalsByDomain = { math: 0, code: 0, other: 0 };
+    const totalsByDomain = { logic: 0, math: 0, code: 0, other: 0 };
     datasetRows.forEach((row) => {
         totalsByDomain[row.domain] = (totalsByDomain[row.domain] || 0) + row.count;
     });
@@ -1247,8 +1263,10 @@ function buildPilotSummary(data) {
 function renderPilotSummary(data) {
     const summary = buildPilotSummary(data);
     const total = summary.total;
+    const logic = summary.totalsByDomain.logic || 0;
     const math = summary.totalsByDomain.math || 0;
     const code = summary.totalsByDomain.code || 0;
+    const logicPct = total ? (100 * logic) / total : 0;
     const mathPct = total ? (100 * math) / total : 0;
     const codePct = total ? (100 * code) / total : 0;
 
@@ -1258,6 +1276,7 @@ function renderPilotSummary(data) {
     setText("pb-stat-domains", String(summary.activeDomains));
     setText("pb-stat-avg-steps", summary.avgSteps.toFixed(1));
     setText("pb-generated-at", formatDateTime(data.generated_at_utc));
+    setText("pb-legend-logic", `Logic: ${formatInt(logic)} (${formatPct(logicPct)})`);
     setText("pb-legend-math", `Math: ${formatInt(math)} (${formatPct(mathPct)})`);
     setText("pb-legend-code", `Code: ${formatInt(code)} (${formatPct(codePct)})`);
 
@@ -1266,6 +1285,11 @@ function renderPilotSummary(data) {
     setText("pb-ctx-max-steps", String(summary.maxSteps));
     setText("pb-ctx-parse", formatPct(summary.parseRate));
 
+    const logicSeg = document.getElementById("pb-seg-logic");
+    if (logicSeg) {
+        logicSeg.style.width = `${logicPct}%`;
+        logicSeg.textContent = `Logic ${formatPct(logicPct)}`;
+    }
     const mathSeg = document.getElementById("pb-seg-math");
     if (mathSeg) {
         mathSeg.style.width = `${mathPct}%`;
@@ -1282,7 +1306,13 @@ function renderPilotSummary(data) {
         const rows = summary.datasetRows
             .map((row) => {
                 const share = total ? (100 * row.count) / total : 0;
-                const rowClass = row.domain === "math" ? "domain-math" : row.domain === "code" ? "domain-code" : "";
+                const rowClass = row.domain === "logic"
+                    ? "domain-logic"
+                    : row.domain === "math"
+                        ? "domain-math"
+                        : row.domain === "code"
+                            ? "domain-code"
+                            : "";
                 return `
                     <tr class="${rowClass}">
                         <td>${esc(row.label)}</td>
@@ -1307,6 +1337,10 @@ function renderPilotSummary(data) {
         `;
     }
 
+    const logicSources = summary.datasetRows
+        .filter((row) => row.domain === "logic" && row.count > 0)
+        .map((row) => `${row.label} (${formatInt(row.count)})`)
+        .join(" + ");
     const mathSources = summary.datasetRows
         .filter((row) => row.domain === "math" && row.count > 0)
         .map((row) => `${row.label} (${formatInt(row.count)})`)
@@ -1316,11 +1350,15 @@ function renderPilotSummary(data) {
         .map((row) => `${row.label} (${formatInt(row.count)})`)
         .join(" + ");
 
+    setText("pb-domain-logic-current", `Current: ${formatInt(logic)} (${formatPct(logicPct)})`);
     setText("pb-domain-math-current", `Current: ${formatInt(math)} (${formatPct(mathPct)})`);
     setText("pb-domain-code-current", `Current: ${formatInt(code)} (${formatPct(codePct)})`);
+    setText("pb-domain-logic-sources", logicSources || "No logic traces loaded");
     setText("pb-domain-math-sources", mathSources || "No math traces loaded");
     setText("pb-domain-code-sources", codeSources || "No code traces loaded");
 
+    const logicFill = document.getElementById("pb-domain-logic-fill");
+    if (logicFill) logicFill.style.width = `${logicPct}%`;
     const mathFill = document.getElementById("pb-domain-math-fill");
     if (mathFill) mathFill.style.width = `${mathPct}%`;
     const codeFill = document.getElementById("pb-domain-code-fill");
