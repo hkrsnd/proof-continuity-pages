@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS - Logic Generalization Strategy</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: #f8f9fa;
+        color: #1a1a2e;
+        line-height: 1.65;
+        padding: 1.8rem;
+        max-width: 980px;
+        margin: 0 auto;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 0.9rem;
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    h1 {
+        font-size: 1.85rem;
+        color: #16213e;
+        margin-bottom: 0.25rem;
+    }
+    .subtitle {
+        color: #556070;
+        font-size: 0.95rem;
+        margin-bottom: 1.2rem;
+    }
+    .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        margin-bottom: 0.9rem;
+    }
+    h2 {
+        font-size: 1.08rem;
+        color: #16213e;
+        margin-bottom: 0.55rem;
+    }
+    ul, ol {
+        margin-left: 1.15rem;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+    li { margin-bottom: 0.28rem; }
+    .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-top: 0.45rem;
+    }
+    .pill {
+        border-radius: 999px;
+        padding: 0.22rem 0.58rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .p-blue { background: #dbeafe; color: #1d4ed8; }
+    .p-green { background: #dcfce7; color: #166534; }
+    .p-amber { background: #fef3c7; color: #92400e; }
+    .p-purple { background: #f3e8ff; color: #6b21a8; }
+    .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.55rem;
+        margin-top: 0.5rem;
+    }
+    .metric {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.55rem;
+        text-align: center;
+    }
+    .metric .v {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #2563eb;
+    }
+    .metric .k {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 0.1rem;
+    }
+    code {
+        background: #eef2ff;
+        color: #3730a3;
+        border-radius: 4px;
+        padding: 0.05rem 0.32rem;
+        font-size: 0.82rem;
+    }
+</style>
+</head>
+<body>
+<a class="back-link" href="index.html">&larr; Back to Hub</a>
+<h1>Logic Generalization Strategy</h1>
+<p class="subtitle">Paper 1 execution plan to improve transfer beyond narrow LogicBench-style training.</p>
+
+<div class="card">
+    <h2>Core Message</h2>
+    <p style="font-size:0.92rem; color:#374151;">
+        Generalization is a <strong>coverage + objective</strong> problem, not only a dataset-size problem.
+        We will scale LogicBench++ with strict symbolic guarantees while increasing language diversity and keeping transfer as the primary evaluation gate.
+    </p>
+    <div class="pill-row">
+        <span class="pill p-blue">Typed Composition</span>
+        <span class="pill p-green">Strict Verification</span>
+        <span class="pill p-amber">Naturalized Language Bridge</span>
+        <span class="pill p-purple">Verifier-Aligned SFT + GRPO</span>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Data Strategy (LogicBench++)</h2>
+    <ol>
+        <li><code>strict_core</code>: exact typed chains with no shortcut proofs.</li>
+        <li><code>rich_noise</code>: strict core plus distractor structures.</li>
+        <li><code>naturalized_bridge</code>: same logic graphs with benchmark-like NL realizations.</li>
+        <li>3-class supervision (<code>True</code>, <code>False</code>, <code>Unknown</code>) with contradiction controls.</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h2>Training Strategy</h2>
+    <ol>
+        <li><strong>SFT:</strong> typed proof traces + final label, balanced by logic type and label.</li>
+        <li><strong>GRPO:</strong> reward on final correctness, step validity, and consistency across paraphrases.</li>
+        <li>Use KL and anti-shortcut controls to avoid collapse.</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h2>Evaluation Gate</h2>
+    <ol>
+        <li>Never train on external benchmark test splits.</li>
+        <li>Track transfer on FOLIO, ProofWriter, and ProntoQA every cycle.</li>
+        <li>Use ablations to isolate causal gains (data coverage vs language diversity vs reward).</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h2>Latest Generation Snapshot</h2>
+    <p style="font-size:0.9rem; color:#475569;">
+        Typed compositional generation results are updated after each pilot run.
+    </p>
+    <div class="metrics">
+        <div class="metric"><div class="v" id="m-samples">pending</div><div class="k">Samples</div></div>
+        <div class="metric"><div class="v" id="m-label">pending</div><div class="k">Label Balance</div></div>
+        <div class="metric"><div class="v" id="m-depth">pending</div><div class="k">Strict Depth</div></div>
+        <div class="metric"><div class="v" id="m-profile">pending</div><div class="k">Profile Mix</div></div>
+    </div>
+    <p id="m-source" style="margin-top:0.5rem; font-size:0.8rem; color:#6b7280;">Source: pending</p>
+</div>
+
+<script>
+const snapshot = {
+    samples: "3,000",
+    label: "1k/1k/1k",
+    depth: "3000/3000 pass",
+    profile: "1531/1469",
+    source: "pilot_typed_compositional_v0_3000.jsonl (generated 2026-02-24)"
+};
+
+document.getElementById("m-samples").textContent = snapshot.samples;
+document.getElementById("m-label").textContent = snapshot.label;
+document.getElementById("m-depth").textContent = snapshot.depth;
+document.getElementById("m-profile").textContent = snapshot.profile;
+document.getElementById("m-source").textContent = `Source: ${snapshot.source}`;
+</script>
+</body>
+</html>
