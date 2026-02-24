@@ -330,7 +330,7 @@ tr:hover { background: #fafbff; }
 
 <p class="breadcrumb"><a href="index.html">RAILS Hub</a> / Proof Bank</p>
 <h1>Proof Bank</h1>
-<p class="subtitle">Verified SFT reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format &middot; currently tracking the first 5% pilot batch across logic, math, and coding datasets</p>
+<p class="subtitle">Verified SFT reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format &middot; currently tracking the first 5% pilot batch across logic, science, math, and coding datasets</p>
 
 <!-- ===== PROGRESS OVERVIEW ===== -->
 <div class="progress-overview">
@@ -344,12 +344,14 @@ tr:hover { background: #fafbff; }
         <div class="stat-card"><div class="stat-val" id="pb-stat-avg-steps">-</div><div class="stat-lbl">Avg Steps / Trace</div></div>
     </div>
     <div class="progress-bar-container">
-        <div class="progress-segment seg-done" id="pb-seg-logic" style="width: 34%; background: #7c3aed;" title="Logic datasets in pilot">Logic</div>
-        <div class="progress-segment seg-done" id="pb-seg-math" style="width: 33%; background: #2563eb;" title="Math datasets in pilot">Math</div>
-        <div class="progress-segment seg-done" id="pb-seg-code" style="width: 33%; background: #d97706;" title="Code datasets in pilot">Code</div>
+        <div class="progress-segment seg-done" id="pb-seg-logic" style="width: 25%; background: #7c3aed;" title="Logic datasets in pilot">Logic</div>
+        <div class="progress-segment seg-done" id="pb-seg-science" style="width: 25%; background: #0d9488;" title="Science datasets in pilot">Science</div>
+        <div class="progress-segment seg-done" id="pb-seg-math" style="width: 25%; background: #2563eb;" title="Math datasets in pilot">Math</div>
+        <div class="progress-segment seg-done" id="pb-seg-code" style="width: 25%; background: #d97706;" title="Code datasets in pilot">Code</div>
     </div>
     <div class="progress-legend">
         <span class="legend-item"><span class="legend-dot done"></span> <span id="pb-legend-logic">Logic: -</span></span>
+        <span class="legend-item"><span class="legend-dot done" style="background:#0d9488;"></span> <span id="pb-legend-science">Science: -</span></span>
         <span class="legend-item"><span class="legend-dot active"></span> <span id="pb-legend-math">Math: -</span></span>
         <span class="legend-item"><span class="legend-dot done" style="background:#d97706;"></span> <span id="pb-legend-code">Code: -</span></span>
         <span class="legend-item"><span class="legend-dot todo"></span> Explorer payload: <span id="pb-generated-at">-</span></span>
@@ -363,7 +365,7 @@ tr:hover { background: #fafbff; }
         <div class="section-title-text">Current Setup</div>
     </div>
     <div class="card">
-        <p>The active Proof Bank setup is a <strong>verified pilot batch</strong> for multi-dataset SFT. It includes the core logic benchmarks (<strong>LogicBench, FOLIO, ProofWriter</strong>) and extends to newly introduced <strong>math</strong> and <strong>coding</strong> datasets.</p>
+        <p>The active Proof Bank setup is a <strong>verified pilot batch</strong> for multi-dataset SFT. It includes the core logic benchmarks (<strong>LogicBench, FOLIO, ProofWriter</strong>) and extends to logic-compatible <strong>science</strong> datasets plus <strong>math</strong> and <strong>coding</strong>.</p>
         <ul style="font-size: 0.85rem; color: #555; padding-left: 1.2rem; margin: 0.5rem 0;">
             <li>Goal for this phase: validate quality before scaling to the full dataset.</li>
             <li>Every shown example includes parsed <code>&lt;step&gt;</code> proof trees and verification metadata.</li>
@@ -463,6 +465,13 @@ tr:hover { background: #fafbff; }
             <div class="current" style="color: #2563eb;" id="pb-domain-math-current">Current: -</div>
             <div class="domain-progress"><div class="domain-progress-fill" id="pb-domain-math-fill" style="width: 0%; background: #2563eb;"></div></div>
             <div class="domain-sources" id="pb-domain-math-sources">Loading math dataset breakdown...</div>
+        </div>
+        <div class="domain-card" style="border-top-color: #0d9488;">
+            <h3 style="color: #0d9488;">Science</h3>
+            <div class="target">Logic-first ASP verified</div>
+            <div class="current" style="color: #0d9488;" id="pb-domain-science-current">Current: -</div>
+            <div class="domain-progress"><div class="domain-progress-fill" id="pb-domain-science-fill" style="width: 0%; background: #0d9488;"></div></div>
+            <div class="domain-sources" id="pb-domain-science-sources">Loading science dataset breakdown...</div>
         </div>
         <div class="domain-card" style="border-top-color: #d97706;">
             <h3 style="color: #d97706;">Code</h3>
@@ -1041,8 +1050,8 @@ train_on_responses_only: <span class="attr">true</span>
                     <td><span class="badge b-green">Done (7.5K)</span></td>
                 </tr>
                 <tr style="background: #f0fdf4;">
-                    <td>9</td><td>Science/STEM conversion</td>
-                    <td style="font-size:0.75rem; font-family: monospace;">convert_science_traces.py</td>
+                    <td>9</td><td>Science/STEM conversion (logic-first)</td>
+                    <td style="font-size:0.75rem; font-family: monospace;">convert_science_logic_traces.py</td>
                     <td>2 days</td><td>#1, #2</td>
                     <td><span class="badge b-green">Done (4.4K)</span></td>
                 </tr>
@@ -1095,7 +1104,7 @@ train_on_responses_only: <span class="attr">true</span>
                 <div class="task-check check-todo">&middot;</div>
                 <div class="task-content">
                     <div class="task-title">Domain verification: 50 traces per domain through verification backend</div>
-                    <div class="task-desc">SAT for logic, SymPy for math, sandbox for code, NLI for science</div>
+                    <div class="task-desc">SAT/ASP for logic + science, SymPy for math, sandbox for code</div>
                 </div>
             </li>
             <li class="task-item">
@@ -1141,7 +1150,7 @@ document.getElementById("last-updated").textContent = new Date().toLocaleDateStr
     day: "numeric",
 });
 
-const EXPLORER_DATA_PATH = "proof_tree_explorer_data.json?v=20260224-133724";
+const EXPLORER_DATA_PATH = "proof_tree_explorer_data.json?v=20260224-140500";
 const PILOT_TARGET = 100000;
 const DATASET_DOMAIN_MAP = {
     logicbench_propositional: "logic",
@@ -1151,6 +1160,7 @@ const DATASET_DOMAIN_MAP = {
     logicbench_nm_asp_extra: "logic",
     folio: "logic",
     proofwriter: "logic",
+    science_logic_asp_seed: "science",
     gsm8k: "math",
     openr1_math: "math",
     math_hendrycks: "math",
@@ -1241,7 +1251,7 @@ function buildPilotSummary(data) {
     });
 
     datasetRows.sort((a, b) => b.count - a.count);
-    const totalsByDomain = { logic: 0, math: 0, code: 0, other: 0 };
+    const totalsByDomain = { logic: 0, science: 0, math: 0, code: 0, other: 0 };
     datasetRows.forEach((row) => {
         totalsByDomain[row.domain] = (totalsByDomain[row.domain] || 0) + row.count;
     });
@@ -1264,9 +1274,11 @@ function renderPilotSummary(data) {
     const summary = buildPilotSummary(data);
     const total = summary.total;
     const logic = summary.totalsByDomain.logic || 0;
+    const science = summary.totalsByDomain.science || 0;
     const math = summary.totalsByDomain.math || 0;
     const code = summary.totalsByDomain.code || 0;
     const logicPct = total ? (100 * logic) / total : 0;
+    const sciencePct = total ? (100 * science) / total : 0;
     const mathPct = total ? (100 * math) / total : 0;
     const codePct = total ? (100 * code) / total : 0;
 
@@ -1277,6 +1289,7 @@ function renderPilotSummary(data) {
     setText("pb-stat-avg-steps", summary.avgSteps.toFixed(1));
     setText("pb-generated-at", formatDateTime(data.generated_at_utc));
     setText("pb-legend-logic", `Logic: ${formatInt(logic)} (${formatPct(logicPct)})`);
+    setText("pb-legend-science", `Science: ${formatInt(science)} (${formatPct(sciencePct)})`);
     setText("pb-legend-math", `Math: ${formatInt(math)} (${formatPct(mathPct)})`);
     setText("pb-legend-code", `Code: ${formatInt(code)} (${formatPct(codePct)})`);
 
@@ -1289,6 +1302,11 @@ function renderPilotSummary(data) {
     if (logicSeg) {
         logicSeg.style.width = `${logicPct}%`;
         logicSeg.textContent = `Logic ${formatPct(logicPct)}`;
+    }
+    const scienceSeg = document.getElementById("pb-seg-science");
+    if (scienceSeg) {
+        scienceSeg.style.width = `${sciencePct}%`;
+        scienceSeg.textContent = `Science ${formatPct(sciencePct)}`;
     }
     const mathSeg = document.getElementById("pb-seg-math");
     if (mathSeg) {
@@ -1308,6 +1326,8 @@ function renderPilotSummary(data) {
                 const share = total ? (100 * row.count) / total : 0;
                 const rowClass = row.domain === "logic"
                     ? "domain-logic"
+                    : row.domain === "science"
+                        ? "domain-science"
                     : row.domain === "math"
                         ? "domain-math"
                         : row.domain === "code"
@@ -1345,20 +1365,28 @@ function renderPilotSummary(data) {
         .filter((row) => row.domain === "math" && row.count > 0)
         .map((row) => `${row.label} (${formatInt(row.count)})`)
         .join(" + ");
+    const scienceSources = summary.datasetRows
+        .filter((row) => row.domain === "science" && row.count > 0)
+        .map((row) => `${row.label} (${formatInt(row.count)})`)
+        .join(" + ");
     const codeSources = summary.datasetRows
         .filter((row) => row.domain === "code" && row.count > 0)
         .map((row) => `${row.label} (${formatInt(row.count)})`)
         .join(" + ");
 
     setText("pb-domain-logic-current", `Current: ${formatInt(logic)} (${formatPct(logicPct)})`);
+    setText("pb-domain-science-current", `Current: ${formatInt(science)} (${formatPct(sciencePct)})`);
     setText("pb-domain-math-current", `Current: ${formatInt(math)} (${formatPct(mathPct)})`);
     setText("pb-domain-code-current", `Current: ${formatInt(code)} (${formatPct(codePct)})`);
     setText("pb-domain-logic-sources", logicSources || "No logic traces loaded");
+    setText("pb-domain-science-sources", scienceSources || "No science traces loaded");
     setText("pb-domain-math-sources", mathSources || "No math traces loaded");
     setText("pb-domain-code-sources", codeSources || "No code traces loaded");
 
     const logicFill = document.getElementById("pb-domain-logic-fill");
     if (logicFill) logicFill.style.width = `${logicPct}%`;
+    const scienceFill = document.getElementById("pb-domain-science-fill");
+    if (scienceFill) scienceFill.style.width = `${sciencePct}%`;
     const mathFill = document.getElementById("pb-domain-math-fill");
     if (mathFill) mathFill.style.width = `${mathPct}%`;
     const codeFill = document.getElementById("pb-domain-code-fill");
