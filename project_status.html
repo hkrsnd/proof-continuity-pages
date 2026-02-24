@@ -128,7 +128,7 @@ tr:hover { background: #fafbff; }
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
 <h1>RAILS &mdash; Project Status</h1>
-<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 23, 2026 21:12 UTC</span></p>
+<p class="subtitle">Research progress, active experiments, and next steps &middot; <strong>Live &mdash; auto-updating</strong> &middot; Last refresh: <span id="last-update">Feb 24, 2026 00:30 UTC</span></p>
 
 <!-- ============================================================ -->
 <!-- OVERVIEW STATS -->
@@ -477,9 +477,11 @@ tr:hover { background: #fafbff; }
         <div class="status-item status-running">
             <h4><span class="badge badge-blue">Running</span> Re-Run: Extended ProntoQA with 4096 Tokens</h4>
             <p>
-                4 critical models re-running with doubled token budget:
-                86524 (Qwen Base, 48%), 86525 (Qwen GRPO, 52%), 86527 (DS GRPO, 48%), 86528 (DS Base, 66%).
-                Will separate genuine error compounding from token budget truncation.
+                4 models re-running with doubled token budget. <strong>DS Base (86528) completed but BROKEN: 5.8% accuracy.</strong>
+                With 4096 tokens, the base model generates endless reasoning without concluding — <code>extract_answer</code>
+                can't find a "Yes"/"No" in the last 20 words, defaulting to "unknown."
+                <strong>Base models need shorter token budgets; only GRPO re-runs (86525, 86527) are meaningful.</strong>
+                Qwen GRPO (86525): 78%, DS GRPO (86527): 75%, Qwen Base (86524): 81%.
             </p>
         </div>
 
