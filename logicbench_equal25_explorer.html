@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS - LogicBench Equal-25 Dataset Explorer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    margin: 0;
+    padding: 1.25rem;
+    max-width: 1250px;
+    margin-inline: auto;
+  }
+  .back { display: inline-block; margin-bottom: .7rem; color: #2563eb; text-decoration: none; font-weight: 600; font-size: .9rem; }
+  h1 { margin: .1rem 0 .2rem 0; font-size: 1.65rem; }
+  .sub { color: #475569; margin-bottom: .9rem; font-size: .93rem; }
+  .card {
+    background: #fff; border-radius: 12px; padding: .9rem 1rem; margin-bottom: .9rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: .55rem; }
+  .stat { background: #f1f5f9; border-radius: 8px; padding: .6rem; text-align: center; }
+  .sv { font-size: 1.18rem; font-weight: 800; color: #1d4ed8; }
+  .sl { font-size: .72rem; color: #64748b; }
+  .controls { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr 1fr; gap: .6rem; align-items: end; }
+  .controls label { display: block; font-size: .73rem; color: #64748b; margin-bottom: .2rem; }
+  .controls input, .controls select {
+    width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: .44rem .52rem; font-size: .84rem; background: #fff;
+  }
+  .hint { margin-top: .45rem; color: #64748b; font-size: .76rem; }
+  .layout { display: grid; grid-template-columns: minmax(520px,1.1fr) minmax(360px,.9fr); gap: .9rem; }
+  .panel { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: .72rem; }
+  .table-wrap { max-height: 68vh; overflow: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
+  table { border-collapse: collapse; width: 100%; font-size: .8rem; }
+  th, td { border-bottom: 1px solid #f1f5f9; text-align: left; padding: .43rem; vertical-align: top; }
+  th { background: #f8fafc; position: sticky; top: 0; z-index: 1; color: #334155; }
+  tr.row { cursor: pointer; }
+  tr.row:hover { background: #f8fafc; }
+  tr.row.active { background: #e0e7ff; }
+  .badge { display:inline-block; border-radius: 999px; padding: .07rem .42rem; font-size:.68rem; font-weight:700; }
+  .b-yes { background:#dcfce7; color:#166534; }
+  .b-no { background:#fee2e2; color:#991b1b; }
+  .b-unk { background:#fef3c7; color:#92400e; }
+  .pager { display:flex; gap:.45rem; align-items:center; justify-content:space-between; margin-top:.55rem; font-size:.8rem; color:#475569; }
+  .pager button { border:1px solid #cbd5e1; border-radius:8px; background:#fff; padding:.3rem .52rem; cursor:pointer; }
+  .pager button:disabled { opacity:.45; cursor:not-allowed; }
+  .detail-title { font-size: .98rem; margin-bottom: .4rem; font-weight: 700; }
+  .block { margin-bottom: .55rem; }
+  .lbl { font-size: .71rem; text-transform: uppercase; letter-spacing: .05em; color: #64748b; margin-bottom: .12rem; font-weight: 700; }
+  .txt { background: #f8fafc; border-left: 3px solid #cbd5e1; border-radius: 0 6px 6px 0; padding: .44rem .54rem; white-space: pre-wrap; font-size: .81rem; color: #334155; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .77rem; }
+  @media (max-width: 980px) {
+    .controls { grid-template-columns: 1fr 1fr; }
+    .layout { grid-template-columns: 1fr; }
+    .table-wrap { max-height: 42vh; }
+  }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">&larr; Back to Hub</a>
+<h1>LogicBench Equal-25 Dataset Explorer</h1>
+<p class="sub">Interactive browser for <code>proof_bank_logicbench_equal25_50k</code> with filters, search, and pagination.</p>
+
+<div class="card">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="st-total">-</div><div class="sl">Total Rows</div></div>
+    <div class="stat"><div class="sv" id="st-ltype">-</div><div class="sl">Logic Types</div></div>
+    <div class="stat"><div class="sv" id="st-tkeys">-</div><div class="sl">Theory Keys</div></div>
+    <div class="stat"><div class="sv" id="st-yes">-</div><div class="sl">Yes</div></div>
+    <div class="stat"><div class="sv" id="st-no">-</div><div class="sl">No</div></div>
+    <div class="stat"><div class="sv" id="st-upd">-</div><div class="sl">Generated</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="controls">
+    <div>
+      <label for="q">Search (id/question/context preview)</label>
+      <input id="q" type="text" placeholder="e.g. modus_tollens or john is angry">
+    </div>
+    <div>
+      <label for="logic">Logic Type</label>
+      <select id="logic"><option value="all">All</option></select>
+    </div>
+    <div>
+      <label for="theory">Theory Key</label>
+      <select id="theory"><option value="all">All</option></select>
+    </div>
+    <div>
+      <label for="ans">Answer</label>
+      <select id="ans">
+        <option value="all">All</option>
+        <option value="yes">yes</option>
+        <option value="no">no</option>
+      </select>
+    </div>
+    <div>
+      <label for="psz">Rows / page</label>
+      <select id="psz">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+  <div class="hint" id="summary">Loading...</div>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Theory</th>
+            <th>Ans</th>
+            <th>Steps</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <div id="page-info">Page -</div>
+      <div>
+        <button id="prev">Prev</button>
+        <button id="next">Next</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div id="empty" class="hint">Select a row to inspect details.</div>
+    <div id="detail" style="display:none;">
+      <div class="detail-title" id="d-id"></div>
+      <div class="block"><div class="lbl">Metadata</div><div class="txt" id="d-meta"></div></div>
+      <div class="block"><div class="lbl">Question</div><div class="txt" id="d-q"></div></div>
+      <div class="block"><div class="lbl">Context Preview</div><div class="txt" id="d-c"></div></div>
+      <div class="block"><div class="lbl">Completion Preview</div><div class="txt mono" id="d-comp"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA_PATH = "logicbench_equal25_explorer_data.json?v=20260225-1428";
+const state = {
+  data: null,
+  filtered: [],
+  activeId: null,
+  page: 1,
+  pageSize: 50,
+};
+
+function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
+function esc(x){ return String(x||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function badge(answer){
+  const a = String(answer||'').toLowerCase();
+  if (a === 'yes' || a === 'true') return `<span class="badge b-yes">${esc(answer)}</span>`;
+  if (a === 'no' || a === 'false') return `<span class="badge b-no">${esc(answer)}</span>`;
+  return `<span class="badge b-unk">${esc(answer||'unknown')}</span>`;
+}
+
+function setStats(data){
+  const s = data.summary || {};
+  document.getElementById('st-total').textContent = fmt(data.total_records || 0);
+  document.getElementById('st-ltype').textContent = fmt(Object.keys(s.logic_type_counts || {}).length);
+  document.getElementById('st-tkeys').textContent = fmt(s.theory_key_count || 0);
+  document.getElementById('st-yes').textContent = fmt((s.answer_counts || {}).yes || (s.answer_counts || {}).Yes || 0);
+  document.getElementById('st-no').textContent = fmt((s.answer_counts || {}).no || (s.answer_counts || {}).No || 0);
+  document.getElementById('st-upd').textContent = (data.generated_at_utc || 'n/a').slice(0,16).replace('T',' ');
+}
+
+function fillFilters(){
+  const logic = document.getElementById('logic');
+  const theory = document.getElementById('theory');
+  const lset = Array.from(new Set(state.data.examples.map(x => x.logic_type))).sort();
+  const tset = Array.from(new Set(state.data.examples.map(x => x.theory_key))).sort();
+  for (const v of lset){
+    const o=document.createElement('option'); o.value=v; o.textContent=v; logic.appendChild(o);
+  }
+  for (const v of tset){
+    const o=document.createElement('option'); o.value=v; o.textContent=v; theory.appendChild(o);
+  }
+}
+
+function currentFilter(){
+  return {
+    q: document.getElementById('q').value.trim().toLowerCase(),
+    logic: document.getElementById('logic').value,
+    theory: document.getElementById('theory').value,
+    ans: document.getElementById('ans').value,
+  };
+}
+
+function applyFilter(resetPage=true){
+  if (!state.data) return;
+  if (resetPage) state.page = 1;
+  const f = currentFilter();
+  const arr = state.data.examples;
+  state.filtered = arr.filter(x => {
+    if (f.logic !== 'all' && x.logic_type !== f.logic) return false;
+    if (f.theory !== 'all' && x.theory_key !== f.theory) return false;
+    if (f.ans !== 'all' && String(x.expected_answer).toLowerCase() !== f.ans) return false;
+    if (f.q){
+      const blob = `${x.id} ${x.theory_key} ${x.question} ${x.context_preview}`.toLowerCase();
+      if (!blob.includes(f.q)) return false;
+    }
+    return true;
+  });
+
+  const total = state.filtered.length;
+  document.getElementById('summary').textContent = `Filtered ${fmt(total)} / ${fmt(state.data.total_records)} rows (preview fields are compact for web speed).`;
+
+  const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
+  if (state.page > maxPage) state.page = maxPage;
+
+  if (!state.activeId || !state.filtered.some(x => x.id === state.activeId)) {
+    state.activeId = total ? state.filtered[(state.page-1)*state.pageSize]?.id || state.filtered[0].id : null;
+  }
+
+  renderRows();
+  renderDetail();
+}
+
+function renderRows(){
+  const tbody = document.getElementById('rows');
+  tbody.innerHTML = '';
+  const total = state.filtered.length;
+  const start = (state.page - 1) * state.pageSize;
+  const end = Math.min(total, start + state.pageSize);
+  const view = state.filtered.slice(start, end);
+
+  for (const x of view){
+    const tr = document.createElement('tr');
+    tr.className = 'row' + (x.id === state.activeId ? ' active' : '');
+    tr.innerHTML = `
+      <td><code>${esc(x.id)}</code></td>
+      <td>${esc(x.logic_type)}</td>
+      <td>${esc(x.theory)}</td>
+      <td>${badge(x.expected_answer)}</td>
+      <td>${esc(x.num_steps)}</td>
+    `;
+    tr.onclick = () => {
+      state.activeId = x.id;
+      renderRows();
+      renderDetail();
+    };
+    tbody.appendChild(tr);
+  }
+
+  const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
+  document.getElementById('page-info').textContent = `Page ${state.page} / ${maxPage} · rows ${fmt(start+1)}-${fmt(Math.max(start+1,end))}`;
+  document.getElementById('prev').disabled = state.page <= 1;
+  document.getElementById('next').disabled = state.page >= maxPage;
+}
+
+function renderDetail(){
+  const empty = document.getElementById('empty');
+  const detail = document.getElementById('detail');
+  const rec = state.filtered.find(x => x.id === state.activeId);
+  if (!rec){
+    empty.style.display='block';
+    detail.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+  detail.style.display='block';
+  document.getElementById('d-id').textContent = rec.id;
+  document.getElementById('d-meta').textContent = `logic_type=${rec.logic_type} | theory=${rec.theory} | theory_key=${rec.theory_key} | answer=${rec.expected_answer} | steps=${rec.num_steps} | context_chars=${rec.context_chars} | completion_chars=${rec.completion_chars}`;
+  document.getElementById('d-q').textContent = rec.question || '';
+  document.getElementById('d-c').textContent = rec.context_preview || '';
+  document.getElementById('d-comp').textContent = rec.completion_preview || '';
+}
+
+function bind(){
+  for (const id of ['q','logic','theory','ans']) {
+    document.getElementById(id).addEventListener('input', () => applyFilter(true));
+    document.getElementById(id).addEventListener('change', () => applyFilter(true));
+  }
+  document.getElementById('psz').addEventListener('change', (e) => {
+    state.pageSize = Number(e.target.value || 50);
+    state.page = 1;
+    renderRows();
+    renderDetail();
+  });
+  document.getElementById('prev').onclick = () => { if (state.page > 1){ state.page -= 1; renderRows(); } };
+  document.getElementById('next').onclick = () => {
+    const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+    if (state.page < maxPage){ state.page += 1; renderRows(); }
+  };
+}
+
+async function boot(){
+  try {
+    const res = await fetch(DATA_PATH);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.data = await res.json();
+    setStats(state.data);
+    fillFilters();
+    bind();
+    applyFilter(true);
+  } catch (err){
+    document.getElementById('summary').textContent = `Failed to load explorer data: ${err.message}`;
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
