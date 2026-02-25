@@ -140,20 +140,24 @@
       <div class="detail-title" id="d-id"></div>
       <div class="block"><div class="lbl">Metadata</div><div class="txt" id="d-meta"></div></div>
       <div class="block"><div class="lbl">Question</div><div class="txt" id="d-q"></div></div>
-      <div class="block"><div class="lbl">Context Preview</div><div class="txt" id="d-c"></div></div>
-      <div class="block"><div class="lbl">Completion Preview</div><div class="txt mono" id="d-comp"></div></div>
+      <div class="block"><div class="lbl">Context</div><div class="txt" id="d-c"></div></div>
+      <div class="block"><div class="lbl">Completion</div><div class="txt mono" id="d-comp"></div></div>
     </div>
   </div>
 </div>
 
 <script>
 const DATA_PATH = "logicbench_equal25_explorer_data.json?v=20260225-1428";
+const FULL_BASE = "logicbench_equal25_full";
+const FULL_VERSION = "20260225-1434";
 const state = {
   data: null,
   filtered: [],
   activeId: null,
   page: 1,
   pageSize: 50,
+  detailToken: 0,
+  fullShardCache: new Map(),
 };
 
 function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
@@ -214,7 +218,7 @@ function applyFilter(resetPage=true){
   });
 
   const total = state.filtered.length;
-  document.getElementById('summary').textContent = `Filtered ${fmt(total)} / ${fmt(state.data.total_records)} rows (preview fields are compact for web speed).`;
+  document.getElementById('summary').textContent = `Filtered ${fmt(total)} / ${fmt(state.data.total_records)} rows. Click a row to lazy-load full context/completion.`;
 
   const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
   if (state.page > maxPage) state.page = maxPage;
@@ -259,7 +263,26 @@ function renderRows(){
   document.getElementById('next').disabled = state.page >= maxPage;
 }
 
-function renderDetail(){
+function shardKey(rec){
+  const safe = (x) => String(x || "unknown").replace(/[^a-zA-Z0-9_]+/g, "_");
+  return `${safe(rec.logic_type)}__${safe(rec.theory)}`;
+}
+
+async function loadFullRecord(rec){
+  const key = shardKey(rec);
+  if (!state.fullShardCache.has(key)){
+    const url = `${FULL_BASE}/${key}.json?v=${FULL_VERSION}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`full shard fetch failed: ${res.status}`);
+    const payload = await res.json();
+    const m = new Map((payload.records || []).map(x => [x.id, x]));
+    state.fullShardCache.set(key, m);
+  }
+  const shardMap = state.fullShardCache.get(key);
+  return shardMap.get(rec.id) || null;
+}
+
+async function renderDetail(){
   const empty = document.getElementById('empty');
   const detail = document.getElementById('detail');
   const rec = state.filtered.find(x => x.id === state.activeId);
@@ -270,11 +293,31 @@ function renderDetail(){
   }
   empty.style.display='none';
   detail.style.display='block';
+  const token = ++state.detailToken;
   document.getElementById('d-id').textContent = rec.id;
   document.getElementById('d-meta').textContent = `logic_type=${rec.logic_type} | theory=${rec.theory} | theory_key=${rec.theory_key} | answer=${rec.expected_answer} | steps=${rec.num_steps} | context_chars=${rec.context_chars} | completion_chars=${rec.completion_chars}`;
   document.getElementById('d-q').textContent = rec.question || '';
-  document.getElementById('d-c').textContent = rec.context_preview || '';
-  document.getElementById('d-comp').textContent = rec.completion_preview || '';
+  document.getElementById('d-c').textContent = (rec.context_preview || '') + "\n\n[Loading full context...]";
+  document.getElementById('d-comp').textContent = (rec.completion_preview || '') + "\n\n[Loading full completion...]";
+
+  try {
+    const full = await loadFullRecord(rec);
+    if (token !== state.detailToken) return;
+    if (!full){
+      document.getElementById('d-c').textContent = rec.context_preview || '';
+      document.getElementById('d-comp').textContent = rec.completion_preview || '';
+      return;
+    }
+    document.getElementById('d-meta').textContent = `logic_type=${full.logic_type} | theory=${full.theory} | theory_key=${full.theory_key} | answer=${full.expected_answer} | steps=${full.num_steps} | context_chars=${full.context_chars} | completion_chars=${full.completion_chars}`;
+    document.getElementById('d-q').textContent = full.question || rec.question || '';
+    document.getElementById('d-c').textContent = full.context || rec.context_preview || '';
+    document.getElementById('d-comp').textContent = full.completion || rec.completion_preview || '';
+  } catch (err) {
+    if (token !== state.detailToken) return;
+    document.getElementById('d-c').textContent = rec.context_preview || '';
+    document.getElementById('d-comp').textContent =
+      (rec.completion_preview || '') + `\n\n[Failed to load full shard: ${err.message}]`;
+  }
 }
 
 function bind(){
