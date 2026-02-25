@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS - GRPO Prompt Specification</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: #f8f9fa;
+        color: #1a1a2e;
+        line-height: 1.65;
+        padding: 2rem;
+        max-width: 980px;
+        margin: 0 auto;
+    }
+    h1 { font-size: 1.8rem; color: #16213e; margin-bottom: 0.35rem; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 1.3rem; }
+    .nav { margin-bottom: 1.6rem; }
+    .nav a {
+        display: inline-block;
+        text-decoration: none;
+        color: #1d4ed8;
+        background: #e0e7ff;
+        border-radius: 8px;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .panel {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        padding: 1.2rem 1.3rem;
+        margin-bottom: 1rem;
+    }
+    .panel h2 { font-size: 1.08rem; color: #16213e; margin-bottom: 0.55rem; }
+    .panel p { font-size: 0.92rem; color: #4b5563; margin-bottom: 0.6rem; }
+    .badge {
+        display: inline-block;
+        padding: 0.16rem 0.5rem;
+        border-radius: 16px;
+        font-size: 0.73rem;
+        font-weight: 700;
+        margin-right: 0.35rem;
+        margin-bottom: 0.3rem;
+    }
+    .b-blue { background: #dbeafe; color: #1e3a8a; }
+    .b-green { background: #dcfce7; color: #166534; }
+    .b-amber { background: #fef3c7; color: #92400e; }
+    .b-rose { background: #ffe4e6; color: #9f1239; }
+    code {
+        background: #f3f4f6;
+        border-radius: 6px;
+        padding: 0.1rem 0.35rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+        font-size: 0.84rem;
+    }
+    pre {
+        background: #0b1220;
+        color: #e5e7eb;
+        border-radius: 10px;
+        padding: 0.95rem;
+        overflow-x: auto;
+        font-size: 0.79rem;
+        line-height: 1.48;
+        margin-top: 0.45rem;
+        margin-bottom: 0.45rem;
+    }
+    ul { margin-left: 1.1rem; color: #374151; font-size: 0.9rem; }
+    li { margin-bottom: 0.3rem; }
+    .warn {
+        border-left: 4px solid #ef4444;
+        background: #fff1f2;
+        border-radius: 10px;
+        padding: 0.85rem 0.95rem;
+        margin-top: 0.45rem;
+    }
+    .warn strong { color: #9f1239; }
+    .footer {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        margin-top: 1.4rem;
+        padding-top: 0.9rem;
+        border-top: 1px solid #e5e7eb;
+    }
+</style>
+</head>
+<body>
+
+<h1>GRPO Prompt Specification</h1>
+<p class="subtitle">Exact message format used by current GRPO runs on the compositional 50K logic dataset.</p>
+<div class="nav"><a href="index.html">Back to Hub</a></div>
+
+<div class="panel">
+    <h2>Current Runtime</h2>
+    <p>As of <strong>February 25, 2026</strong>, both running GRPO jobs (<code>88209</code> Qwen3-8B and <code>88210</code> DeepSeek-R1-7B) read prompts directly from:</p>
+    <p><code>data/proof_bank/proof_bank_typed_logic_50k.jsonl</code></p>
+    <div>
+        <span class="badge b-blue">50,000 samples</span>
+        <span class="badge b-green">domain=logic only</span>
+        <span class="badge b-amber">max_prompt_length=6144</span>
+        <span class="badge b-blue">max_completion_length=4096</span>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Message Construction Path</h2>
+    <ul>
+        <li><code>experiments/convert_typed_compositional_to_sft.py</code> builds <code>system_prompt</code>, <code>user_prompt</code>, <code>completion</code> in JSONL.</li>
+        <li><code>experiments/train_experiment.py</code> (Proof Bank loader) reads those fields unchanged.</li>
+        <li>Each GRPO training sample is a two-message chat prompt:</li>
+    </ul>
+<pre>{
+  "prompt": [
+    {"role": "system", "content": system_prompt},
+    {"role": "user", "content": user_prompt}
+  ],
+  "answer": "True|False|Unknown",
+  "domain": "logic"
+}</pre>
+</div>
+
+<div class="panel">
+    <h2>System Prompt Components</h2>
+    <p>The system message is assembled as:</p>
+    <pre>prompt/think_cot_prompt.txt
++ prompt/logic_supplement.txt
++ answer_instructions["ternary_unknown"]</pre>
+    <p>This enforces:</p>
+    <ul>
+        <li>Reasoning inside <code>&lt;think&gt;</code> with explicit <code>&lt;step&gt;</code> tags.</li>
+        <li>Per-step <code>&lt;text&gt;</code> and <code>&lt;logic&gt;</code> fields.</li>
+        <li>Final answer class in <code>{True, False, Unknown}</code>.</li>
+    </ul>
+</div>
+
+<div class="panel">
+    <h2>User Prompt Template (Current)</h2>
+    <p>Template used for every compositional record:</p>
+<pre>{context}
+
+{question}
+
+The correct answer is: {answer}.
+
+Answer by thinking through the problem and recording formal steps:
+
+&lt;think&gt;
+[Your reasoning here, with &lt;step&gt; tags for each key deduction]
+&lt;/think&gt;
+
+Answer: ___________</pre>
+    <div class="warn">
+        <p><strong>Important:</strong> this template currently contains answer leakage (<code>The correct answer is: {answer}</code>).</p>
+        <p>In the 50K file, leakage appears in <strong>50,000/50,000</strong> raw user prompts, and still remains after truncation in approximately <strong>25,200/50,000</strong> prompts.</p>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Prompt Truncation at Training Time</h2>
+    <p>GRPO applies character-based truncation before tokenization:</p>
+    <ul>
+        <li>System message cap: <code>23347</code> chars (95% of prompt budget)</li>
+        <li>User message cap: <code>1228</code> chars (5% of prompt budget)</li>
+    </ul>
+    <p>Config source: <code>max_prompt_length=6144</code> in runtime GRPO YAML.</p>
+</div>
+
+<div class="panel">
+    <h2>One Concrete Example (Abbreviated)</h2>
+<pre>system (start):
+"You are a reasoning assistant. Think through problems step by step inside &lt;think&gt; tags..."
+
+user (start):
+"At least one of the following is true ... determine whether the conclusion is True, False, or Unknown ...
+The correct answer is: True."
+
+gold completion (start):
+"&lt;think&gt;
+&lt;step n=\"1\" type=\"premise\"&gt;...&lt;/step&gt;
+..."
+</pre>
+</div>
+
+<div class="panel">
+    <h2>Relevant Files</h2>
+    <ul>
+        <li><code>experiments/configs/runtime/qwen3_grpo_typed50k_from_sft_88207.yaml</code></li>
+        <li><code>experiments/configs/runtime/deepseek_grpo_typed50k_from_sft_88208.yaml</code></li>
+        <li><code>experiments/train_experiment.py</code> (Proof Bank loader + truncation)</li>
+        <li><code>experiments/convert_typed_compositional_to_sft.py</code> (prompt generator)</li>
+        <li><code>prompt/think_cot_prompt.txt</code></li>
+        <li><code>prompt/logic_supplement.txt</code></li>
+        <li><code>prompt/answer_instructions.py</code></li>
+    </ul>
+</div>
+
+<div class="footer">
+Updated February 25, 2026 · RAILS GRPO Prompt Documentation
+</div>
+
+</body>
+</html>
