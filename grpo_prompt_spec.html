@@ -155,18 +155,18 @@ Answer by thinking through the problem and recording formal steps:
 Answer: ___________</pre>
     <div class="warn">
         <p><strong>Important:</strong> this template currently contains answer leakage (<code>The correct answer is: {answer}</code>).</p>
-        <p>In the 50K file, leakage appears in <strong>50,000/50,000</strong> raw user prompts, and still remains after truncation in approximately <strong>25,200/50,000</strong> prompts.</p>
+        <p>In the 50K file, leakage appears in <strong>50,000/50,000</strong> raw user prompts. This should be removed in the next regenerated training file.</p>
     </div>
 </div>
 
 <div class="panel">
     <h2>Prompt Truncation at Training Time</h2>
-    <p>GRPO applies character-based truncation before tokenization:</p>
+    <p>GRPO applies character-based truncation before tokenization using a total prompt budget:</p>
     <ul>
-        <li>System message cap: <code>23347</code> chars (95% of prompt budget)</li>
-        <li>User message cap: <code>1228</code> chars (5% of prompt budget)</li>
+        <li>Total prompt cap: <code>max_prompt_length * 4</code> characters (default: <code>6144 * 4 = 24576</code>)</li>
+        <li>Adaptive trimming: preserve full user prompt whenever possible, trim system first only when total exceeds budget.</li>
     </ul>
-    <p>Config source: <code>max_prompt_length=6144</code> in runtime GRPO YAML.</p>
+    <p>Note: older runs used a fixed 95/5 system/user split; this has been patched to the adaptive policy above.</p>
 </div>
 
 <div class="panel">
