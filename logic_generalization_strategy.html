@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAILS - Logic Generalization Strategy</title>
+<title>RAILS - Complete Logic Generalization Plan</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -97,83 +97,146 @@
         padding: 0.05rem 0.32rem;
         font-size: 0.82rem;
     }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+        margin-top: 0.4rem;
+    }
+    th, td {
+        border: 1px solid #e2e8f0;
+        text-align: left;
+        vertical-align: top;
+        padding: 0.48rem;
+    }
+    th {
+        background: #f1f5f9;
+        color: #0f172a;
+        font-weight: 700;
+    }
+    .small { font-size: 0.82rem; color: #64748b; }
 </style>
 </head>
 <body>
 <a class="back-link" href="index.html">&larr; Back to Hub</a>
-<h1>Logic Generalization Strategy</h1>
-<p class="subtitle">Paper 1 execution plan to improve transfer beyond narrow LogicBench-style training.</p>
+<h1>Complete Logic Generalization Plan</h1>
+<p class="subtitle">Updated strategy for Paper 1 (logic focus): axes-complete coverage, strict symbolic quality, and transfer-first evaluation.</p>
 
 <div class="card">
-    <h2>Core Message</h2>
+    <h2>Objective</h2>
     <p style="font-size:0.92rem; color:#374151;">
-        Generalization is a <strong>coverage + objective</strong> problem, not only a dataset-size problem.
-        We will scale LogicBench++ with strict symbolic guarantees while increasing language diversity and keeping transfer as the primary evaluation gate.
+        Build a model that learns robust logical reasoning from strict formal traces and
+        transfers to natural-language logic benchmarks (FOLIO, ProofWriter, ProntoQA),
+        without leakage or benchmark overfitting.
     </p>
     <div class="pill-row">
-        <span class="pill p-blue">Typed Composition</span>
+        <span class="pill p-blue">All LogicBench Types</span>
+        <span class="pill p-blue">Axes Coverage Matrix</span>
         <span class="pill p-green">Strict Verification</span>
-        <span class="pill p-amber">Naturalized Language Bridge</span>
-        <span class="pill p-purple">Verifier-Aligned SFT + GRPO</span>
+        <span class="pill p-amber">Bridge to Natural Language</span>
+        <span class="pill p-purple">SFT Then GRPO</span>
     </div>
 </div>
 
 <div class="card">
-    <h2>Data Strategy (LogicBench++)</h2>
+    <h2>Two-Track Data Strategy</h2>
     <ol>
-        <li><code>strict_core</code>: exact typed chains with no shortcut proofs.</li>
-        <li><code>rich_noise</code>: strict core plus distractor structures.</li>
-        <li><code>naturalized_bridge</code>: same logic graphs with benchmark-like NL realizations.</li>
-        <li>3-class supervision (<code>True</code>, <code>False</code>, <code>Unknown</code>) with contradiction controls.</li>
+        <li><code>strict_core</code>: exact formal reasoning with strict chain validation.</li>
+        <li><code>rich_noise</code>: strict chains plus distractors to prevent shortcut reliance.</li>
+        <li><code>bridge_nl</code>: same formal proof graph realized in diverse natural language.</li>
+        <li>All training examples keep <code>&lt;think&gt;</code> with intermediate reasoning text and formal <code>&lt;step&gt;</code> blocks.</li>
     </ol>
 </div>
 
 <div class="card">
-    <h2>Training Strategy</h2>
+    <h2>Axes Coverage Matrix (must be complete)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Axis</th>
+                <th>Coverage Bins</th>
+                <th>Quota Policy</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Inference family</td><td>All 25 LogicBench(Aug) theory types</td><td>Equal count per type</td></tr>
+            <tr><td>Chain depth</td><td>3-5, 6-9, 10-14, 15-20</td><td>Minimum quota per bin</td></tr>
+            <tr><td>Label</td><td>True / False / Unknown</td><td>Balanced globally and per-type</td></tr>
+            <tr><td>Lexical style</td><td>Canonical, plain NL, rich NL</td><td>Balanced within each depth band</td></tr>
+            <tr><td>Negation profile</td><td>None, single, multi-negation</td><td>Minimum support per type</td></tr>
+            <tr><td>Entity structure</td><td>Single entity, multi-entity, cross-entity</td><td>Minimum support per type</td></tr>
+            <tr><td>Distractor pressure</td><td>Low, medium, high noise</td><td>Fixed ratio per split</td></tr>
+            <tr><td>Uncertainty regime</td><td>Deterministic, partial conflict, unknown-heavy</td><td>Balanced across training stages</td></tr>
+        </tbody>
+    </table>
+    <p class="small">Generation stops only when all bins satisfy quota. Under-covered bins are regenerated.</p>
+</div>
+
+<div class="card">
+    <h2>Equal-Type Requirement</h2>
+    <ul>
+        <li>LogicBench(Aug) has 25 theory types total (8 propositional, 9 FOL, 8 non-monotonic).</li>
+        <li>For a 50K logic-focused release: target <code>2,000</code> examples per theory type.</li>
+        <li>Within each type, maintain near-balanced <code>True / False / Unknown</code>.</li>
+        <li>Primitive rule mix (MP/DS/MT/etc.) is monitored and corrected by quota-based sampling.</li>
+    </ul>
+</div>
+
+<div class="card">
+    <h2>SFT vs GRPO Data Protocol</h2>
     <ol>
-        <li><strong>SFT:</strong> typed proof traces + final label, balanced by logic type and label.</li>
-        <li><strong>GRPO:</strong> reward on final correctness, step validity, and consistency across paraphrases.</li>
-        <li>Use KL and anti-shortcut controls to avoid collapse.</li>
+        <li>Use disjoint splits: <strong>no prompt overlap</strong> between SFT and GRPO training sets.</li>
+        <li><strong>SFT:</strong> full supervision on completion traces to teach stable format and formal steps.</li>
+        <li><strong>GRPO:</strong> optimize generated traces with reward for correctness + formal consistency + format validity.</li>
+        <li>GRPO set emphasizes harder axes bins (longer chains, richer language, uncertainty cases).</li>
     </ol>
 </div>
 
 <div class="card">
-    <h2>Evaluation Gate</h2>
+    <h2>Leakage and Validity Gates</h2>
     <ol>
-        <li>Never train on external benchmark test splits.</li>
-        <li>Track transfer on FOLIO, ProofWriter, and ProntoQA every cycle.</li>
-        <li>Use ablations to isolate causal gains (data coverage vs language diversity vs reward).</li>
+        <li>No answer leakage in <code>user_prompt</code> before and after truncation.</li>
+        <li>Parser-valid trace required: balanced <code>&lt;step&gt;</code> tags, valid references, final answer present.</li>
+        <li>Logical validity required: strict-chain depth checks and symbolic consistency checks.</li>
+        <li>Dedup required: exact, normalized, and near-duplicate checks.</li>
+        <li>Any sample failing gates is dropped.</li>
     </ol>
 </div>
 
 <div class="card">
-    <h2>Latest Generation Snapshot</h2>
-    <p style="font-size:0.9rem; color:#475569;">
-        Typed compositional generation results are updated after each pilot run.
-    </p>
+    <h2>Training Curriculum</h2>
+    <ol>
+        <li>Stage 1: SFT on strict-core-heavy data to lock in reasoning format.</li>
+        <li>Stage 2: SFT mix-in of bridge natural-language variants.</li>
+        <li>Stage 3: GRPO on disjoint hard split with verifier-aligned reward.</li>
+        <li>Reward components: answer correctness, formal consistency, step format, truncation control.</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h2>Generalization Evaluation Gates</h2>
+    <ol>
+        <li>Internal holdout by axis bins (depth/style/negation/uncertainty).</li>
+        <li>External untouched transfer: FOLIO, ProofWriter, ProntoQA.</li>
+        <li>Ablations: strict-only vs strict+bridge, balanced vs unbalanced type sampling, short vs long-chain.</li>
+        <li>Go/no-go criterion: strict+bridge must outperform strict-only on external transfer with no consistency regression.</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h2>Execution Targets</h2>
     <div class="metrics">
-        <div class="metric"><div class="v" id="m-samples">pending</div><div class="k">Samples</div></div>
-        <div class="metric"><div class="v" id="m-label">pending</div><div class="k">Label Balance</div></div>
-        <div class="metric"><div class="v" id="m-depth">pending</div><div class="k">Strict Depth</div></div>
-        <div class="metric"><div class="v" id="m-profile">pending</div><div class="k">Profile Mix</div></div>
+        <div class="metric"><div class="v">50K</div><div class="k">Logic Set (Current)</div></div>
+        <div class="metric"><div class="v">25</div><div class="k">Theory Types</div></div>
+        <div class="metric"><div class="v">20</div><div class="k">Max Hop Target</div></div>
+        <div class="metric"><div class="v">0</div><div class="k">Leakage Tolerance</div></div>
     </div>
-    <p id="m-source" style="margin-top:0.5rem; font-size:0.8rem; color:#6b7280;">Source: pending</p>
+    <p class="small" style="margin-top:0.55rem;">
+        Related pages:
+        <a href="logicbench_compositional_examples.html">Compositional Examples</a> ·
+        <a href="grpo_prompt_spec.html">GRPO Prompt Spec</a> ·
+        <a href="project_status.html">Project Status</a>
+    </p>
 </div>
-
-<script>
-const snapshot = {
-    samples: "3,000",
-    label: "1k/1k/1k",
-    depth: "3000/3000 pass",
-    profile: "1531/1469",
-    source: "pilot_typed_compositional_v0_3000.jsonl (generated 2026-02-24)"
-};
-
-document.getElementById("m-samples").textContent = snapshot.samples;
-document.getElementById("m-label").textContent = snapshot.label;
-document.getElementById("m-depth").textContent = snapshot.depth;
-document.getElementById("m-profile").textContent = snapshot.profile;
-document.getElementById("m-source").textContent = `Source: ${snapshot.source}`;
-</script>
 </body>
 </html>
