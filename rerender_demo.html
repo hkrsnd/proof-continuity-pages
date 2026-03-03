@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proof Bank v3 &mdash; Re-rendering Demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+.back-link:hover { text-decoration: underline; }
+
+/* Summary */
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.72rem; color: #666; margin-top: 0.2rem; }
+.stat-green .stat-value { color: #16a34a; }
+.stat-purple .stat-value { color: #7c3aed; }
+.stat-red .stat-value { color: #dc2626; }
+.stat-amber .stat-value { color: #d97706; }
+
+/* Key insight box */
+.insight-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.insight-box h3 { color: #0369a1; margin-bottom: 0.5rem; font-size: 1rem; }
+.insight-box p { font-size: 0.85rem; color: #0c4a6e; line-height: 1.6; }
+
+/* Pipeline explanation */
+.pipeline-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.pipeline-box h3 { color: #92400e; margin-bottom: 0.8rem; font-size: 1rem; }
+.pipeline-steps { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+.pipeline-step { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; }
+.pipeline-arrow { color: #d97706; font-size: 1.2rem; }
+
+/* Example cards */
+.example-card { background: white; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+.card-header { background: #f8fafc; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.card-header-left { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.card-num { font-size: 1.1rem; font-weight: 800; color: #475569; }
+.card-id { font-family: monospace; font-size: 0.8rem; color: #94a3b8; }
+.type-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.status-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.status-valid { background: #dcfce7; color: #166534; border: 1px solid #16a34a40; }
+.status-partial { background: #fef3c7; color: #92400e; border: 1px solid #d9770640; }
+.status-failed { background: #fee2e2; color: #991b1b; border: 1px solid #dc262640; }
+.status-pending { background: #f3f4f6; color: #6b7280; border: 1px solid #9ca3af40; }
+
+/* Plan row */
+.plan-row { padding: 0.8rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.plan-label { font-size: 0.78rem; color: #64748b; font-weight: 600; }
+.rule-badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 700; font-family: monospace; }
+
+/* Card body — side by side */
+.card-body { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 1000px) { .card-body { grid-template-columns: 1fr; } }
+
+.skeleton-input { padding: 1.5rem; border-right: 1px solid #e2e8f0; }
+.rendered-output { padding: 1.5rem; }
+.rendered-output.pending { display: flex; flex-direction: column; }
+
+.section-title { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+.input-title { color: #475569; }
+.output-title { color: #2563eb; display: flex; align-items: center; gap: 0.5rem; }
+.domain-tag { background: #dbeafe; color: #1e40af; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: none; letter-spacing: 0; }
+
+/* Query box */
+.query-box { margin-bottom: 1rem; }
+.query-text { background: #faf5ff; border-left: 3px solid #a855f7; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+.query-text code { background: #f3e8ff; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.8rem; color: #6b21a8; }
+
+/* Context / question boxes */
+.context-box, .question-box { margin-bottom: 1rem; }
+.context-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+.context-text { background: #f8fafc; border-left: 3px solid #94a3b8; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0; font-size: 0.83rem; line-height: 1.55; }
+.gen-context { border-left-color: #2563eb; background: #eff6ff; }
+.question-text { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0; font-size: 0.85rem; font-weight: 500; }
+
+/* Logic items */
+.logic-section { margin-bottom: 0.8rem; }
+.logic-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+.logic-item { margin-bottom: 0.2rem; }
+.logic-item code { background: #f1f5f9; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.78rem; color: #334155; }
+
+/* Proof steps */
+.proof-section { margin-top: 1rem; }
+.proof-step { display: flex; align-items: flex-start; gap: 0.4rem; margin-bottom: 0.3rem; font-size: 0.78rem; }
+.proof-type { display: inline-block; min-width: 2.2rem; padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.65rem; font-weight: 700; font-family: monospace; text-align: center; flex-shrink: 0; }
+.proof-step.premise .proof-type { background: #dbeafe; color: #1e40af; }
+.proof-step.derived .proof-type { background: #fef3c7; color: #92400e; }
+.proof-step code { background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.75rem; color: #334155; }
+.proof-from { color: #94a3b8; font-size: 0.7rem; }
+
+/* Output meta */
+.output-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.meta-item { background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; color: #64748b; font-family: monospace; }
+
+/* Mapping sections */
+.map-section { margin-bottom: 0.8rem; }
+.map-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+.map-row { display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.15rem; }
+.map-old { background: #fee2e2; color: #991b1b; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.72rem; text-decoration: line-through; }
+.map-new { background: #dcfce7; color: #166534; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.72rem; }
+.map-arrow { color: #94a3b8; font-size: 0.8rem; }
+
+/* Completion box */
+.completion-box { margin-top: 0.8rem; }
+.completion-box.valid { border-left: 3px solid #16a34a; padding-left: 0.5rem; }
+.completion-box.invalid { border-left: 3px solid #d97706; padding-left: 0.5rem; }
+.comp-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+
+/* Rendered content */
+.rendered-content { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; font-size: 0.74rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: #334155; max-height: 500px; overflow-y: auto; }
+.raw-content { background: #fefce8; border-color: #fde68a; }
+.xml-tag { color: #2563eb; font-weight: 600; }
+
+/* Error box */
+.error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.error-title { color: #991b1b; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+.error-desc { color: #7f1d1d; font-size: 0.8rem; }
+
+.raw-response-box { margin-top: 0.8rem; }
+
+.pending-msg { background: #f3f4f6; border: 1px dashed #9ca3af; border-radius: 8px; padding: 2rem; text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 1rem; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+
+/* Footer */
+.footer { text-align: center; color: #94a3b8; font-size: 0.78rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">&larr; Back to RAILS Dashboard</a>
+<h1>Proof Bank v3 &mdash; Re-rendering Demo</h1>
+<p class="subtitle">Skeleton &rarr; LLM re-rendering pipeline &middot; 10 examples &middot; Model: unsloth/Qwen3-8B</p>
+
+<div class="summary">
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value">10</div>
+            <div class="stat-label">Examples</div>
+        </div>
+        <div class="stat stat-green">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Fully Valid</div>
+        </div>
+        <div class="stat stat-amber">
+            <div class="stat-value">9</div>
+            <div class="stat-label">JSON Parsed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Propositional</div>
+        </div>
+        <div class="stat stat-purple">
+            <div class="stat-value">4</div>
+            <div class="stat-label">FOL</div>
+        </div>
+        <div class="stat stat-green">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Non-Monotonic</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">17</div>
+            <div class="stat-label">Unique Rules</div>
+        </div>
+    </div>
+</div>
+
+<div class="insight-box">
+    <h3>What This Demo Shows</h3>
+    <p>
+        The <strong>left panel</strong> shows a <em>programmatically generated skeleton</em> &mdash; the logical structure
+        (facts, rules, disjunctions, proof chain) is deterministic and provably correct. The <strong>right panel</strong>
+        shows the LLM's attempt to re-express this skeleton as natural language with formal anchors. The LLM produces
+        a <code>context</code>, <code>question</code>, entity/predicate mappings, and a structured <code>completion</code>
+        with <code>&lt;step&gt;</code> tags. <strong>Validation status</strong> indicates whether the output passed
+        format checks (JSON parse + &lt;think&gt;/&lt;step&gt;/&lt;logic&gt; tags present).
+    </p>
+    <p style="margin-top:0.5rem;">
+        <strong>2/10 fully valid</strong> completions with an 8B base model.
+        A larger instruct model (32B+) is expected to achieve &gt;60% pass rate.
+        Invalid outputs are still shown for diagnostic purposes.
+    </p>
+</div>
+
+<div class="pipeline-box">
+    <h3>Pipeline Overview</h3>
+    <p style="font-size:0.85rem;color:#78350f;">The LLM does <strong>not</strong> reason &mdash; it only rephrases. Logical correctness is guaranteed by skeleton construction + 8-stage validation (SAT/ASP).</p>
+    <div class="pipeline-steps">
+        <div class="pipeline-step">Skeleton Generator<br><small style="color:#94a3b8">CPU, deterministic</small></div>
+        <span class="pipeline-arrow">&rarr;</span>
+        <div class="pipeline-step" style="border-color:#2563eb;background:#eff6ff">LLM Re-render<br><small style="color:#2563eb">unsloth/Qwen3-8B</small></div>
+        <span class="pipeline-arrow">&rarr;</span>
+        <div class="pipeline-step">8-Stage Validation<br><small style="color:#94a3b8">SAT + ASP</small></div>
+        <span class="pipeline-arrow">&rarr;</span>
+        <div class="pipeline-step" style="border-color:#16a34a;background:#f0fdf4">SFT Record<br><small style="color:#16a34a">verified output</small></div>
+    </div>
+</div>
+
+
+    <div class="example-card" id="flb_v1_000022">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#1</span>
+                <span class="card-id">flb_v1_000022</span>
+                <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
+                <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (7 steps):</span>
+            <span class="rule-badge" style="background:#4338ca15;color:#4338ca;border:1px solid #4338ca40">BD</span> <span class="rule-badge" style="background:#4338ca15;color:#4338ca;border:1px solid #4338ca40">BD</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">MT</span> <span class="rule-badge" style="background:#4338ca15;color:#4338ca;border:1px solid #4338ca40">BD</span> <span class="rule-badge" style="background:#be185d15;color:#be185d;border:1px solid #be185d40">DD</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">MT</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">UI</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>principled(stella)</code> = <strong>Unknown</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>observant(carl)</code></div><div class="logic-item"><code>observant(harley)</code></div><div class="logic-item"><code>observant(luna)</code></div><div class="logic-item"><code>observant(stella)</code></div><div class="logic-item"><code>~grateful(carl)</code></div><div class="logic-item"><code>~grateful(harley)</code></div><div class="logic-item"><code>~grateful(luna)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>brave(stella) :- ~inventive(stella)</code></div><div class="logic-item"><code>generous(stella) :- ~grateful(stella)</code></div><div class="logic-item"><code>sharp(stella) :- observant(stella)</code></div><div class="logic-item"><code>strong(stella) :- sharp(stella)</code></div><div class="logic-item"><code>well_prepared(stella) :- grateful(stella)</code></div><div class="logic-item"><code>~brave(stella) :- well_prepared(stella)</code></div><div class="logic-item"><code>~cautious(stella) :- focused(stella)</code></div><div class="logic-item"><code>~fit(stella) :- evidence_driven(stella)</code></div><div class="logic-item"><code>~methodical(stella) :- articulate(stella)</code></div><div class="logic-item"><code>~strong(stella) :- inventive(stella)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>observant(stella) v ~articulate(stella)</code></div><div class="logic-item"><code>sharp(stella) v ~evidence_driven(stella)</code></div><div class="logic-item"><code>~inventive(stella) v ~focused(stella)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>observant(stella)</code></div><div class="proof-step derived"><span class="proof-type">BD</span> <code>sharp(stella)</code> <span class="proof-from">from: observant(stella)</span></div><div class="proof-step derived"><span class="proof-type">BD</span> <code>strong(stella)</code> <span class="proof-from">from: sharp(stella)</span></div><div class="proof-step derived"><span class="proof-type">MT</span> <code>~inventive(stella)</code> <span class="proof-from">from: strong(stella)</span></div><div class="proof-step derived"><span class="proof-type">BD</span> <code>brave(stella)</code> <span class="proof-from">from: ~inventive(stella)</span></div><div class="proof-step derived"><span class="proof-type">DD</span> <code>~well_prepared(stella)</code> <span class="proof-from">from: brave(stella)</span></div><div class="proof-step derived"><span class="proof-type">MT</span> <code>~grateful(stella)</code> <span class="proof-from">from: ~well_prepared(stella)</span></div><div class="proof-step derived"><span class="proof-type">UI</span> <code>generous(stella)</code> <span class="proof-from">from: ~grateful(stella)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">marine biology</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In a marine biology research team, several scientists are being evaluated for their traits. Carl, Harley, Luna, and Stella are all observant. However, none of them are grateful. Stella has specific traits that are influenced by her characteristics. If Stella is not inventive, she is brave. If Stella is not grateful, she is generous. If Stella is observant, she is sharp. If Stella is sharp, she is strong. If Stella is grateful, she is well-prepared. If Stella is well-prepared, she is not brave. If Stella is focused, she is not cautious. If Stella is evidence-driven, she is not fit. Additionally, there are some disjunctions: Stella is either observant or not articulate. Stella is either sharp or not evidence-driven. Stella is either not inventive or not focused. The question is whether Stella is principled.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Stella principled?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">carl</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_carl</code></div><div class="map-row"><code class="map-old">harley</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_harley</code></div><div class="map-row"><code class="map-old">luna</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_luna</code></div><div class="map-row"><code class="map-old">stella</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_stella</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">communicative</code></div><div class="map-row"><code class="map-old">brave</code><span class="map-arrow">&rarr;</span><code class="map-new">daring</code></div><div class="map-row"><code class="map-old">cautious</code><span class="map-arrow">&rarr;</span><code class="map-new">prudent</code></div><div class="map-row"><code class="map-old">evidence_driven</code><span class="map-arrow">&rarr;</span><code class="map-new">data_oriented</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">physically_qualified</code></div><div class="map-row"><code class="map-old">focused</code><span class="map-arrow">&rarr;</span><code class="map-new">concentrated</code></div><div class="map-row"><code class="map-old">generous</code><span class="map-arrow">&rarr;</span><code class="map-new">charitable</code></div><div class="map-row"><code class="map-old">grateful</code><span class="map-arrow">&rarr;</span><code class="map-new">appreciative</code></div><div class="map-row"><code class="map-old">inventive</code><span class="map-arrow">&rarr;</span><code class="map-new">creative</code></div><div class="map-row"><code class="map-old">methodical</code><span class="map-arrow">&rarr;</span><code class="map-new">organized</code></div><div class="map-row"><code class="map-old">sharp</code><span class="map-arrow">&rarr;</span><code class="map-new">perceptive</code></div><div class="map-row"><code class="map-old">strong</code><span class="map-arrow">&rarr;</span><code class="map-new">robust</code></div><div class="map-row"><code class="map-old">well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">adequately_trained</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">ethical</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="flb_v1_000029">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#2</span>
+                <span class="card-id">flb_v1_000029</span>
+                <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
+                <span class="type-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #16a34a40">Answer: True</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (7 steps):</span>
+            <span class="rule-badge" style="background:#be185d15;color:#be185d;border:1px solid #be185d40">DD</span> <span class="rule-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">CD</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">HS</span> <span class="rule-badge" style="background:#be185d15;color:#be185d;border:1px solid #be185d40">DD</span> <span class="rule-badge" style="background:#4338ca15;color:#4338ca;border:1px solid #4338ca40">BD</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">EI</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>thorough(faith)</code> = <strong>True</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>content(faith)</code></div><div class="logic-item"><code>content(mark)</code></div><div class="logic-item"><code>content(nico)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>analytical(faith) :- observant(faith)</code></div><div class="logic-item"><code>brilliant(faith) :- disciplined(faith)</code></div><div class="logic-item"><code>decisive(faith) :- strategic(faith)</code></div><div class="logic-item"><code>observant(faith) :- ~productive(faith)</code></div><div class="logic-item"><code>optimistic(faith) :- ~resilient(faith)</code></div><div class="logic-item"><code>strategic(faith) :- analytical(faith)</code></div><div class="logic-item"><code>thorough(faith) :- optimistic(faith)</code></div><div class="logic-item"><code>~content(faith) :- productive(faith)</code></div><div class="logic-item"><code>~decisive(faith) :- resilient(faith)</code></div><div class="logic-item"><code>~fit(faith) :- supportive(faith)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>~productive(faith) v disciplined(faith)</code></div><div class="logic-item"><code>~resilient(faith) v ~supportive(faith)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>content(faith)</code></div><div class="proof-step derived"><span class="proof-type">DD</span> <code>~productive(faith)</code> <span class="proof-from">from: content(faith)</span></div><div class="proof-step derived"><span class="proof-type">CD</span> <code>observant(faith)</code> <span class="proof-from">from: ~productive(faith)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>analytical(faith)</code> <span class="proof-from">from: observant(faith)</span></div><div class="proof-step derived"><span class="proof-type">HS</span> <code>decisive(faith)</code> <span class="proof-from">from: analytical(faith)</span></div><div class="proof-step derived"><span class="proof-type">DD</span> <code>~resilient(faith)</code> <span class="proof-from">from: decisive(faith)</span></div><div class="proof-step derived"><span class="proof-type">BD</span> <code>optimistic(faith)</code> <span class="proof-from">from: ~resilient(faith)</span></div><div class="proof-step derived"><span class="proof-type">EI</span> <code>thorough(faith)</code> <span class="proof-from">from: optimistic(faith)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">astronomy</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In an astronomy research team, Faith, Mark, and Nico are all content with their work. Faith&#x27;s traits are influenced by various factors. If Faith is observant, she is analytical. If she is disciplined, she is brilliant. If she is strategic, she is decisive. If she is not productive, she is observant. If she is not resilient, she is optimistic. If she is analytical, she is strategic. If she is optimistic, she is thorough. If she is productive, she is not content. Additionally, either Faith is not productive or she is disciplined. Also, either Faith is not resilient or she is not supportive.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Faith thorough?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">faith</code><span class="map-arrow">&rarr;</span><code class="map-new">faith</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">analytical</code><span class="map-arrow">&rarr;</span><code class="map-new">analytical</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">content</code><span class="map-arrow">&rarr;</span><code class="map-new">content</code></div><div class="map-row"><code class="map-old">decisive</code><span class="map-arrow">&rarr;</span><code class="map-new">decisive</code></div><div class="map-row"><code class="map-old">disciplined</code><span class="map-arrow">&rarr;</span><code class="map-new">disciplined</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">observant</code></div><div class="map-row"><code class="map-old">optimistic</code><span class="map-arrow">&rarr;</span><code class="map-new">optimistic</code></div><div class="map-row"><code class="map-old">productive</code><span class="map-arrow">&rarr;</span><code class="map-new">productive</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: True</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="nlb_v1_000046">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#3</span>
+                <span class="card-id">nlb_v1_000046</span>
+                <span class="type-badge" style="background:#ecfdf5;color:#059669;border:1px solid #05966940">non_monotonic</span>
+                <span class="type-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #16a34a40">Answer: True</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (7 steps):</span>
+            <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#92400e15;color:#92400e;border:1px solid #92400e40">EXCEPT_2</span> <span class="rule-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">EXCEPTION</span> <span class="rule-badge" style="background:#b91c1c15;color:#b91c1c;border:1px solid #b91c1c40">PRIORITY</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">DEFAULT_IRR</span> <span class="rule-badge" style="background:#7e22ce15;color:#7e22ce;border:1px solid #7e22ce40">EXCEPT_3</span> <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DEFAULT</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>certified(lennon)</code> = <strong>True</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>ab_reliable(faith)</code></div><div class="logic-item"><code>brilliant(lennon)</code></div><div class="logic-item"><code>competitive(lennon)</code></div><div class="logic-item"><code>permitted(lennon)</code></div><div class="logic-item"><code>trustworthy(faith)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>evaluated(lennon) :- exempt(lennon)</code></div><div class="logic-item"><code>exempt(lennon) :- studious(lennon)</code></div><div class="logic-item"><code>selected(lennon) :- reliable(lennon)</code></div><div class="logic-item"><code>studious(lennon) :- brilliant(lennon)</code></div></div>
+                
+                <div class="logic-section"><div class="logic-label">Default Rules</div><div class="logic-item"><code>certified(lennon) :- selected(lennon), not ab_certified(lennon)</code></div><div class="logic-item"><code>reliable(lennon) :- trustworthy(lennon), not ab_reliable(lennon)</code></div><div class="logic-item"><code>trustworthy(lennon) :- evaluated(lennon), not ab_trustworthy_a(lennon)</code></div><div class="logic-item"><code>~trustworthy(lennon) :- permitted(lennon), not ab_trustworthy_b(lennon)</code></div></div>
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>brilliant(lennon)</code></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>studious(lennon)</code> <span class="proof-from">from: brilliant(lennon)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>exempt(lennon)</code> <span class="proof-from">from: studious(lennon)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>evaluated(lennon)</code> <span class="proof-from">from: exempt(lennon)</span></div><div class="proof-step derived"><span class="proof-type">PRIORITY</span> <code>trustworthy(lennon)</code> <span class="proof-from">from: evaluated(lennon)</span></div><div class="proof-step derived"><span class="proof-type">DEFAULT_IRR</span> <code>reliable(lennon)</code> <span class="proof-from">from: trustworthy(lennon)</span></div><div class="proof-step derived"><span class="proof-type">EXCEPT_3</span> <code>selected(lennon)</code> <span class="proof-from">from: reliable(lennon)</span></div><div class="proof-step derived"><span class="proof-type">DEFAULT</span> <code>certified(lennon)</code> <span class="proof-from">from: selected(lennon)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">cooking</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In a cooking competition, Lennon is a contestant. Faith is a judge. The judges evaluate contestants based on their reliability, trustworthiness, and other attributes. Certain rules determine if a contestant is certified, selected, or exempt from evaluations.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Lennon certified?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">faith</code><span class="map-arrow">&rarr;</span><code class="map-new">judge_faith</code></div><div class="map-row"><code class="map-old">lennon</code><span class="map-arrow">&rarr;</span><code class="map-new">contestant_lennon</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_reliable</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_reliable</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">competitive</code><span class="map-arrow">&rarr;</span><code class="map-new">competitive</code></div><div class="map-row"><code class="map-old">evaluated</code><span class="map-arrow">&rarr;</span><code class="map-new">evaluated</code></div><div class="map-row"><code class="map-old">exempt</code><span class="map-arrow">&rarr;</span><code class="map-new">exempt</code></div><div class="map-row"><code class="map-old">permitted</code><span class="map-arrow">&rarr;</span><code class="map-new">permitted</code></div><div class="map-row"><code class="map-old">reliable</code><span class="map-arrow">&rarr;</span><code class="map-new">reliable</code></div><div class="map-row"><code class="map-old">selected</code><span class="map-arrow">&rarr;</span><code class="map-new">selected</code></div><div class="map-row"><code class="map-old">studious</code><span class="map-arrow">&rarr;</span><code class="map-new">studious</code></div><div class="map-row"><code class="map-old">trustworthy</code><span class="map-arrow">&rarr;</span><code class="map-new">trustworthy</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: True</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="flb_v1_000030">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#4</span>
+                <span class="card-id">flb_v1_000030</span>
+                <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
+                <span class="type-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #dc262640">Answer: False</span>
+                <span class="status-badge status-valid">Valid</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (7 steps):</span>
+            <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DS</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">EI</span> <span class="rule-badge" style="background:#be185d15;color:#be185d;border:1px solid #be185d40">DD</span> <span class="rule-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">CD</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">EI</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">HS</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>~astute(iris)</code> = <strong>False</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>respectful(harper)</code></div><div class="logic-item"><code>respectful(iris)</code></div><div class="logic-item"><code>respectful(sofia)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>active(iris) :- ~punctual(iris)</code></div><div class="logic-item"><code>astute(iris) :- thorough(iris)</code></div><div class="logic-item"><code>friendly(iris) :- active(iris)</code></div><div class="logic-item"><code>impartial(iris) :- logical(iris)</code></div><div class="logic-item"><code>motivated(iris) :- energetic(iris)</code></div><div class="logic-item"><code>observant(iris) :- respectful(iris)</code></div><div class="logic-item"><code>thorough(iris) :- friendly(iris)</code></div><div class="logic-item"><code>~motivated(iris) :- punctual(iris)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>~observant(iris) v energetic(iris)</code></div><div class="logic-item"><code>~punctual(iris) v logical(iris)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>respectful(iris)</code></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>observant(iris)</code> <span class="proof-from">from: respectful(iris)</span></div><div class="proof-step derived"><span class="proof-type">DS</span> <code>energetic(iris)</code> <span class="proof-from">from: observant(iris)</span></div><div class="proof-step derived"><span class="proof-type">EI</span> <code>motivated(iris)</code> <span class="proof-from">from: energetic(iris)</span></div><div class="proof-step derived"><span class="proof-type">DD</span> <code>~punctual(iris)</code> <span class="proof-from">from: motivated(iris)</span></div><div class="proof-step derived"><span class="proof-type">CD</span> <code>active(iris)</code> <span class="proof-from">from: ~punctual(iris)</span></div><div class="proof-step derived"><span class="proof-type">EI</span> <code>friendly(iris)</code> <span class="proof-from">from: active(iris)</span></div><div class="proof-step derived"><span class="proof-type">HS</span> <code>astute(iris)</code> <span class="proof-from">from: friendly(iris)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">criminal law</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: valid</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In a criminal law case, the court is evaluating the characteristics of three individuals: Harper, Iris, and Sofia. The court has determined that all three are respectful. The court also has a set of rules and disjunctions that define the relationships between these characteristics. For instance, if Iris is not punctual, then she is active. If Iris is thorough, then she is astute. If Iris is active, then she is friendly. If Iris is logical, then she is impartial. If Iris is energetic, then she is motivated. If Iris is respectful, then she is observant. If Iris is friendly, then she is thorough. Additionally, there are disjunctions that state that either Iris is not observant or she is energetic, and either Iris is not punctual or she is logical.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Iris not astute?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">harper</code><span class="map-arrow">&rarr;</span><code class="map-new">harper</code></div><div class="map-row"><code class="map-old">iris</code><span class="map-arrow">&rarr;</span><code class="map-new">iris</code></div><div class="map-row"><code class="map-old">sofia</code><span class="map-arrow">&rarr;</span><code class="map-new">sofia</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">active</code><span class="map-arrow">&rarr;</span><code class="map-new">active</code></div><div class="map-row"><code class="map-old">astute</code><span class="map-arrow">&rarr;</span><code class="map-new">astute</code></div><div class="map-row"><code class="map-old">energetic</code><span class="map-arrow">&rarr;</span><code class="map-new">energetic</code></div><div class="map-row"><code class="map-old">friendly</code><span class="map-arrow">&rarr;</span><code class="map-new">friendly</code></div><div class="map-row"><code class="map-old">impartial</code><span class="map-arrow">&rarr;</span><code class="map-new">impartial</code></div><div class="map-row"><code class="map-old">logical</code><span class="map-arrow">&rarr;</span><code class="map-new">logical</code></div><div class="map-row"><code class="map-old">motivated</code><span class="map-arrow">&rarr;</span><code class="map-new">motivated</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">observant</code></div><div class="map-row"><code class="map-old">punctual</code><span class="map-arrow">&rarr;</span><code class="map-new">punctual</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Respectful(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>respectful(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: observant(iris) :- respectful(iris), we can derive:
+
+&lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Observant(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>observant(iris) :- respectful(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the disjunction: ~observant(iris) v energetic(iris), and since we have observant(iris), we can infer:
+
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Energetic(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~observant(iris) v energetic(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: energetic(iris) :- motivated(iris), we can derive:
+
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;3&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Motivated(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>motivated(iris) :- energetic(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the disjunction: ~punctual(iris) v logical(iris), and the rule: ~motivated(iris) :- punctual(iris), we can infer:
+
+&lt;step n=&quot;5&quot; type=&quot;derived&quot; from=&quot;4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>~punctual(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~motivated(iris) :- punctual(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the disjunction: ~punctual(iris) v logical(iris), and since we have ~punctual(iris), we can infer:
+
+&lt;step n=&quot;6&quot; type=&quot;derived&quot; from=&quot;5&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Logical(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~punctual(iris) v logical(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: impartial(iris) :- logical(iris), we can derive:
+
+&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Impartial(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>impartial(iris) :- logical(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: friendly(iris) :- active(iris), and the rule: active(iris) :- ~punctual(iris), we can derive:
+
+&lt;step n=&quot;8&quot; type=&quot;derived&quot; from=&quot;5&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Active(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>active(iris) :- ~punctual(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: friendly(iris) :- active(iris), we can derive:
+
+&lt;step n=&quot;9&quot; type=&quot;derived&quot; from=&quot;8&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Friendly(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>friendly(iris) :- active(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: thorough(iris) :- friendly(iris), we can derive:
+
+&lt;step n=&quot;10&quot; type=&quot;derived&quot; from=&quot;9&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Thorough(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>thorough(iris) :- friendly(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+From the rule: astute(iris) :- thorough(iris), we can derive:
+
+&lt;step n=&quot;11&quot; type=&quot;derived&quot; from=&quot;10&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Astute(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>astute(iris) :- thorough(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+Therefore, the query ~astute(iris) is false.
+
+Answer: False
+<span class="xml-tag">&lt;/think&gt;</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="flb_v1_000028">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#5</span>
+                <span class="card-id">flb_v1_000028</span>
+                <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
+                <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (7 steps):</span>
+            <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">EI</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">HS</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">UI</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">EI</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#4338ca15;color:#4338ca;border:1px solid #4338ca40">BD</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">HS</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>confident(cora)</code> = <strong>Unknown</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>fair_minded(cora)</code></div><div class="logic-item"><code>fair_minded(reed)</code></div><div class="logic-item"><code>fair_minded(rex)</code></div><div class="logic-item"><code>fair_minded(sage)</code></div><div class="logic-item"><code>wise(reed)</code></div><div class="logic-item"><code>wise(rex)</code></div><div class="logic-item"><code>wise(sage)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>analytical(cora) :- fair_minded(cora)</code></div><div class="logic-item"><code>energetic(cora) :- wise(cora)</code></div><div class="logic-item"><code>fit(cora) :- respectful(cora)</code></div><div class="logic-item"><code>focused(cora) :- rested(cora)</code></div><div class="logic-item"><code>judicious(cora) :- energetic(cora)</code></div><div class="logic-item"><code>open_minded(cora) :- analytical(cora)</code></div><div class="logic-item"><code>respectful(cora) :- judicious(cora)</code></div><div class="logic-item"><code>rested(cora) :- fit(cora)</code></div><div class="logic-item"><code>wise(cora) :- open_minded(cora)</code></div><div class="logic-item"><code>~resourceful(cora) :- methodical(cora)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>respectful(cora) v ~methodical(cora)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>fair_minded(cora)</code></div><div class="proof-step derived"><span class="proof-type">EI</span> <code>analytical(cora)</code> <span class="proof-from">from: fair_minded(cora)</span></div><div class="proof-step derived"><span class="proof-type">HS</span> <code>wise(cora)</code> <span class="proof-from">from: analytical(cora)</span></div><div class="proof-step derived"><span class="proof-type">UI</span> <code>energetic(cora)</code> <span class="proof-from">from: wise(cora)</span></div><div class="proof-step derived"><span class="proof-type">EI</span> <code>judicious(cora)</code> <span class="proof-from">from: energetic(cora)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>respectful(cora)</code> <span class="proof-from">from: judicious(cora)</span></div><div class="proof-step derived"><span class="proof-type">BD</span> <code>fit(cora)</code> <span class="proof-from">from: respectful(cora)</span></div><div class="proof-step derived"><span class="proof-type">HS</span> <code>focused(cora)</code> <span class="proof-from">from: fit(cora)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">architecture</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In an architectural firm, Cora, Reed, Rex, and Sage are team members. The firm values fair-mindedness, wisdom, and various other qualities. It is known that Cora, Reed, Rex, and Sage are all fair-minded. Additionally, Reed, Rex, and Sage are wise. The firm has established some rules: Cora is analytical if she is fair-minded, energetic if she is wise, fit if she is respectful, focused if she is rested, judicious if she is energetic, open-minded if she is analytical, respectful if she is judicious, and rested if she is fit. There is also a disjunction that Cora is respectful or not methodical. The question is whether Cora is confident.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Cora confident?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">cora</code><span class="map-arrow">&rarr;</span><code class="map-new">cora</code></div><div class="map-row"><code class="map-old">reed</code><span class="map-arrow">&rarr;</span><code class="map-new">reed</code></div><div class="map-row"><code class="map-old">rex</code><span class="map-arrow">&rarr;</span><code class="map-new">rex</code></div><div class="map-row"><code class="map-old">sage</code><span class="map-arrow">&rarr;</span><code class="map-new">sage</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">fair_minded</code><span class="map-arrow">&rarr;</span><code class="map-new">fair_minded</code></div><div class="map-row"><code class="map-old">wise</code><span class="map-arrow">&rarr;</span><code class="map-new">wise</code></div><div class="map-row"><code class="map-old">analytical</code><span class="map-arrow">&rarr;</span><code class="map-new">analytical</code></div><div class="map-row"><code class="map-old">energetic</code><span class="map-arrow">&rarr;</span><code class="map-new">energetic</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">focused</code><span class="map-arrow">&rarr;</span><code class="map-new">focused</code></div><div class="map-row"><code class="map-old">judicious</code><span class="map-arrow">&rarr;</span><code class="map-new">judicious</code></div><div class="map-row"><code class="map-old">open_minded</code><span class="map-arrow">&rarr;</span><code class="map-new">open_minded</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div><div class="map-row"><code class="map-old">rested</code><span class="map-arrow">&rarr;</span><code class="map-new">rested</code></div><div class="map-row"><code class="map-old">confident</code><span class="map-arrow">&rarr;</span><code class="map-new">confident</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="tlb_v1_000010">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#6</span>
+                <span class="card-id">tlb_v1_000010</span>
+                <span class="type-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #2563eb40">propositional</span>
+                <span class="type-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #dc262640">Answer: False</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (6 steps):</span>
+            <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#be185d15;color:#be185d;border:1px solid #be185d40">DD</span> <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DS</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">HS</span> <span class="rule-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">CD</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">MT</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>loyal(alice)</code> = <strong>False</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>creative(alice)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>ambitious(alice) :- empathetic(alice)</code></div><div class="logic-item"><code>fit(alice) :- strategic(alice)</code></div><div class="logic-item"><code>impartial(alice) :- experienced(alice)</code></div><div class="logic-item"><code>proactive(alice) :- creative(alice)</code></div><div class="logic-item"><code>strategic(alice) :- impartial(alice)</code></div><div class="logic-item"><code>~fit(alice) :- loyal(alice)</code></div><div class="logic-item"><code>~proactive(alice) :- principled(alice)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>principled(alice) v experienced(alice)</code></div><div class="logic-item"><code>strategic(alice) v empathetic(alice)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>creative(alice)</code></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>proactive(alice)</code> <span class="proof-from">from: creative(alice)</span></div><div class="proof-step derived"><span class="proof-type">DD</span> <code>~principled(alice)</code> <span class="proof-from">from: proactive(alice)</span></div><div class="proof-step derived"><span class="proof-type">DS</span> <code>experienced(alice)</code> <span class="proof-from">from: ~principled(alice)</span></div><div class="proof-step derived"><span class="proof-type">HS</span> <code>strategic(alice)</code> <span class="proof-from">from: experienced(alice)</span></div><div class="proof-step derived"><span class="proof-type">CD</span> <code>fit(alice)</code> <span class="proof-from">from: strategic(alice)</span></div><div class="proof-step derived"><span class="proof-type">MT</span> <code>~loyal(alice)</code> <span class="proof-from">from: fit(alice)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">music theory</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In music theory, Alice is known to be creative. Certain traits are linked to other traits. If Alice is empathetic, then she is ambitious. If Alice is strategic, then she is fit. If Alice is experienced, then she is impartial. If Alice is creative, then she is proactive. If Alice is strategic, then she is impartial. If Alice is loyal, then she is not fit. If Alice is principled, then she is not proactive. Either Alice is principled or experienced. Either Alice is strategic or empathetic. What can we determine about Alice&#x27;s loyalty?</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Alice loyal?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">alice</code><span class="map-arrow">&rarr;</span><code class="map-new">alice</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ambitious</code><span class="map-arrow">&rarr;</span><code class="map-new">ambitious</code></div><div class="map-row"><code class="map-old">creative</code><span class="map-arrow">&rarr;</span><code class="map-new">creative</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">experienced</code><span class="map-arrow">&rarr;</span><code class="map-new">experienced</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">impartial</code><span class="map-arrow">&rarr;</span><code class="map-new">impartial</code></div><div class="map-row"><code class="map-old">loyal</code><span class="map-arrow">&rarr;</span><code class="map-new">loyal</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">principled</code></div><div class="map-row"><code class="map-old">proactive</code><span class="map-arrow">&rarr;</span><code class="map-new">proactive</code></div><div class="map-row"><code class="map-old">strategic</code><span class="map-arrow">&rarr;</span><code class="map-new">strategic</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: False</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="tlb_v1_000008">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#7</span>
+                <span class="card-id">tlb_v1_000008</span>
+                <span class="type-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #2563eb40">propositional</span>
+                <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (5 steps):</span>
+            <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#4338ca15;color:#4338ca;border:1px solid #4338ca40">BD</span> <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DS</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">MT</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>courageous(emma)</code> = <strong>Unknown</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>diligent(emma)</code></div><div class="logic-item"><code>wise(steve)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>anxious(steve) :- rational(steve)</code></div><div class="logic-item"><code>fit(steve) :- wise(steve)</code></div><div class="logic-item"><code>loyal(emma) :- proactive(emma)</code></div><div class="logic-item"><code>polite(emma) :- capable(emma)</code></div><div class="logic-item"><code>proactive(emma) :- diligent(emma)</code></div><div class="logic-item"><code>~polite(emma) :- resilient(emma)</code></div><div class="logic-item"><code>~strategic(emma) :- supportive(emma)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>proactive(emma) v ~supportive(emma)</code></div><div class="logic-item"><code>~fit(steve) v rational(steve)</code></div><div class="logic-item"><code>~loyal(emma) v capable(emma)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>diligent(emma)</code></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>proactive(emma)</code> <span class="proof-from">from: diligent(emma)</span></div><div class="proof-step derived"><span class="proof-type">BD</span> <code>loyal(emma)</code> <span class="proof-from">from: proactive(emma)</span></div><div class="proof-step derived"><span class="proof-type">DS</span> <code>capable(emma)</code> <span class="proof-from">from: loyal(emma)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>polite(emma)</code> <span class="proof-from">from: capable(emma)</span></div><div class="proof-step derived"><span class="proof-type">MT</span> <code>~resilient(emma)</code> <span class="proof-from">from: polite(emma)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">gardening</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In a gardening community, Emma and Steve are known for their traits. Emma is diligent, while Steve is wise. The following rules apply to their characteristics: if Steve is rational, he is anxious; if Steve is wise, he is fit; if Emma is proactive, she is loyal; if Emma is capable, she is polite; if Emma is diligent, she is proactive; if Emma is resilient, she is not polite; if Emma is supportive, she is not strategic. Additionally, there are disjunctions: Emma is either proactive or not supportive; Steve is either not fit or rational; and Emma is either not loyal or capable. The question is whether Emma is courageous.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Emma courageous?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">emma</code><span class="map-arrow">&rarr;</span><code class="map-new">gardener_emma</code></div><div class="map-row"><code class="map-old">steve</code><span class="map-arrow">&rarr;</span><code class="map-new">gardener_steve</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">anxious</code><span class="map-arrow">&rarr;</span><code class="map-new">anxious</code></div><div class="map-row"><code class="map-old">capable</code><span class="map-arrow">&rarr;</span><code class="map-new">capable</code></div><div class="map-row"><code class="map-old">diligent</code><span class="map-arrow">&rarr;</span><code class="map-new">diligent</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">loyal</code><span class="map-arrow">&rarr;</span><code class="map-new">loyal</code></div><div class="map-row"><code class="map-old">polite</code><span class="map-arrow">&rarr;</span><code class="map-new">polite</code></div><div class="map-row"><code class="map-old">proactive</code><span class="map-arrow">&rarr;</span><code class="map-new">proactive</code></div><div class="map-row"><code class="map-old">rational</code><span class="map-arrow">&rarr;</span><code class="map-new">rational</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">strategic</code><span class="map-arrow">&rarr;</span><code class="map-new">strategic</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="nlb_v1_000047">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#8</span>
+                <span class="card-id">nlb_v1_000047</span>
+                <span class="type-badge" style="background:#ecfdf5;color:#059669;border:1px solid #05966940">non_monotonic</span>
+                <span class="type-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #dc262640">Answer: False</span>
+                <span class="status-badge status-valid">Valid</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (5 steps):</span>
+            <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DEFAULT</span> <span class="rule-badge" style="background:#7e22ce15;color:#7e22ce;border:1px solid #7e22ce40">EXCEPT_3</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#0891b215;color:#0891b2;border:1px solid #0891b240">DEFAULT_OPEN</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>~ambitious(jade)</code> = <strong>False</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>ab_healthy(marley)</code></div><div class="logic-item"><code>ab_well_prepared(cyrus)</code></div><div class="logic-item"><code>active(jamie)</code></div><div class="logic-item"><code>enrolled(jade)</code></div><div class="logic-item"><code>enrolled(marley)</code></div><div class="logic-item"><code>patient(kit)</code></div><div class="logic-item"><code>systematic(cyrus)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>ambitious(jade) :- well_prepared(jade)</code></div><div class="logic-item"><code>empathetic(jamie) :- intuitive(jamie)</code></div><div class="logic-item"><code>fit(jade) :- healthy(jade)</code></div><div class="logic-item"><code>principled(kit) :- patient(kit)</code></div><div class="logic-item"><code>resilient(kit) :- resourceful(kit)</code></div><div class="logic-item"><code>respectful(jamie) :- active(jamie)</code></div><div class="logic-item"><code>systematic(jade) :- fit(jade)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>~principled(kit) v resourceful(kit)</code></div><div class="logic-item"><code>~respectful(jamie) v intuitive(jamie)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Default Rules</div><div class="logic-item"><code>healthy(jade) :- enrolled(jade), not ab_healthy(jade)</code></div><div class="logic-item"><code>well_prepared(jade) :- systematic(jade), not ab_well_prepared(jade)</code></div></div>
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>enrolled(jade)</code></div><div class="proof-step derived"><span class="proof-type">DEFAULT</span> <code>healthy(jade)</code> <span class="proof-from">from: enrolled(jade)</span></div><div class="proof-step derived"><span class="proof-type">EXCEPT_3</span> <code>fit(jade)</code> <span class="proof-from">from: healthy(jade)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>systematic(jade)</code> <span class="proof-from">from: fit(jade)</span></div><div class="proof-step derived"><span class="proof-type">DEFAULT_OPEN</span> <code>well_prepared(jade)</code> <span class="proof-from">from: systematic(jade)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>ambitious(jade)</code> <span class="proof-from">from: well_prepared(jade)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">meteorology</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 3</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: valid</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In a weather forecasting team, there are five members: Cyrus, Jade, Jamie, Kit, and Marley. Certain attributes are associated with these individuals. Marley is ab_healthy, Cyrus is ab_well_prepared, Jamie is active, Jade and Marley are enrolled, and Kit is patient. Some rules apply to these individuals: Jade is ambitious if she is well_prepared, Jamie is empathetic if she is intuitive, Jade is fit if she is healthy, Kit is principled if she is patient, Kit is resilient if she is resourceful, Jamie is respectful if she is active, and Jade is systematic if she is fit. There are also disjunctions: Kit is not principled or resourceful, and Jamie is not respectful or intuitive. Default rules state that Jade is healthy if she is enrolled and not ab_healthy, and Jade is well_prepared if she is systematic and not ab_well_prepared. The query is whether Jade is not ambitious.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Jade not ambitious?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">cyrus</code><span class="map-arrow">&rarr;</span><code class="map-new">cyrus</code></div><div class="map-row"><code class="map-old">jade</code><span class="map-arrow">&rarr;</span><code class="map-new">jade</code></div><div class="map-row"><code class="map-old">jamie</code><span class="map-arrow">&rarr;</span><code class="map-new">jamie</code></div><div class="map-row"><code class="map-old">kit</code><span class="map-arrow">&rarr;</span><code class="map-new">kit</code></div><div class="map-row"><code class="map-old">marley</code><span class="map-arrow">&rarr;</span><code class="map-new">marley</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_healthy</code><span class="map-arrow">&rarr;</span><code class="map-new">healthy</code></div><div class="map-row"><code class="map-old">ab_well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">well_prepared</code></div><div class="map-row"><code class="map-old">active</code><span class="map-arrow">&rarr;</span><code class="map-new">active</code></div><div class="map-row"><code class="map-old">ambitious</code><span class="map-arrow">&rarr;</span><code class="map-new">ambitious</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">enrolled</code><span class="map-arrow">&rarr;</span><code class="map-new">enrolled</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">healthy</code><span class="map-arrow">&rarr;</span><code class="map-new">healthy</code></div><div class="map-row"><code class="map-old">intuitive</code><span class="map-arrow">&rarr;</span><code class="map-new">intuitive</code></div><div class="map-row"><code class="map-old">patient</code><span class="map-arrow">&rarr;</span><code class="map-new">patient</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">principled</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div><div class="map-row"><code class="map-old">systematic</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is enrolled.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>enrolled(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is not ab_healthy.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not ab_healthy(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is healthy.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>healthy(jade) :- enrolled(jade), not ab_healthy(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is systematic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>systematic(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is not ab_well_prepared.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not ab_well_prepared(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;derived&quot; from=&quot;4,5&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is well_prepared.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>well_prepared(jade) :- systematic(jade), not ab_well_prepared(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is ambitious.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>ambitious(jade) :- well_prepared(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;8&quot; type=&quot;query&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Is Jade not ambitious?<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not ambitious(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;9&quot; type=&quot;contradiction&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Jade is ambitious, so she is not not ambitious.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>ambitious(jade) and not ambitious(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+Answer: False
+<span class="xml-tag">&lt;/think&gt;</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="tlb_v1_000012">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#9</span>
+                <span class="card-id">tlb_v1_000012</span>
+                <span class="type-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #2563eb40">propositional</span>
+                <span class="type-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #16a34a40">Answer: True</span>
+                <span class="status-badge status-failed">Parse Failed</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (4 steps):</span>
+            <span class="rule-badge" style="background:#0891b215;color:#0891b2;border:1px solid #0891b240">MI</span> <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DS</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#d9770615;color:#d97706;border:1px solid #d9770640">HS</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>knowledgeable(emma)</code> = <strong>True</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>motivated(emma)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>adaptable(emma) :- perceptive(emma)</code></div><div class="logic-item"><code>articulate(emma) :- adaptable(emma)</code></div><div class="logic-item"><code>brilliant(emma) :- motivated(emma)</code></div><div class="logic-item"><code>knowledgeable(emma) :- articulate(emma)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Disjunctions</div><div class="logic-item"><code>~brilliant(emma) v perceptive(emma)</code></div></div>
+                
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>motivated(emma)</code></div><div class="proof-step derived"><span class="proof-type">MI</span> <code>brilliant(emma)</code> <span class="proof-from">from: motivated(emma)</span></div><div class="proof-step derived"><span class="proof-type">DS</span> <code>perceptive(emma)</code> <span class="proof-from">from: brilliant(emma)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>adaptable(emma)</code> <span class="proof-from">from: perceptive(emma)</span></div><div class="proof-step derived"><span class="proof-type">HS</span> <code>knowledgeable(emma)</code> <span class="proof-from">from: adaptable(emma)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">competitive sports</span></div>
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: FAILED</span>
+                </div>
+                <div class="error-box">
+                    <div class="error-title">JSON Parse Failed</div>
+                    <div class="error-desc">The model produced output that could not be parsed as valid JSON, even after stripping markdown fences and &lt;think&gt; blocks.</div>
+                </div>
+                <div class="raw-response-box">
+                    <div class="comp-label">Raw Response (first 2000 chars)</div>
+                    <div class="rendered-content raw-content">{
+  &quot;context&quot;: &quot;In a competitive sports environment, Emma exhibits certain traits. Emma is motivated. If Emma is perceptive, then she is adaptable. If Emma is adaptable, then she is articulate. If Emma is motivated, then she is brilliant. If Emma is articulate, then she is knowledgeable. Additionally, either Emma is not brilliant or she is perceptive.&quot;,
+  &quot;question&quot;: &quot;Is Emma knowledgeable?&quot;,
+  &quot;entity_map&quot;: {&quot;emma&quot;: &quot;emma&quot;},
+  &quot;predicate_map&quot;: {&quot;motivated&quot;: &quot;motivated&quot;, &quot;adaptable&quot;: &quot;adaptable&quot;, &quot;articulate&quot;: &quot;articulate&quot;, &quot;brilliant&quot;: &quot;brilliant&quot;, &quot;knowledgeable&quot;: &quot;knowledgeable&quot;, &quot;perceptive&quot;: &quot;perceptive&quot;},
+  &quot;completion&quot;: &quot;&lt;/think&gt;
+
+&lt;/think&gt;
+
+{
+  &quot;context&quot;: &quot;In a competitive sports environment, Emma exhibits certain traits. Emma is motivated. If Emma is perceptive, then she is adaptable. If Emma is adaptable, then she is articulate. If Emma is motivated, then she is brilliant. If Emma is articulate, then she is knowledgeable. Additionally, either Emma is not brilliant or she is perceptive.&quot;,
+  &quot;question&quot;: &quot;Is Emma knowledgeable?&quot;,
+  &quot;entity_map&quot;: {&quot;emma&quot;: &quot;emma&quot;},
+  &quot;predicate_map&quot;: {&quot;motivated&quot;: &quot;motivated&quot;, &quot;adaptable&quot;: &quot;adaptable&quot;, &quot;articulate&quot;: &quot;articulate&quot;, &quot;brilliant&quot;: &quot;brilliant&quot;, &quot;knowledgeable&quot;: &quot;knowledgeable&quot;, &quot;perceptive&quot;: &quot;perceptive&quot;},
+  &quot;completion&quot;: &quot;&lt;/think&gt;
+
+&lt;/think&gt;
+
+{
+  &quot;context&quot;: &quot;In a competitive sports environment, Emma exhibits certain traits. Emma is motivated. If Emma is perceptive, then she is adaptable. If Emma is adaptable, then she is articulate. If Emma is motivated, then she is brilliant. If Emma is articulate, then she is knowledgeable. Additionally, either Emma is not brilliant or she is perceptive.&quot;,
+  &quot;question&quot;: &quot;Is Emma knowledgeable?&quot;,
+  &quot;entity_map&quot;: {&quot;emma&quot;: &quot;emma&quot;},
+  &quot;predicate_map&quot;: {&quot;motivated&quot;: &quot;motivated&quot;, &quot;adaptable&quot;: &quot;adaptable&quot;, &quot;articulate&quot;: &quot;articulate&quot;, &quot;brilliant&quot;: &quot;brilliant&quot;, &quot;knowledgeable&quot;: &quot;knowledgeable&quot;, &quot;perceptive&quot;: &quot;perceptive&quot;},
+  &quot;completion&quot;: &quot;&lt;/think&gt;
+
+{&quot;context&quot;: &quot;In a competitive sports envir...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-card" id="nlb_v1_000036">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-num">#10</span>
+                <span class="card-id">nlb_v1_000036</span>
+                <span class="type-badge" style="background:#ecfdf5;color:#059669;border:1px solid #05966940">non_monotonic</span>
+                <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
+                <span class="status-badge status-partial">Parsed (incomplete)</span>
+            </div>
+        </div>
+
+        <div class="plan-row">
+            <span class="plan-label">Inference Plan (5 steps):</span>
+            <span class="rule-badge" style="background:#05966915;color:#059669;border:1px solid #05966940">DEFAULT</span> <span class="rule-badge" style="background:#7e22ce15;color:#7e22ce;border:1px solid #7e22ce40">EXCEPT_3</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span> <span class="rule-badge" style="background:#0891b215;color:#0891b2;border:1px solid #0891b240">DEFAULT_OPEN</span> <span class="rule-badge" style="background:#2563eb15;color:#2563eb;border:1px solid #2563eb40">MP</span>
+        </div>
+
+        <div class="card-body">
+            <div class="skeleton-input">
+                <div class="section-title input-title">Input Skeleton</div>
+
+                <div class="query-box">
+                    <div class="context-label">Query</div>
+                    <div class="query-text"><code>enthusiastic(harley)</code> = <strong>Unknown</strong></div>
+                </div>
+
+                <div class="logic-section"><div class="logic-label">Facts</div><div class="logic-item"><code>ab_empathetic(kira)</code></div><div class="logic-item"><code>ab_knowledgeable(keith)</code></div><div class="logic-item"><code>polite(keith)</code></div><div class="logic-item"><code>systematic(harley)</code></div><div class="logic-item"><code>systematic(kira)</code></div></div>
+                <div class="logic-section"><div class="logic-label">Implications</div><div class="logic-item"><code>articulate(harley) :- knowledgeable(harley)</code></div><div class="logic-item"><code>polite(harley) :- rested(harley)</code></div><div class="logic-item"><code>rested(harley) :- empathetic(harley)</code></div></div>
+                
+                <div class="logic-section"><div class="logic-label">Default Rules</div><div class="logic-item"><code>empathetic(harley) :- systematic(harley), not ab_empathetic(harley)</code></div><div class="logic-item"><code>knowledgeable(harley) :- polite(harley), not ab_knowledgeable(harley)</code></div></div>
+
+                <div class="proof-section">
+                    <div class="logic-label">Gold Proof Chain</div>
+                    <div class="proof-step premise"><span class="proof-type">P</span> <code>systematic(harley)</code></div><div class="proof-step derived"><span class="proof-type">DEFAULT</span> <code>empathetic(harley)</code> <span class="proof-from">from: systematic(harley)</span></div><div class="proof-step derived"><span class="proof-type">EXCEPT_3</span> <code>rested(harley)</code> <span class="proof-from">from: empathetic(harley)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>polite(harley)</code> <span class="proof-from">from: rested(harley)</span></div><div class="proof-step derived"><span class="proof-type">DEFAULT_OPEN</span> <code>knowledgeable(harley)</code> <span class="proof-from">from: polite(harley)</span></div><div class="proof-step derived"><span class="proof-type">MP</span> <code>articulate(harley)</code> <span class="proof-from">from: knowledgeable(harley)</span></div>
+                </div>
+            </div>
+
+            
+            <div class="rendered-output">
+                <div class="section-title output-title">LLM Output <span class="domain-tag">geology</span></div>
+
+                <div class="output-meta">
+                    <span class="meta-item">Attempt: 1</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In a geology department, three researchers, Harley, Keith, and Kira, have various attributes. Kira is ab_empathetic, Keith is ab_knowledgeable and polite, and both Harley and Kira are systematic. Certain rules apply to determine other attributes. If Harley is systematic and not ab_empathetic, then he is empathetic. If Harley is polite and not ab_knowledgeable, then he is knowledgeable. Additionally, if Harley is knowledgeable, then he is articulate. If Harley is rested, then he is polite. If Harley is empathetic, then he is rested. The question is whether Harley is enthusiastic.</div>
+                </div>
+
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Harley enthusiastic?</div>
+                </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">harley</code><span class="map-arrow">&rarr;</span><code class="map-new">harley</code></div><div class="map-row"><code class="map-old">keith</code><span class="map-arrow">&rarr;</span><code class="map-new">keith</code></div><div class="map-row"><code class="map-old">kira</code><span class="map-arrow">&rarr;</span><code class="map-new">kira</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_empathetic</code></div><div class="map-row"><code class="map-old">ab_knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_knowledgeable</code></div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">articulate</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">knowledgeable</code></div><div class="map-row"><code class="map-old">polite</code><span class="map-arrow">&rarr;</span><code class="map-new">polite</code></div><div class="map-row"><code class="map-old">rested</code><span class="map-arrow">&rarr;</span><code class="map-new">rested</code></div><div class="map-row"><code class="map-old">systematic</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div></div>
+                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+            </div>
+        </div>
+    </div>
+
+<div class="footer">
+    Proof Bank v3 &mdash; RAILS Framework &middot; Generated by <code>scripts/build_rerender_demo_html.py</code>
+</div>
+
+</body>
+</html>
