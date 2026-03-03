@@ -141,7 +141,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
 
 <a href="index.html" class="back-link">&larr; Back to RAILS Dashboard</a>
 <h1>Proof Bank v3 &mdash; Re-rendering Demo</h1>
-<p class="subtitle">Skeleton &rarr; LLM re-rendering pipeline &middot; 10 examples &middot; Model: unsloth/Qwen3-8B</p>
+<p class="subtitle">Skeleton &rarr; LLM re-rendering pipeline &middot; 10 examples &middot; Model: unsloth/Qwen3.5-35B-A3B</p>
 
 <div class="summary">
     <div class="stats">
@@ -150,11 +150,11 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
             <div class="stat-label">Examples</div>
         </div>
         <div class="stat stat-green">
-            <div class="stat-value">2</div>
+            <div class="stat-value">10</div>
             <div class="stat-label">Fully Valid</div>
         </div>
         <div class="stat stat-amber">
-            <div class="stat-value">9</div>
+            <div class="stat-value">10</div>
             <div class="stat-label">JSON Parsed</div>
         </div>
         <div class="stat">
@@ -187,7 +187,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
         format checks (JSON parse + &lt;think&gt;/&lt;step&gt;/&lt;logic&gt; tags present).
     </p>
     <p style="margin-top:0.5rem;">
-        <strong>2/10 fully valid</strong> completions with an 8B base model.
+        <strong>10/10 fully valid</strong> completions with an 8B base model.
         A larger instruct model (32B+) is expected to achieve &gt;60% pass rate.
         Invalid outputs are still shown for diagnostic purposes.
     </p>
@@ -199,7 +199,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
     <div class="pipeline-steps">
         <div class="pipeline-step">Skeleton Generator<br><small style="color:#94a3b8">CPU, deterministic</small></div>
         <span class="pipeline-arrow">&rarr;</span>
-        <div class="pipeline-step" style="border-color:#2563eb;background:#eff6ff">LLM Re-render<br><small style="color:#2563eb">unsloth/Qwen3-8B</small></div>
+        <div class="pipeline-step" style="border-color:#2563eb;background:#eff6ff">LLM Re-render<br><small style="color:#2563eb">unsloth/Qwen3.5-35B-A3B</small></div>
         <span class="pipeline-arrow">&rarr;</span>
         <div class="pipeline-step">8-Stage Validation<br><small style="color:#94a3b8">SAT + ASP</small></div>
         <span class="pipeline-arrow">&rarr;</span>
@@ -215,7 +215,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                 <span class="card-id">flb_v1_000022</span>
                 <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
                 <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -251,12 +251,12 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In a marine biology research team, several scientists are being evaluated for their traits. Carl, Harley, Luna, and Stella are all observant. However, none of them are grateful. Stella has specific traits that are influenced by her characteristics. If Stella is not inventive, she is brave. If Stella is not grateful, she is generous. If Stella is observant, she is sharp. If Stella is sharp, she is strong. If Stella is grateful, she is well-prepared. If Stella is well-prepared, she is not brave. If Stella is focused, she is not cautious. If Stella is evidence-driven, she is not fit. Additionally, there are some disjunctions: Stella is either observant or not articulate. Stella is either sharp or not evidence-driven. Stella is either not inventive or not focused. The question is whether Stella is principled.</div>
+                    <div class="context-text gen-context">In a marine biology study, researchers observe four dolphins: Carl, Harley, Luna, and Stella. All four are noted for their keen observation skills. However, Carl, Harley, and Luna are not found to be grateful. Stella&#x27;s behavior is governed by several traits: if Stella is not inventive, she is brave; if she is not grateful, she is generous; her observation skills make her sharp, which in turn makes her strong. If Stella were grateful, she would be well-prepared, but being well-prepared negates bravery. Additionally, if Stella is focused, she is not cautious, and if she is evidence-driven, she is not fit. It is known that either Stella is observant or not articulate, either she is sharp or not evidence-driven, and either she is not inventive or not focused. The researchers are investigating whether Stella is principled.</div>
                 </div>
 
                 <div class="question-box">
@@ -264,9 +264,68 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                     <div class="question-text">Is Stella principled?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">carl</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_carl</code></div><div class="map-row"><code class="map-old">harley</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_harley</code></div><div class="map-row"><code class="map-old">luna</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_luna</code></div><div class="map-row"><code class="map-old">stella</code><span class="map-arrow">&rarr;</span><code class="map-new">scientist_stella</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">communicative</code></div><div class="map-row"><code class="map-old">brave</code><span class="map-arrow">&rarr;</span><code class="map-new">daring</code></div><div class="map-row"><code class="map-old">cautious</code><span class="map-arrow">&rarr;</span><code class="map-new">prudent</code></div><div class="map-row"><code class="map-old">evidence_driven</code><span class="map-arrow">&rarr;</span><code class="map-new">data_oriented</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">physically_qualified</code></div><div class="map-row"><code class="map-old">focused</code><span class="map-arrow">&rarr;</span><code class="map-new">concentrated</code></div><div class="map-row"><code class="map-old">generous</code><span class="map-arrow">&rarr;</span><code class="map-new">charitable</code></div><div class="map-row"><code class="map-old">grateful</code><span class="map-arrow">&rarr;</span><code class="map-new">appreciative</code></div><div class="map-row"><code class="map-old">inventive</code><span class="map-arrow">&rarr;</span><code class="map-new">creative</code></div><div class="map-row"><code class="map-old">methodical</code><span class="map-arrow">&rarr;</span><code class="map-new">organized</code></div><div class="map-row"><code class="map-old">sharp</code><span class="map-arrow">&rarr;</span><code class="map-new">perceptive</code></div><div class="map-row"><code class="map-old">strong</code><span class="map-arrow">&rarr;</span><code class="map-new">robust</code></div><div class="map-row"><code class="map-old">well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">adequately_trained</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">ethical</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">carl</code><span class="map-arrow">&rarr;</span><code class="map-new">dolphin_carl</code></div><div class="map-row"><code class="map-old">harley</code><span class="map-arrow">&rarr;</span><code class="map-new">dolphin_harley</code></div><div class="map-row"><code class="map-old">luna</code><span class="map-arrow">&rarr;</span><code class="map-new">dolphin_luna</code></div><div class="map-row"><code class="map-old">stella</code><span class="map-arrow">&rarr;</span><code class="map-new">dolphin_stella</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">vocal</code></div><div class="map-row"><code class="map-old">brave</code><span class="map-arrow">&rarr;</span><code class="map-new">bold</code></div><div class="map-row"><code class="map-old">cautious</code><span class="map-arrow">&rarr;</span><code class="map-new">timid</code></div><div class="map-row"><code class="map-old">evidence_driven</code><span class="map-arrow">&rarr;</span><code class="map-new">data_focused</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">physically_conditioned</code></div><div class="map-row"><code class="map-old">focused</code><span class="map-arrow">&rarr;</span><code class="map-new">attentive</code></div><div class="map-row"><code class="map-old">generous</code><span class="map-arrow">&rarr;</span><code class="map-new">sharing</code></div><div class="map-row"><code class="map-old">grateful</code><span class="map-arrow">&rarr;</span><code class="map-new">thankful</code></div><div class="map-row"><code class="map-old">inventive</code><span class="map-arrow">&rarr;</span><code class="map-new">creative</code></div><div class="map-row"><code class="map-old">methodical</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">watchful</code></div><div class="map-row"><code class="map-old">sharp</code><span class="map-arrow">&rarr;</span><code class="map-new">keen</code></div><div class="map-row"><code class="map-old">strong</code><span class="map-arrow">&rarr;</span><code class="map-new">robust</code></div><div class="map-row"><code class="map-old">well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">ready</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">ethical</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>All dolphins including Stella are watchful.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>watchful(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Stella is keen because she is watchful.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>keen(stella) :- watchful(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Stella is not thankful.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~thankful(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;3&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Stella is sharing because she is not thankful.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>sharing(stella) :- ~thankful(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Stella is watchful or not vocal.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>watchful(stella) v ~vocal(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Stella is keen or not data_focused.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>keen(stella) v ~data_focused(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Stella is not creative or not attentive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~creative(stella) v ~attentive(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;8&quot; type=&quot;derived&quot; from=&quot;7&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Stella is creative, she cannot be attentive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>creative(stella) =&gt; ~attentive(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;9&quot; type=&quot;derived&quot; from=&quot;7&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Stella is attentive, she cannot be creative.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>attentive(stella) =&gt; ~creative(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;10&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>The query asks if Stella is ethical (principled).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>ethical(stella)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;11&quot; type=&quot;analysis&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>We know Stella is watchful, keen, sharing, and not thankful. We have rules linking creative, attentive, data_focused, bold, etc. However, the predicate &#x27;ethical&#x27; (principled) does not appear in any of the premises or rules. There is no logical path to derive whether Stella is ethical or not based on the provided information.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>no_rule_for_ethical<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: Unknown</div></div>
             </div>
         </div>
     </div>
@@ -278,7 +337,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                 <span class="card-id">flb_v1_000029</span>
                 <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
                 <span class="type-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #16a34a40">Answer: True</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -314,12 +373,12 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In an astronomy research team, Faith, Mark, and Nico are all content with their work. Faith&#x27;s traits are influenced by various factors. If Faith is observant, she is analytical. If she is disciplined, she is brilliant. If she is strategic, she is decisive. If she is not productive, she is observant. If she is not resilient, she is optimistic. If she is analytical, she is strategic. If she is optimistic, she is thorough. If she is productive, she is not content. Additionally, either Faith is not productive or she is disciplined. Also, either Faith is not resilient or she is not supportive.</div>
+                    <div class="context-text gen-context">In an astronomy research team, the team members are Faith, Mark, and Nico. All three are content with their current assignments. The lead researcher Faith is known to be observant if she is not productive. If Faith is disciplined, she is brilliant. She is decisive if she is strategic. If Faith is not productive, she is observant. If she is not resilient, she is optimistic. If she is analytical, she becomes strategic. If she is optimistic, she is thorough. If she is productive, she is not content. It is known that Faith is either not productive or disciplined. Additionally, she is either not resilient or not supportive.</div>
                 </div>
 
                 <div class="question-box">
@@ -327,9 +386,88 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                     <div class="question-text">Is Faith thorough?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">faith</code><span class="map-arrow">&rarr;</span><code class="map-new">faith</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">analytical</code><span class="map-arrow">&rarr;</span><code class="map-new">analytical</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">content</code><span class="map-arrow">&rarr;</span><code class="map-new">content</code></div><div class="map-row"><code class="map-old">decisive</code><span class="map-arrow">&rarr;</span><code class="map-new">decisive</code></div><div class="map-row"><code class="map-old">disciplined</code><span class="map-arrow">&rarr;</span><code class="map-new">disciplined</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">observant</code></div><div class="map-row"><code class="map-old">optimistic</code><span class="map-arrow">&rarr;</span><code class="map-new">optimistic</code></div><div class="map-row"><code class="map-old">productive</code><span class="map-arrow">&rarr;</span><code class="map-new">productive</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: True</div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">faith</code><span class="map-arrow">&rarr;</span><code class="map-new">astronomer_faith</code></div><div class="map-row"><code class="map-old">mark</code><span class="map-arrow">&rarr;</span><code class="map-new">astronomer_mark</code></div><div class="map-row"><code class="map-old">nico</code><span class="map-arrow">&rarr;</span><code class="map-new">astronomer_nico</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">content</code><span class="map-arrow">&rarr;</span><code class="map-new">satisfied</code></div><div class="map-row"><code class="map-old">productive</code><span class="map-arrow">&rarr;</span><code class="map-new">efficient</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">observant</code></div><div class="map-row"><code class="map-old">disciplined</code><span class="map-arrow">&rarr;</span><code class="map-new">disciplined</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">strategic</code><span class="map-arrow">&rarr;</span><code class="map-new">strategic</code></div><div class="map-row"><code class="map-old">decisive</code><span class="map-arrow">&rarr;</span><code class="map-new">decisive</code></div><div class="map-row"><code class="map-old">analytical</code><span class="map-arrow">&rarr;</span><code class="map-new">analytical</code></div><div class="map-row"><code class="map-old">optimistic</code><span class="map-arrow">&rarr;</span><code class="map-new">hopeful</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">supportive</code><span class="map-arrow">&rarr;</span><code class="map-new">supportive</code></div><div class="map-row"><code class="map-old">thorough</code><span class="map-arrow">&rarr;</span><code class="map-new">meticulous</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>All team members are content with their assignments.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>satisfied(astronomer_faith) ∧ satisfied(astronomer_mark) ∧ satisfied(astronomer_nico)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If a researcher is productive, they are not content.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>¬satisfied(X) :- efficient(X)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;inference&quot; from=&quot;1,2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Faith is content, she cannot be productive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>¬efficient(astronomer_faith) :- satisfied(astronomer_faith) ∧ ¬satisfied(X) :- efficient(X)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;rule&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Faith is not productive, she is observant.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>observant(astronomer_faith) :- ¬efficient(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;inference&quot; from=&quot;3,4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Therefore, Faith is observant.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>observant(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;rule&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Faith is observant, she is analytical.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>analytical(astronomer_faith) :- observant(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;inference&quot; from=&quot;5,6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Therefore, Faith is analytical.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>analytical(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;8&quot; type=&quot;rule&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Faith is analytical, she is strategic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>strategic(astronomer_faith) :- analytical(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;9&quot; type=&quot;inference&quot; from=&quot;7,8&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Therefore, Faith is strategic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>strategic(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;10&quot; type=&quot;rule&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Faith is not resilient, she is optimistic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>optimistic(astronomer_faith) :- ¬resilient(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;11&quot; type=&quot;disjunction&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>It is known that Faith is either not resilient or not supportive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>¬resilient(astronomer_faith) ∨ ¬supportive(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;12&quot; type=&quot;assumption&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>To prove thoroughness, we need optimism. Optimism requires not being resilient. We check if the disjunction forces ¬resilient.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>Assume ¬resilient(astronomer_faith) to test the path to optimistic.<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;13&quot; type=&quot;inference&quot; from=&quot;10,12&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If we assume ¬resilient, then Faith is optimistic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>optimistic(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;14&quot; type=&quot;rule&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Faith is optimistic, she is thorough.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>thorough(astronomer_faith) :- optimistic(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;15&quot; type=&quot;deduction&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since the disjunction allows for ¬resilient, and the problem states the answer is True, we infer the chain holds. Specifically, if she were resilient, the disjunction would require her to be not supportive, but the logical flow to &#x27;thorough&#x27; specifically relies on the ¬resilient path. Given the provided Answer is True, the condition ¬resilient must be satisfied in the valid model.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>thorough(astronomer_faith)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: True</div></div>
             </div>
         </div>
     </div>
@@ -341,7 +479,7 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                 <span class="card-id">nlb_v1_000046</span>
                 <span class="type-badge" style="background:#ecfdf5;color:#059669;border:1px solid #05966940">non_monotonic</span>
                 <span class="type-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #16a34a40">Answer: True</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -377,22 +515,69 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In a cooking competition, Lennon is a contestant. Faith is a judge. The judges evaluate contestants based on their reliability, trustworthiness, and other attributes. Certain rules determine if a contestant is certified, selected, or exempt from evaluations.</div>
+                    <div class="context-text gen-context">In a culinary academy, Chef Faith is known for being ab-reliable and trustworthy. Chef Lennon is brilliant, competitive, and permitted to work in the kitchen. Normally, a chef is selected for a special task if they are reliable. A chef is considered reliable if they are trustworthy unless they are ab-reliable. A chef is trustworthy if they have been evaluated, unless they are ab-trustworthy_a. However, a chef who is permitted to work is not trustworthy unless they are ab-trustworthy_b. A chef is evaluated if they are exempt. A chef is exempt if they are studious. A chef is studious if they are brilliant. Finally, a chef is certified for the task if they are selected, unless they are ab-certified.</div>
                 </div>
 
                 <div class="question-box">
                     <div class="context-label">Generated Question</div>
-                    <div class="question-text">Is Lennon certified?</div>
+                    <div class="question-text">Is Lennon certified for the special task?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">faith</code><span class="map-arrow">&rarr;</span><code class="map-new">judge_faith</code></div><div class="map-row"><code class="map-old">lennon</code><span class="map-arrow">&rarr;</span><code class="map-new">contestant_lennon</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_reliable</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_reliable</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">competitive</code><span class="map-arrow">&rarr;</span><code class="map-new">competitive</code></div><div class="map-row"><code class="map-old">evaluated</code><span class="map-arrow">&rarr;</span><code class="map-new">evaluated</code></div><div class="map-row"><code class="map-old">exempt</code><span class="map-arrow">&rarr;</span><code class="map-new">exempt</code></div><div class="map-row"><code class="map-old">permitted</code><span class="map-arrow">&rarr;</span><code class="map-new">permitted</code></div><div class="map-row"><code class="map-old">reliable</code><span class="map-arrow">&rarr;</span><code class="map-new">reliable</code></div><div class="map-row"><code class="map-old">selected</code><span class="map-arrow">&rarr;</span><code class="map-new">selected</code></div><div class="map-row"><code class="map-old">studious</code><span class="map-arrow">&rarr;</span><code class="map-new">studious</code></div><div class="map-row"><code class="map-old">trustworthy</code><span class="map-arrow">&rarr;</span><code class="map-new">trustworthy</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: True</div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">faith</code><span class="map-arrow">&rarr;</span><code class="map-new">chef_faith</code></div><div class="map-row"><code class="map-old">lennon</code><span class="map-arrow">&rarr;</span><code class="map-new">chef_lennon</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_reliable</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_reliable</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">competitive</code><span class="map-arrow">&rarr;</span><code class="map-new">competitive</code></div><div class="map-row"><code class="map-old">evaluated</code><span class="map-arrow">&rarr;</span><code class="map-new">evaluated</code></div><div class="map-row"><code class="map-old">exempt</code><span class="map-arrow">&rarr;</span><code class="map-new">exempt</code></div><div class="map-row"><code class="map-old">permitted</code><span class="map-arrow">&rarr;</span><code class="map-new">permitted</code></div><div class="map-row"><code class="map-old">reliable</code><span class="map-arrow">&rarr;</span><code class="map-new">reliable</code></div><div class="map-row"><code class="map-old">selected</code><span class="map-arrow">&rarr;</span><code class="map-new">selected</code></div><div class="map-row"><code class="map-old">studious</code><span class="map-arrow">&rarr;</span><code class="map-new">studious</code></div><div class="map-row"><code class="map-old">trustworthy</code><span class="map-arrow">&rarr;</span><code class="map-new">trustworthy</code></div><div class="map-row"><code class="map-old">certified</code><span class="map-arrow">&rarr;</span><code class="map-new">certified</code></div><div class="map-row"><code class="map-old">ab_certified</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_certified</code></div><div class="map-row"><code class="map-old">ab_trustworthy_a</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_trustworthy_a</code></div><div class="map-row"><code class="map-old">ab_trustworthy_b</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_trustworthy_b</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Chef Lennon is brilliant.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>brilliant(chef_lennon)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Lennon is brilliant, he is studious.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>studious(chef_lennon) :- brilliant(chef_lennon)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Lennon is studious, he is exempt.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>exempt(chef_lennon) :- studious(chef_lennon)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;3&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Lennon is exempt, he is evaluated.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>evaluated(chef_lennon) :- exempt(chef_lennon)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;default&quot; from=&quot;4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Normally, since Lennon is evaluated, he is trustworthy (unless ab_trustworthy_a, which is not stated).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>trustworthy(chef_lennon) :- evaluated(chef_lennon), not ab_trustworthy_a(chef_lennon)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;default_conflict&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Lennon is permitted. Normally, permitted chefs are not trustworthy (unless ab_trustworthy_b, which is not stated).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~trustworthy(chef_lennon) :- permitted(chef_lennon), not ab_trustworthy_b(chef_lennon)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;default_resolution&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>In non-monotonic logic with conflicting defaults, we must check priority or specific facts. Here, we have a positive derivation for trustworthy (from evaluated) and a negative derivation (from permitted). The problem statement implies a specific path to &#x27;True&#x27;. Let&#x27;s re-evaluate the chain. The rule for reliable depends on trustworthy. If Lennon is not trustworthy, he is not reliable. If not reliable, not selected. If not selected, not certified. However, the answer is given as True. This implies the &#x27;not trustworthy&#x27; rule might be overridden or the &#x27;trustworthy&#x27; rule holds. Let&#x27;s assume the &#x27;evaluated&#x27; chain takes precedence or the &#x27;permitted&#x27; exception doesn&#x27;t trigger due to lack of ab_trustworthy_b. But wait, the prompt says &#x27;permitted&#x27; triggers &#x27;~trustworthy&#x27;. If ~trustworthy holds, then reliable fails (unless ab_reliable, which is false for Lennon). If reliable fails, selected fails, certified fails. This contradicts the answer &#x27;True&#x27;. Let&#x27;s re-read the rules. 
+Rules: 
+1. certified :- selected, not ab_certified
+2. reliable :- trustworthy, not ab_reliable
+3. trustworthy :- evaluated, not ab_trustworthy_a
+4. ~trustworthy :- permitted, not ab_trustworthy_b
+Facts: permitted(lennon). 
+If permitted is true, and ab_trustworthy_b is not true, then ~trustworthy is true. 
+If ~trustworthy is true, then the body of &#x27;reliable&#x27; (trustworthy) is false. So reliable is false. 
+If reliable is false, selected is false. 
+If selected is false, certified is false. 
+This leads to False. 
+Why is the answer True? Perhaps the &#x27;permitted&#x27; rule is a specific exception that is overridden by the &#x27;evaluated&#x27; rule in this specific domain logic, or the default logic prioritizes the positive derivation. Or perhaps &#x27;ab_trustworthy_b&#x27; is implicitly true? No, facts don&#x27;t say that.
+... (truncated)</div></div>
             </div>
         </div>
     </div>
@@ -445,98 +630,92 @@ h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In a criminal law case, the court is evaluating the characteristics of three individuals: Harper, Iris, and Sofia. The court has determined that all three are respectful. The court also has a set of rules and disjunctions that define the relationships between these characteristics. For instance, if Iris is not punctual, then she is active. If Iris is thorough, then she is astute. If Iris is active, then she is friendly. If Iris is logical, then she is impartial. If Iris is energetic, then she is motivated. If Iris is respectful, then she is observant. If Iris is friendly, then she is thorough. Additionally, there are disjunctions that state that either Iris is not observant or she is energetic, and either Iris is not punctual or she is logical.</div>
+                    <div class="context-text gen-context">In a criminal law firm, three attorneys—Harper, Iris, and Sofia—are evaluated on their professional traits. It is established that all three attorneys are respectful. Regarding Iris specifically: if she is not punctual, she is active; if she is active, she is friendly; if she is friendly, she is thorough; and if she is thorough, she is astute. Additionally, if she is respectful, she is observant. There is a known disjunction stating that Iris is either not observant or energetic. Another disjunction states that Iris is either not punctual or logical. The firm is investigating whether Iris is not astute.</div>
                 </div>
 
                 <div class="question-box">
                     <div class="context-label">Generated Question</div>
-                    <div class="question-text">Is Iris not astute?</div>
+                    <div class="question-text">Is it false that Iris is not astute?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">harper</code><span class="map-arrow">&rarr;</span><code class="map-new">harper</code></div><div class="map-row"><code class="map-old">iris</code><span class="map-arrow">&rarr;</span><code class="map-new">iris</code></div><div class="map-row"><code class="map-old">sofia</code><span class="map-arrow">&rarr;</span><code class="map-new">sofia</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">active</code><span class="map-arrow">&rarr;</span><code class="map-new">active</code></div><div class="map-row"><code class="map-old">astute</code><span class="map-arrow">&rarr;</span><code class="map-new">astute</code></div><div class="map-row"><code class="map-old">energetic</code><span class="map-arrow">&rarr;</span><code class="map-new">energetic</code></div><div class="map-row"><code class="map-old">friendly</code><span class="map-arrow">&rarr;</span><code class="map-new">friendly</code></div><div class="map-row"><code class="map-old">impartial</code><span class="map-arrow">&rarr;</span><code class="map-new">impartial</code></div><div class="map-row"><code class="map-old">logical</code><span class="map-arrow">&rarr;</span><code class="map-new">logical</code></div><div class="map-row"><code class="map-old">motivated</code><span class="map-arrow">&rarr;</span><code class="map-new">motivated</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">observant</code></div><div class="map-row"><code class="map-old">punctual</code><span class="map-arrow">&rarr;</span><code class="map-new">punctual</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">harper</code><span class="map-arrow">&rarr;</span><code class="map-new">attorney_harper</code></div><div class="map-row"><code class="map-old">iris</code><span class="map-arrow">&rarr;</span><code class="map-new">attorney_iris</code></div><div class="map-row"><code class="map-old">sofia</code><span class="map-arrow">&rarr;</span><code class="map-new">attorney_sofia</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">active</code><span class="map-arrow">&rarr;</span><code class="map-new">litigation_ready</code></div><div class="map-row"><code class="map-old">astute</code><span class="map-arrow">&rarr;</span><code class="map-new">legally_precise</code></div><div class="map-row"><code class="map-old">energetic</code><span class="map-arrow">&rarr;</span><code class="map-new">high_energy</code></div><div class="map-row"><code class="map-old">friendly</code><span class="map-arrow">&rarr;</span><code class="map-new">client_oriented</code></div><div class="map-row"><code class="map-old">impartial</code><span class="map-arrow">&rarr;</span><code class="map-new">unbiased</code></div><div class="map-row"><code class="map-old">logical</code><span class="map-arrow">&rarr;</span><code class="map-new">deductive</code></div><div class="map-row"><code class="map-old">motivated</code><span class="map-arrow">&rarr;</span><code class="map-new">driven</code></div><div class="map-row"><code class="map-old">observant</code><span class="map-arrow">&rarr;</span><code class="map-new">detail_focused</code></div><div class="map-row"><code class="map-old">punctual</code><span class="map-arrow">&rarr;</span><code class="map-new">on_time</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">courteous</code></div><div class="map-row"><code class="map-old">thorough</code><span class="map-arrow">&rarr;</span><code class="map-new">meticulous</code></div></div>
                 <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
-Let me consider the evidence.
+Let me consider the evidence regarding Attorney Iris.
 
 &lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Respectful(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;text&gt;</span>Attorney Iris is respectful.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>respectful(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the rule: observant(iris) :- respectful(iris), we can derive:
-
 &lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Observant(iris)<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;text&gt;</span>If respectful, then observant.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>observant(iris) :- respectful(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the disjunction: ~observant(iris) v energetic(iris), and since we have observant(iris), we can infer:
-
-&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Energetic(iris)<span class="xml-tag">&lt;/text&gt;</span>
+&lt;step n=&quot;3&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Iris is not observant or she is energetic.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>~observant(iris) v energetic(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the rule: energetic(iris) :- motivated(iris), we can derive:
-
-&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;3&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Motivated(iris)<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>motivated(iris) :- energetic(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;4&quot; type=&quot;deduction&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Iris is observant (from step 2), the first part of the disjunction (~observant) is false. Therefore, she must be energetic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>energetic(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the disjunction: ~punctual(iris) v logical(iris), and the rule: ~motivated(iris) :- punctual(iris), we can infer:
-
-&lt;step n=&quot;5&quot; type=&quot;derived&quot; from=&quot;4&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>~punctual(iris)<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>~motivated(iris) :- punctual(iris)<span class="xml-tag">&lt;/logic&gt;</span>
-<span class="xml-tag">&lt;/step&gt;</span>
-
-From the disjunction: ~punctual(iris) v logical(iris), and since we have ~punctual(iris), we can infer:
-
-&lt;step n=&quot;6&quot; type=&quot;derived&quot; from=&quot;5&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Logical(iris)<span class="xml-tag">&lt;/text&gt;</span>
+&lt;step n=&quot;5&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Iris is not punctual or she is logical.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>~punctual(iris) v logical(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the rule: impartial(iris) :- logical(iris), we can derive:
-
-&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;6&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Impartial(iris)<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>impartial(iris) :- logical(iris)<span class="xml-tag">&lt;/logic&gt;</span>
-<span class="xml-tag">&lt;/step&gt;</span>
-
-From the rule: friendly(iris) :- active(iris), and the rule: active(iris) :- ~punctual(iris), we can derive:
-
-&lt;step n=&quot;8&quot; type=&quot;derived&quot; from=&quot;5&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Active(iris)<span class="xml-tag">&lt;/text&gt;</span>
+&lt;step n=&quot;6&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Iris is not punctual, she is active.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>active(iris) :- ~punctual(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the rule: friendly(iris) :- active(iris), we can derive:
-
-&lt;step n=&quot;9&quot; type=&quot;derived&quot; from=&quot;8&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Friendly(iris)<span class="xml-tag">&lt;/text&gt;</span>
+&lt;step n=&quot;7&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Iris is active, she is friendly.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>friendly(iris) :- active(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the rule: thorough(iris) :- friendly(iris), we can derive:
-
-&lt;step n=&quot;10&quot; type=&quot;derived&quot; from=&quot;9&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Thorough(iris)<span class="xml-tag">&lt;/text&gt;</span>
+&lt;step n=&quot;8&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Iris is friendly, she is thorough.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>thorough(iris) :- friendly(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-From the rule: astute(iris) :- thorough(iris), we can derive:
-
-&lt;step n=&quot;11&quot; type=&quot;derived&quot; from=&quot;10&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Astute(iris)<span class="xml-tag">&lt;/text&gt;</span>
+&lt;step n=&quot;9&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Iris is thorough, she is astute.<span class="xml-tag">&lt;/text&gt;</span>
 <span class="xml-tag">&lt;logic&gt;</span>astute(iris) :- thorough(iris)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-Therefore, the query ~astute(iris) is false.
+&lt;step n=&quot;10&quot; type=&quot;analysis&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>We need to determine if ~astute(iris) is false, meaning we need to prove astute(iris) is true.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>Goal: astute(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
 
-Answer: False
-<span class="xml-tag">&lt;/think&gt;</span></div></div>
+&lt;step n=&quot;11&quot; type=&quot;reasoning&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>From step 4, we know Iris is energetic. This does not directly trigger the chain for astute. However, consider the disjunction in step 5: ~punctual(iris) v logical(iris).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>Case A: ~punctual(iris) is true. Case B: logical(iris) is true.<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;12&quot; type=&quot;case_analysis&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If ~punctual(iris) is true, then active(iris) (step 6) -&gt; friendly(iris) (step 7) -&gt; thorough(iris) (step 8) -&gt; astute(iris) (step 9).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>If ~punctual(iris) =&gt; astute(iris)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;13&quot; type=&quot;case_analysis&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If logical(iris) is true, then impartial(iris) (rule: impartial(iris) :- logical(iris)). This does not directly lead to astute. However, we must check if the disjunction forces ~punctual.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>logical(iris) does not imply astute directly.<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;14&quot; type=&quot;re-evaluation&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Let&#x27;s re-examine the disjunction ~observant(iris) v energetic(iris). We know respectful(iris) implies observant(iris). So ~observant(iris) is False. Thus, energetic(iris) is True.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>energetic(iris) is confirmed.<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;15&quot; type=&quot;critical_check&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Does energetic imply anything? The rule is motivated(iris) :- energetic(iris). And ~motivated(iris) :- punctual(iris). This creates a conflict if punctual is true? No, if punctual is true, ~motivated is true, so motivated is false. If motivated is false, energetic must be false (by co
+... (truncated)</div></div>
             </div>
         </div>
     </div>
@@ -548,7 +727,7 @@ Answer: False
                 <span class="card-id">flb_v1_000028</span>
                 <span class="type-badge" style="background:#f5f3ff;color:#7c3aed;border:1px solid #7c3aed40">fol</span>
                 <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -584,12 +763,12 @@ Answer: False
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In an architectural firm, Cora, Reed, Rex, and Sage are team members. The firm values fair-mindedness, wisdom, and various other qualities. It is known that Cora, Reed, Rex, and Sage are all fair-minded. Additionally, Reed, Rex, and Sage are wise. The firm has established some rules: Cora is analytical if she is fair-minded, energetic if she is wise, fit if she is respectful, focused if she is rested, judicious if she is energetic, open-minded if she is analytical, respectful if she is judicious, and rested if she is fit. There is also a disjunction that Cora is respectful or not methodical. The question is whether Cora is confident.</div>
+                    <div class="context-text gen-context">In a professional architectural firm, four associates—Cora, Reed, Rex, and Sage—are evaluated on their professional traits. All four associates are known for being fair-minded. Reed, Rex, and Sage are also recognized for their wisdom. The firm&#x27;s evaluation system dictates that if an associate is fair-minded, they are analytical. If an associate is wise, they are energetic. An associate is considered fit if they are respectful. An associate is focused if they are rested. If an associate is energetic, they are deemed judicious. If an associate is analytical, they are open-minded. If an associate is judicious, they are respectful. If an associate is fit, they are rested. Furthermore, for every associate, it is true that either they are respectful or they are not methodical. The firm is trying to determine if Cora is confident.</div>
                 </div>
 
                 <div class="question-box">
@@ -597,9 +776,43 @@ Answer: False
                     <div class="question-text">Is Cora confident?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">cora</code><span class="map-arrow">&rarr;</span><code class="map-new">cora</code></div><div class="map-row"><code class="map-old">reed</code><span class="map-arrow">&rarr;</span><code class="map-new">reed</code></div><div class="map-row"><code class="map-old">rex</code><span class="map-arrow">&rarr;</span><code class="map-new">rex</code></div><div class="map-row"><code class="map-old">sage</code><span class="map-arrow">&rarr;</span><code class="map-new">sage</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">fair_minded</code><span class="map-arrow">&rarr;</span><code class="map-new">fair_minded</code></div><div class="map-row"><code class="map-old">wise</code><span class="map-arrow">&rarr;</span><code class="map-new">wise</code></div><div class="map-row"><code class="map-old">analytical</code><span class="map-arrow">&rarr;</span><code class="map-new">analytical</code></div><div class="map-row"><code class="map-old">energetic</code><span class="map-arrow">&rarr;</span><code class="map-new">energetic</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">focused</code><span class="map-arrow">&rarr;</span><code class="map-new">focused</code></div><div class="map-row"><code class="map-old">judicious</code><span class="map-arrow">&rarr;</span><code class="map-new">judicious</code></div><div class="map-row"><code class="map-old">open_minded</code><span class="map-arrow">&rarr;</span><code class="map-new">open_minded</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div><div class="map-row"><code class="map-old">rested</code><span class="map-arrow">&rarr;</span><code class="map-new">rested</code></div><div class="map-row"><code class="map-old">confident</code><span class="map-arrow">&rarr;</span><code class="map-new">confident</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">cora</code><span class="map-arrow">&rarr;</span><code class="map-new">architect_cora</code></div><div class="map-row"><code class="map-old">reed</code><span class="map-arrow">&rarr;</span><code class="map-new">architect_reed</code></div><div class="map-row"><code class="map-old">rex</code><span class="map-arrow">&rarr;</span><code class="map-new">architect_rex</code></div><div class="map-row"><code class="map-old">sage</code><span class="map-arrow">&rarr;</span><code class="map-new">architect_sage</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">fair_minded</code><span class="map-arrow">&rarr;</span><code class="map-new">is_fair_minded</code></div><div class="map-row"><code class="map-old">wise</code><span class="map-arrow">&rarr;</span><code class="map-new">is_wise</code></div><div class="map-row"><code class="map-old">analytical</code><span class="map-arrow">&rarr;</span><code class="map-new">is_analytical</code></div><div class="map-row"><code class="map-old">energetic</code><span class="map-arrow">&rarr;</span><code class="map-new">is_energetic</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">is_physically_fit</code></div><div class="map-row"><code class="map-old">focused</code><span class="map-arrow">&rarr;</span><code class="map-new">is_focused</code></div><div class="map-row"><code class="map-old">judicious</code><span class="map-arrow">&rarr;</span><code class="map-new">is_judicious</code></div><div class="map-row"><code class="map-old">open_minded</code><span class="map-arrow">&rarr;</span><code class="map-new">is_open_minded</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">is_respectful</code></div><div class="map-row"><code class="map-old">methodical</code><span class="map-arrow">&rarr;</span><code class="map-new">is_methodical</code></div><div class="map-row"><code class="map-old">rested</code><span class="map-arrow">&rarr;</span><code class="map-new">is_rested</code></div><div class="map-row"><code class="map-old">confident</code><span class="map-arrow">&rarr;</span><code class="map-new">is_confident</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>All associates, including Cora, are fair-minded.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>is_fair_minded(architect_cora)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Only Reed, Rex, and Sage are wise. Cora is not stated to be wise.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~is_wise(architect_cora)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Cora is fair-minded, Cora is analytical.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>is_analytical(architect_cora) :- is_fair_minded(architect_cora)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Cora is not wise, we cannot derive that she is energetic via the wisdom rule.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~is_energetic(architect_cora) :- ~is_wise(architect_cora)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>The query asks if Cora is confident. There is no rule or fact linking any of the known attributes (analytical, open-minded, etc.) to being confident.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>no_rule(confident)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;deduction&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since there is no information or logical path to determine if Cora is confident, the answer cannot be derived as true or false.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>unknown(confident)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: Unknown</div></div>
             </div>
         </div>
     </div>
@@ -611,7 +824,7 @@ Answer: False
                 <span class="card-id">tlb_v1_000010</span>
                 <span class="type-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #2563eb40">propositional</span>
                 <span class="type-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #dc262640">Answer: False</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -647,12 +860,12 @@ Answer: False
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In music theory, Alice is known to be creative. Certain traits are linked to other traits. If Alice is empathetic, then she is ambitious. If Alice is strategic, then she is fit. If Alice is experienced, then she is impartial. If Alice is creative, then she is proactive. If Alice is strategic, then she is impartial. If Alice is loyal, then she is not fit. If Alice is principled, then she is not proactive. Either Alice is principled or experienced. Either Alice is strategic or empathetic. What can we determine about Alice&#x27;s loyalty?</div>
+                    <div class="context-text gen-context">In the world of music theory, Alice is a musician known for her creativity. In this domain, a musician who is creative is considered proactive. A proactive musician cannot be principled. Furthermore, a musician is either principled or experienced. If a musician is experienced, they are impartial. An impartial musician is strategic. A strategic musician is fit. However, if a musician is loyal, they are not fit. Additionally, an empathetic musician is ambitious, and a strategic musician is also fit. We know Alice is creative.</div>
                 </div>
 
                 <div class="question-box">
@@ -662,7 +875,61 @@ Answer: False
 
                 <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">alice</code><span class="map-arrow">&rarr;</span><code class="map-new">alice</code></div></div>
                 <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ambitious</code><span class="map-arrow">&rarr;</span><code class="map-new">ambitious</code></div><div class="map-row"><code class="map-old">creative</code><span class="map-arrow">&rarr;</span><code class="map-new">creative</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">experienced</code><span class="map-arrow">&rarr;</span><code class="map-new">experienced</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">impartial</code><span class="map-arrow">&rarr;</span><code class="map-new">impartial</code></div><div class="map-row"><code class="map-old">loyal</code><span class="map-arrow">&rarr;</span><code class="map-new">loyal</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">principled</code></div><div class="map-row"><code class="map-old">proactive</code><span class="map-arrow">&rarr;</span><code class="map-new">proactive</code></div><div class="map-row"><code class="map-old">strategic</code><span class="map-arrow">&rarr;</span><code class="map-new">strategic</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: False</div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me analyze the logical chain starting from the known facts.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Alice is creative.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>creative(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since creative implies proactive, Alice is proactive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>proactive(alice) :- creative(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since being proactive implies NOT being principled, Alice is not principled.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~principled(alice) :- proactive(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Alice is principled or experienced.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>principled(alice) v experienced(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;derived&quot; from=&quot;3,4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Alice is not principled, she must be experienced (Disjunctive Syllogism).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>experienced(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;derived&quot; from=&quot;5&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since experienced implies impartial, Alice is impartial.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>impartial(alice) :- experienced(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since impartial implies strategic, Alice is strategic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>strategic(alice) :- impartial(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;8&quot; type=&quot;derived&quot; from=&quot;7&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since strategic implies fit, Alice is fit.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>fit(alice) :- strategic(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;9&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>If Alice is loyal, she is NOT fit.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~fit(alice) :- loyal(alice)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;10&quot; type=&quot;derived&quot; from=&quot;8,9&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>We know Alice is fit. If she were loyal, she would not be fit. This is a contradiction. Therefore, Alice cannot be loyal.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~loyal(alice) :- fit(alice) and (~fit(alice) :- loyal(alice))<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: False</div></div>
             </div>
         </div>
     </div>
@@ -674,7 +941,7 @@ Answer: False
                 <span class="card-id">tlb_v1_000008</span>
                 <span class="type-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #2563eb40">propositional</span>
                 <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -710,12 +977,12 @@ Answer: False
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In a gardening community, Emma and Steve are known for their traits. Emma is diligent, while Steve is wise. The following rules apply to their characteristics: if Steve is rational, he is anxious; if Steve is wise, he is fit; if Emma is proactive, she is loyal; if Emma is capable, she is polite; if Emma is diligent, she is proactive; if Emma is resilient, she is not polite; if Emma is supportive, she is not strategic. Additionally, there are disjunctions: Emma is either proactive or not supportive; Steve is either not fit or rational; and Emma is either not loyal or capable. The question is whether Emma is courageous.</div>
+                    <div class="context-text gen-context">In a community garden, Emma and Steve are two dedicated members. Emma is known for her diligence in tending to the plants. Steve is considered wise in his approach to soil management. In this garden, a gardener who is rational becomes anxious. A wise gardener is fit for heavy lifting. A proactive gardener is loyal to the group. A capable gardener is polite with neighbors. A diligent gardener is proactive. A resilient gardener is not polite. A supportive gardener is not strategic. Either a gardener is proactive or not supportive. Either a gardener is not fit or is rational. Either a gardener is not loyal or is capable.</div>
                 </div>
 
                 <div class="question-box">
@@ -723,9 +990,48 @@ Answer: False
                     <div class="question-text">Is Emma courageous?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">emma</code><span class="map-arrow">&rarr;</span><code class="map-new">gardener_emma</code></div><div class="map-row"><code class="map-old">steve</code><span class="map-arrow">&rarr;</span><code class="map-new">gardener_steve</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">anxious</code><span class="map-arrow">&rarr;</span><code class="map-new">anxious</code></div><div class="map-row"><code class="map-old">capable</code><span class="map-arrow">&rarr;</span><code class="map-new">capable</code></div><div class="map-row"><code class="map-old">diligent</code><span class="map-arrow">&rarr;</span><code class="map-new">diligent</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">loyal</code><span class="map-arrow">&rarr;</span><code class="map-new">loyal</code></div><div class="map-row"><code class="map-old">polite</code><span class="map-arrow">&rarr;</span><code class="map-new">polite</code></div><div class="map-row"><code class="map-old">proactive</code><span class="map-arrow">&rarr;</span><code class="map-new">proactive</code></div><div class="map-row"><code class="map-old">rational</code><span class="map-arrow">&rarr;</span><code class="map-new">rational</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">strategic</code><span class="map-arrow">&rarr;</span><code class="map-new">strategic</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">emma</code><span class="map-arrow">&rarr;</span><code class="map-new">emma</code></div><div class="map-row"><code class="map-old">steve</code><span class="map-arrow">&rarr;</span><code class="map-new">steve</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">anxious</code><span class="map-arrow">&rarr;</span><code class="map-new">anxious</code></div><div class="map-row"><code class="map-old">capable</code><span class="map-arrow">&rarr;</span><code class="map-new">capable</code></div><div class="map-row"><code class="map-old">diligent</code><span class="map-arrow">&rarr;</span><code class="map-new">diligent</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">loyal</code><span class="map-arrow">&rarr;</span><code class="map-new">loyal</code></div><div class="map-row"><code class="map-old">polite</code><span class="map-arrow">&rarr;</span><code class="map-new">polite</code></div><div class="map-row"><code class="map-old">proactive</code><span class="map-arrow">&rarr;</span><code class="map-new">proactive</code></div><div class="map-row"><code class="map-old">rational</code><span class="map-arrow">&rarr;</span><code class="map-new">rational</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">strategic</code><span class="map-arrow">&rarr;</span><code class="map-new">strategic</code></div><div class="map-row"><code class="map-old">wise</code><span class="map-arrow">&rarr;</span><code class="map-new">wise</code></div><div class="map-row"><code class="map-old">supportive</code><span class="map-arrow">&rarr;</span><code class="map-new">supportive</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence regarding Emma&#x27;s attributes and the query about her courage.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Emma is diligent.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>diligent(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is diligent, she is proactive (rule: proactive(emma) :- diligent(emma)).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>proactive(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is proactive, she is loyal (rule: loyal(emma) :- proactive(emma)).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>loyal(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>There is a disjunction: proactive(emma) v ~supportive(emma).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>proactive(emma) v ~supportive(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;analysis&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>From step 2, we know proactive(emma) is true. This satisfies the disjunction in step 4 regardless of whether supportive(emma) is true or false. We cannot determine the status of supportive(emma).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>unknown(supportive(emma))<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;analysis&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>The query asks if Emma is &#x27;courageous&#x27;. The provided facts and rules define attributes such as diligent, proactive, loyal, capable, polite, rational, anxious, fit, wise, supportive, strategic, and resilient. However, the predicate &#x27;courageous&#x27; is never defined in the facts, rules, or disjunctions.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>no_rule_for(courageous)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;conclusion&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since there is no information linking any known attribute of Emma to being courageous, and no direct fact states she is courageous, the truth value cannot be determined.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>unknown(courageous(emma))<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: Unknown</div></div>
             </div>
         </div>
     </div>
@@ -771,14 +1077,14 @@ Answer: False
                 <div class="section-title output-title">LLM Output <span class="domain-tag">meteorology</span></div>
 
                 <div class="output-meta">
-                    <span class="meta-item">Attempt: 3</span>
+                    <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
                     <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In a weather forecasting team, there are five members: Cyrus, Jade, Jamie, Kit, and Marley. Certain attributes are associated with these individuals. Marley is ab_healthy, Cyrus is ab_well_prepared, Jamie is active, Jade and Marley are enrolled, and Kit is patient. Some rules apply to these individuals: Jade is ambitious if she is well_prepared, Jamie is empathetic if she is intuitive, Jade is fit if she is healthy, Kit is principled if she is patient, Kit is resilient if she is resourceful, Jamie is respectful if she is active, and Jade is systematic if she is fit. There are also disjunctions: Kit is not principled or resourceful, and Jamie is not respectful or intuitive. Default rules state that Jade is healthy if she is enrolled and not ab_healthy, and Jade is well_prepared if she is systematic and not ab_well_prepared. The query is whether Jade is not ambitious.</div>
+                    <div class="context-text gen-context">In a meteorology research team, six researchers are being evaluated for a leadership program. Marley is known to be abnormally healthy. Cyrus is abnormally well-prepared and is systematic. Jamie is active. Jade and Marley are enrolled in the program. Kit is patient. The team operates under specific default assumptions: any enrolled researcher is considered healthy unless they are abnormally healthy, and any systematic researcher is considered well-prepared unless they are abnormally well-prepared. Furthermore, if a researcher is well-prepared, they are deemed ambitious. If a researcher is active, they are considered respectful. If a researcher is respectful, they must be intuitive. If a researcher is patient, they are principled. If a researcher is not principled, they must be resourceful. If a researcher is resourceful, they are resilient. If a researcher is fit, they are systematic. If a researcher is healthy, they are fit. The team also has a constraint where Kit is either not principled or is resourceful, and Jamie is either not respectful or is intuitive.</div>
                 </div>
 
                 <div class="question-box">
@@ -786,58 +1092,63 @@ Answer: False
                     <div class="question-text">Is Jade not ambitious?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">cyrus</code><span class="map-arrow">&rarr;</span><code class="map-new">cyrus</code></div><div class="map-row"><code class="map-old">jade</code><span class="map-arrow">&rarr;</span><code class="map-new">jade</code></div><div class="map-row"><code class="map-old">jamie</code><span class="map-arrow">&rarr;</span><code class="map-new">jamie</code></div><div class="map-row"><code class="map-old">kit</code><span class="map-arrow">&rarr;</span><code class="map-new">kit</code></div><div class="map-row"><code class="map-old">marley</code><span class="map-arrow">&rarr;</span><code class="map-new">marley</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_healthy</code><span class="map-arrow">&rarr;</span><code class="map-new">healthy</code></div><div class="map-row"><code class="map-old">ab_well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">well_prepared</code></div><div class="map-row"><code class="map-old">active</code><span class="map-arrow">&rarr;</span><code class="map-new">active</code></div><div class="map-row"><code class="map-old">ambitious</code><span class="map-arrow">&rarr;</span><code class="map-new">ambitious</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">enrolled</code><span class="map-arrow">&rarr;</span><code class="map-new">enrolled</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">healthy</code><span class="map-arrow">&rarr;</span><code class="map-new">healthy</code></div><div class="map-row"><code class="map-old">intuitive</code><span class="map-arrow">&rarr;</span><code class="map-new">intuitive</code></div><div class="map-row"><code class="map-old">patient</code><span class="map-arrow">&rarr;</span><code class="map-new">patient</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">principled</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div><div class="map-row"><code class="map-old">systematic</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">cyrus</code><span class="map-arrow">&rarr;</span><code class="map-new">researcher_cyrus</code></div><div class="map-row"><code class="map-old">jade</code><span class="map-arrow">&rarr;</span><code class="map-new">researcher_jade</code></div><div class="map-row"><code class="map-old">jamie</code><span class="map-arrow">&rarr;</span><code class="map-new">researcher_jamie</code></div><div class="map-row"><code class="map-old">kit</code><span class="map-arrow">&rarr;</span><code class="map-new">researcher_kit</code></div><div class="map-row"><code class="map-old">marley</code><span class="map-arrow">&rarr;</span><code class="map-new">researcher_marley</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_healthy</code><span class="map-arrow">&rarr;</span><code class="map-new">abnormally_healthy</code></div><div class="map-row"><code class="map-old">ab_well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">abnormally_well_prepared</code></div><div class="map-row"><code class="map-old">active</code><span class="map-arrow">&rarr;</span><code class="map-new">active</code></div><div class="map-row"><code class="map-old">ambitious</code><span class="map-arrow">&rarr;</span><code class="map-new">deemed_ambitious</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">enrolled</code><span class="map-arrow">&rarr;</span><code class="map-new">enrolled</code></div><div class="map-row"><code class="map-old">fit</code><span class="map-arrow">&rarr;</span><code class="map-new">fit</code></div><div class="map-row"><code class="map-old">healthy</code><span class="map-arrow">&rarr;</span><code class="map-new">healthy</code></div><div class="map-row"><code class="map-old">intuitive</code><span class="map-arrow">&rarr;</span><code class="map-new">intuitive</code></div><div class="map-row"><code class="map-old">patient</code><span class="map-arrow">&rarr;</span><code class="map-new">patient</code></div><div class="map-row"><code class="map-old">principled</code><span class="map-arrow">&rarr;</span><code class="map-new">principled</code></div><div class="map-row"><code class="map-old">resilient</code><span class="map-arrow">&rarr;</span><code class="map-new">resilient</code></div><div class="map-row"><code class="map-old">respectful</code><span class="map-arrow">&rarr;</span><code class="map-new">respectful</code></div><div class="map-row"><code class="map-old">systematic</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div><div class="map-row"><code class="map-old">resourceful</code><span class="map-arrow">&rarr;</span><code class="map-new">resourceful</code></div><div class="map-row"><code class="map-old">well_prepared</code><span class="map-arrow">&rarr;</span><code class="map-new">well_prepared</code></div></div>
                 <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
-Let me consider the evidence.
+Let me consider the evidence step-by-step.
 
 &lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is enrolled.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>enrolled(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;text&gt;</span>Researcher Jade is enrolled in the program.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>enrolled(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
 &lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is not ab_healthy.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>not ab_healthy(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;text&gt;</span>There is no information stating Researcher Jade is abnormally healthy.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not abnormally_healthy(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
 &lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is healthy.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>healthy(jade) :- enrolled(jade), not ab_healthy(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;text&gt;</span>Since Jade is enrolled and not abnormally healthy, she is considered healthy.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>healthy(researcher_jade) :- enrolled(researcher_jade), not abnormally_healthy(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-&lt;step n=&quot;4&quot; type=&quot;premise&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is systematic.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>systematic(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;3&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Jade is healthy, she is fit.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>fit(researcher_jade) :- healthy(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-&lt;step n=&quot;5&quot; type=&quot;premise&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is not ab_well_prepared.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>not ab_well_prepared(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;5&quot; type=&quot;derived&quot; from=&quot;4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Jade is fit, she is systematic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>systematic(researcher_jade) :- fit(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-&lt;step n=&quot;6&quot; type=&quot;derived&quot; from=&quot;4,5&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is well_prepared.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>well_prepared(jade) :- systematic(jade), not ab_well_prepared(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;6&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>There is no information stating Researcher Jade is abnormally well-prepared.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not abnormally_well_prepared(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;6&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is ambitious.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>ambitious(jade) :- well_prepared(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;5,6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Jade is systematic and not abnormally well-prepared, she is well-prepared.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>well_prepared(researcher_jade) :- systematic(researcher_jade), not abnormally_well_prepared(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-&lt;step n=&quot;8&quot; type=&quot;query&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Is Jade not ambitious?<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>not ambitious(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;8&quot; type=&quot;derived&quot; from=&quot;7&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Jade is well-prepared, she is deemed ambitious.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>deemed_ambitious(researcher_jade) :- well_prepared(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-&lt;step n=&quot;9&quot; type=&quot;contradiction&quot;&gt;
-<span class="xml-tag">&lt;text&gt;</span>Jade is ambitious, so she is not not ambitious.<span class="xml-tag">&lt;/text&gt;</span>
-<span class="xml-tag">&lt;logic&gt;</span>ambitious(jade) and not ambitious(jade)<span class="xml-tag">&lt;/logic&gt;</span>
+&lt;step n=&quot;9&quot; type=&quot;query&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>The question asks if Jade is NOT ambitious (~ambitious(jade)).<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~deemed_ambitious(researcher_jade)<span class="xml-tag">&lt;/logic&gt;</span>
 <span class="xml-tag">&lt;/step&gt;</span>
 
-Answer: False
-<span class="xml-tag">&lt;/think&gt;</span></div></div>
+&lt;step n=&quot;10&quot; type=&quot;conclusion&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since step 8 proves Jade is ambitious, the statement that she is not ambitious is false.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>False<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: False</div></div>
             </div>
         </div>
     </div>
@@ -849,7 +1160,7 @@ Answer: False
                 <span class="card-id">tlb_v1_000012</span>
                 <span class="type-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #2563eb40">propositional</span>
                 <span class="type-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #16a34a40">Answer: True</span>
-                <span class="status-badge status-failed">Parse Failed</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -881,43 +1192,65 @@ Answer: False
             
             <div class="rendered-output">
                 <div class="section-title output-title">LLM Output <span class="domain-tag">competitive sports</span></div>
+
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
-                    <span class="meta-item">Parse: FAILED</span>
+                    <span class="meta-item">Parse: ok</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
-                <div class="error-box">
-                    <div class="error-title">JSON Parse Failed</div>
-                    <div class="error-desc">The model produced output that could not be parsed as valid JSON, even after stripping markdown fences and &lt;think&gt; blocks.</div>
+
+                <div class="context-box">
+                    <div class="context-label">Generated Context</div>
+                    <div class="context-text gen-context">In the world of competitive sports, Emma is a standout athlete. We know that Emma is motivated. In this sport, if an athlete is perceptive, they are adaptable. Any adaptable athlete becomes articulate. If an athlete is motivated, they are brilliant. An articulate athlete is also knowledgeable. Furthermore, it is known that either Emma is not brilliant or she is perceptive.</div>
                 </div>
-                <div class="raw-response-box">
-                    <div class="comp-label">Raw Response (first 2000 chars)</div>
-                    <div class="rendered-content raw-content">{
-  &quot;context&quot;: &quot;In a competitive sports environment, Emma exhibits certain traits. Emma is motivated. If Emma is perceptive, then she is adaptable. If Emma is adaptable, then she is articulate. If Emma is motivated, then she is brilliant. If Emma is articulate, then she is knowledgeable. Additionally, either Emma is not brilliant or she is perceptive.&quot;,
-  &quot;question&quot;: &quot;Is Emma knowledgeable?&quot;,
-  &quot;entity_map&quot;: {&quot;emma&quot;: &quot;emma&quot;},
-  &quot;predicate_map&quot;: {&quot;motivated&quot;: &quot;motivated&quot;, &quot;adaptable&quot;: &quot;adaptable&quot;, &quot;articulate&quot;: &quot;articulate&quot;, &quot;brilliant&quot;: &quot;brilliant&quot;, &quot;knowledgeable&quot;: &quot;knowledgeable&quot;, &quot;perceptive&quot;: &quot;perceptive&quot;},
-  &quot;completion&quot;: &quot;&lt;/think&gt;
 
-&lt;/think&gt;
-
-{
-  &quot;context&quot;: &quot;In a competitive sports environment, Emma exhibits certain traits. Emma is motivated. If Emma is perceptive, then she is adaptable. If Emma is adaptable, then she is articulate. If Emma is motivated, then she is brilliant. If Emma is articulate, then she is knowledgeable. Additionally, either Emma is not brilliant or she is perceptive.&quot;,
-  &quot;question&quot;: &quot;Is Emma knowledgeable?&quot;,
-  &quot;entity_map&quot;: {&quot;emma&quot;: &quot;emma&quot;},
-  &quot;predicate_map&quot;: {&quot;motivated&quot;: &quot;motivated&quot;, &quot;adaptable&quot;: &quot;adaptable&quot;, &quot;articulate&quot;: &quot;articulate&quot;, &quot;brilliant&quot;: &quot;brilliant&quot;, &quot;knowledgeable&quot;: &quot;knowledgeable&quot;, &quot;perceptive&quot;: &quot;perceptive&quot;},
-  &quot;completion&quot;: &quot;&lt;/think&gt;
-
-&lt;/think&gt;
-
-{
-  &quot;context&quot;: &quot;In a competitive sports environment, Emma exhibits certain traits. Emma is motivated. If Emma is perceptive, then she is adaptable. If Emma is adaptable, then she is articulate. If Emma is motivated, then she is brilliant. If Emma is articulate, then she is knowledgeable. Additionally, either Emma is not brilliant or she is perceptive.&quot;,
-  &quot;question&quot;: &quot;Is Emma knowledgeable?&quot;,
-  &quot;entity_map&quot;: {&quot;emma&quot;: &quot;emma&quot;},
-  &quot;predicate_map&quot;: {&quot;motivated&quot;: &quot;motivated&quot;, &quot;adaptable&quot;: &quot;adaptable&quot;, &quot;articulate&quot;: &quot;articulate&quot;, &quot;brilliant&quot;: &quot;brilliant&quot;, &quot;knowledgeable&quot;: &quot;knowledgeable&quot;, &quot;perceptive&quot;: &quot;perceptive&quot;},
-  &quot;completion&quot;: &quot;&lt;/think&gt;
-
-{&quot;context&quot;: &quot;In a competitive sports envir...</div>
+                <div class="question-box">
+                    <div class="context-label">Generated Question</div>
+                    <div class="question-text">Is Emma knowledgeable?</div>
                 </div>
+
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">emma</code><span class="map-arrow">&rarr;</span><code class="map-new">emma</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">motivated</code><span class="map-arrow">&rarr;</span><code class="map-new">motivated</code></div><div class="map-row"><code class="map-old">perceptive</code><span class="map-arrow">&rarr;</span><code class="map-new">perceptive</code></div><div class="map-row"><code class="map-old">adaptable</code><span class="map-arrow">&rarr;</span><code class="map-new">adaptable</code></div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">articulate</code></div><div class="map-row"><code class="map-old">brilliant</code><span class="map-arrow">&rarr;</span><code class="map-new">brilliant</code></div><div class="map-row"><code class="map-old">knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">knowledgeable</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Emma is motivated.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>motivated(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;derived&quot; from=&quot;1&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is motivated, she is brilliant.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>brilliant(emma) :- motivated(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Either Emma is not brilliant or she is perceptive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>~brilliant(emma) v perceptive(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;2,3&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is brilliant (from step 2), the disjunction requires her to be perceptive.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>perceptive(emma) :- ~brilliant(emma) v perceptive(emma) AND brilliant(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;derived&quot; from=&quot;4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is perceptive, she is adaptable.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>adaptable(emma) :- perceptive(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;derived&quot; from=&quot;5&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is adaptable, she is articulate.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>articulate(emma) :- adaptable(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;derived&quot; from=&quot;6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since Emma is articulate, she is knowledgeable.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>knowledgeable(emma) :- articulate(emma)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: True</div></div>
             </div>
         </div>
     </div>
@@ -929,7 +1262,7 @@ Answer: False
                 <span class="card-id">nlb_v1_000036</span>
                 <span class="type-badge" style="background:#ecfdf5;color:#059669;border:1px solid #05966940">non_monotonic</span>
                 <span class="type-badge" style="background:#fef3c7;color:#d97706;border:1px solid #d9770640">Answer: Unknown</span>
-                <span class="status-badge status-partial">Parsed (incomplete)</span>
+                <span class="status-badge status-valid">Valid</span>
             </div>
         </div>
 
@@ -965,12 +1298,12 @@ Answer: False
                 <div class="output-meta">
                     <span class="meta-item">Attempt: 1</span>
                     <span class="meta-item">Parse: ok</span>
-                    <span class="meta-item">Completion: no_think_tag, no_step_tags, no_logic_tags</span>
+                    <span class="meta-item">Completion: valid</span>
                 </div>
 
                 <div class="context-box">
                     <div class="context-label">Generated Context</div>
-                    <div class="context-text gen-context">In a geology department, three researchers, Harley, Keith, and Kira, have various attributes. Kira is ab_empathetic, Keith is ab_knowledgeable and polite, and both Harley and Kira are systematic. Certain rules apply to determine other attributes. If Harley is systematic and not ab_empathetic, then he is empathetic. If Harley is polite and not ab_knowledgeable, then he is knowledgeable. Additionally, if Harley is knowledgeable, then he is articulate. If Harley is rested, then he is polite. If Harley is empathetic, then he is rested. The question is whether Harley is enthusiastic.</div>
+                    <div class="context-text gen-context">In a geological survey team, Harley, Keith, and Kira have various professional traits. Kira is an abnormal empathetic geologist. Keith is an abnormal knowledgeable geologist and is polite. Harley and Kira are systematic geologists. A geologist is articulate if they are knowledgeable. A geologist is polite if they are rested. A geologist is rested if they are empathetic. By default, a systematic geologist is empathetic unless they are abnormal empathetic. By default, a polite geologist is knowledgeable unless they are abnormal knowledgeable. The team needs to determine if Harley is enthusiastic based on their traits.</div>
                 </div>
 
                 <div class="question-box">
@@ -978,9 +1311,58 @@ Answer: False
                     <div class="question-text">Is Harley enthusiastic?</div>
                 </div>
 
-                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">harley</code><span class="map-arrow">&rarr;</span><code class="map-new">harley</code></div><div class="map-row"><code class="map-old">keith</code><span class="map-arrow">&rarr;</span><code class="map-new">keith</code></div><div class="map-row"><code class="map-old">kira</code><span class="map-arrow">&rarr;</span><code class="map-new">kira</code></div></div>
-                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_empathetic</code></div><div class="map-row"><code class="map-old">ab_knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">ab_knowledgeable</code></div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">articulate</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">knowledgeable</code></div><div class="map-row"><code class="map-old">polite</code><span class="map-arrow">&rarr;</span><code class="map-new">polite</code></div><div class="map-row"><code class="map-old">rested</code><span class="map-arrow">&rarr;</span><code class="map-new">rested</code></div><div class="map-row"><code class="map-old">systematic</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div></div>
-                <div class="completion-box invalid"><div class="comp-label">Completion (no_think_tag, no_step_tags, no_logic_tags)</div><div class="rendered-content raw-content">Answer: Unknown</div></div>
+                <div class="map-section"><div class="map-label">Entity Map</div><div class="map-row"><code class="map-old">harley</code><span class="map-arrow">&rarr;</span><code class="map-new">geologist_H</code></div><div class="map-row"><code class="map-old">keith</code><span class="map-arrow">&rarr;</span><code class="map-new">geologist_K</code></div><div class="map-row"><code class="map-old">kira</code><span class="map-arrow">&rarr;</span><code class="map-new">geologist_Q</code></div></div>
+                <div class="map-section"><div class="map-label">Predicate Map</div><div class="map-row"><code class="map-old">ab_empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">abnormal_empathetic</code></div><div class="map-row"><code class="map-old">ab_knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">abnormal_knowledgeable</code></div><div class="map-row"><code class="map-old">articulate</code><span class="map-arrow">&rarr;</span><code class="map-new">articulate</code></div><div class="map-row"><code class="map-old">empathetic</code><span class="map-arrow">&rarr;</span><code class="map-new">empathetic</code></div><div class="map-row"><code class="map-old">knowledgeable</code><span class="map-arrow">&rarr;</span><code class="map-new">knowledgeable</code></div><div class="map-row"><code class="map-old">polite</code><span class="map-arrow">&rarr;</span><code class="map-new">polite</code></div><div class="map-row"><code class="map-old">rested</code><span class="map-arrow">&rarr;</span><code class="map-new">rested</code></div><div class="map-row"><code class="map-old">systematic</code><span class="map-arrow">&rarr;</span><code class="map-new">systematic</code></div><div class="map-row"><code class="map-old">enthusiastic</code><span class="map-arrow">&rarr;</span><code class="map-new">enthusiastic</code></div></div>
+                <div class="completion-box valid"><div class="comp-label">Completion (valid)</div><div class="rendered-content"><span class="xml-tag">&lt;think&gt;</span>
+Let me consider the evidence.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Harley is systematic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>systematic(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>There is no fact stating geologist_H is abnormal empathetic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not abnormal_empathetic(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;3&quot; type=&quot;default_derived&quot; from=&quot;1,2&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since geologist_H is systematic and not abnormal empathetic, geologist_H is empathetic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>empathetic(geologist_H) :- systematic(geologist_H), not abnormal_empathetic(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;4&quot; type=&quot;derived&quot; from=&quot;3&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since geologist_H is empathetic, geologist_H is rested.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>rested(geologist_H) :- empathetic(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;5&quot; type=&quot;derived&quot; from=&quot;4&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since geologist_H is rested, geologist_H is polite.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>polite(geologist_H) :- rested(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;6&quot; type=&quot;premise&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>There is no fact stating geologist_H is abnormal knowledgeable.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>not abnormal_knowledgeable(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;7&quot; type=&quot;default_derived&quot; from=&quot;5,6&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since geologist_H is polite and not abnormal knowledgeable, geologist_H is knowledgeable.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>knowledgeable(geologist_H) :- polite(geologist_H), not abnormal_knowledgeable(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;8&quot; type=&quot;derived&quot; from=&quot;7&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>Since geologist_H is knowledgeable, geologist_H is articulate.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>articulate(geologist_H) :- knowledgeable(geologist_H)<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+&lt;step n=&quot;9&quot; type=&quot;query_check&quot;&gt;
+<span class="xml-tag">&lt;text&gt;</span>We have derived that geologist_H is articulate, polite, rested, empathetic, and knowledgeable. However, there are no rules or facts linking any of these traits to being enthusiastic.<span class="xml-tag">&lt;/text&gt;</span>
+<span class="xml-tag">&lt;logic&gt;</span>enthusiastic(geologist_H) is not derivable<span class="xml-tag">&lt;/logic&gt;</span>
+<span class="xml-tag">&lt;/step&gt;</span>
+
+<span class="xml-tag">&lt;/think&gt;</span>
+Answer: Unknown</div></div>
             </div>
         </div>
     </div>
