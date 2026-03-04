@@ -89,6 +89,7 @@
   .b-nm { background: #ecfccb; color: #3f6212; }
   .b-rule { background: #f1f5f9; color: #475569; font-weight: 600; }
   .b-steps { background: #f5f3ff; color: #6d28d9; }
+  .b-v2 { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-weight: 800; }
 
   /* ── Pager ── */
   .list-pager {
@@ -247,6 +248,14 @@
       <option value="10">10+</option>
     </select>
   </div>
+  <div class="filter-group">
+    <label for="f-render">Rendering</label>
+    <select id="f-render">
+      <option value="all">All</option>
+      <option value="v1">v1 (LLM)</option>
+      <option value="v2">v2 (Programmatic)</option>
+    </select>
+  </div>
   <div class="filter-count" id="filter-count">—</div>
 </div>
 
@@ -287,6 +296,10 @@ function esc(s) {
 function splitBadge(s) {
   const cls = {sft:"b-sft", grpo:"b-grpo", holdout:"b-holdout"}[s] || "b-rule";
   return `<span class="badge ${cls}">${esc(s.toUpperCase())}</span>`;
+}
+function renderBadge(mode) {
+  if (mode === "v2") return `<span class="badge b-v2">V2</span>`;
+  return "";
 }
 function answerBadge(a) {
   const n = a.toLowerCase();
@@ -349,6 +362,7 @@ function applyFilters() {
   const answer = document.getElementById("f-answer").value;
   const rule = document.getElementById("f-rule").value;
   const minSteps = parseInt(document.getElementById("f-steps").value) || 0;
+  const render = document.getElementById("f-render").value;
 
   filtered = DATA.examples.filter(e => {
     if (split !== "all" && e.split !== split) return false;
@@ -356,6 +370,10 @@ function applyFilters() {
     if (answer !== "all" && e.expected_answer !== answer) return false;
     if (rule !== "all" && !e.inference_rules.includes(rule)) return false;
     if (e.num_steps < minSteps) return false;
+    if (render !== "all") {
+      const mode = e.rendering_mode || "v1";
+      if (mode !== render) return false;
+    }
     if (q) {
       const hay = (e.id + " " + e.context + " " + e.question + " " + e.inference_rules.join(" ")).toLowerCase();
       if (!hay.includes(q)) return false;
@@ -393,6 +411,7 @@ function renderList() {
         ${logicBadge(e.logic_type)}
         ${answerBadge(e.expected_answer)}
         <span class="badge b-steps">${e.num_steps} steps</span>
+        ${renderBadge(e.rendering_mode)}
       </div>
     </div>`;
   }).join("");
@@ -532,6 +551,7 @@ function renderDetail() {
         <span class="badge b-steps">${e.num_steps} steps</span>
         ${e.planned_hops ? `<span class="badge b-rule">${e.planned_hops} hops</span>` : ""}
         ${e.profile ? `<span class="badge b-rule">${esc(e.profile)}</span>` : ""}
+        ${renderBadge(e.rendering_mode)}
       </div>
     </div>
 
@@ -588,7 +608,7 @@ async function init() {
 
   // Event listeners
   document.getElementById("q").addEventListener("input", debounce(applyFilters, 200));
-  ["f-split", "f-logic", "f-answer", "f-rule", "f-steps"].forEach(id => {
+  ["f-split", "f-logic", "f-answer", "f-rule", "f-steps", "f-render"].forEach(id => {
     document.getElementById(id).addEventListener("change", applyFilters);
   });
   document.getElementById("pg-prev").addEventListener("click", () => { page--; renderList(); });
