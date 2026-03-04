@@ -77,32 +77,21 @@
     <a class="card" href="project_status.html" style="border: 2px solid #f59e0b;">
         <div class="card-icon">&#x1F6A7;</div>
         <h3>Project Status Dashboard</h3>
-        <p>Two-stage strategy dashboard: Stage 1 rapid logic-focused preprint, Stage 2 scaled generalized reasoning model paper. Includes current results, active workstreams, and execution roadmap.</p>
+        <p>Recent results, active experiments, and roadmap. 8-model comparison, mechanistic interpretability findings, reward overoptimization diagnosis, label bias fix, and extended depth evaluation plans.</p>
         <div class="card-stats">
-            <span class="card-badge badge-amber">2-stage strategy</span>
+            <span class="card-badge badge-amber">active</span>
             <span class="card-badge badge-green">results + roadmap</span>
-            <span class="card-badge badge-purple">updated Feb 24</span>
+            <span class="card-badge badge-purple">updated Feb 23</span>
         </div>
     </a>
-    <a class="card" href="proof_bank.html" style="border: 2px solid #7c3aed;">
+    <a class="card" href="logicbench_equal25_explorer.html" style="border: 2px solid #7c3aed;">
         <div class="card-icon">&#x1F4DA;</div>
-        <h3>Proof Bank Plan</h3>
-        <p>Verified trace pipeline and scaling track toward 100K multi-domain examples. Stage 1 uses the logic-focused subset for fast publication; Stage 2 uses full-scale expansion.</p>
+        <h3>LogicBench 50K Explorer</h3>
+        <p>Explore the full equal-25 LogicBench dataset with split/type/theory filters and lazy-loaded complete reasoning traces for every instance.</p>
         <div class="card-stats">
-            <span class="card-badge badge-purple">100K target</span>
-            <span class="card-badge badge-green">pilot active</span>
-            <span class="card-badge badge-blue">4 domains</span>
-        </div>
-    </a>
-    <a class="card" href="logic_generalization_strategy.html" style="border: 2px solid #0891b2;">
-        <div class="card-icon">&#x1F9ED;</div>
-        <h3>Logic Generalization Strategy</h3>
-        <p>Complete plan for logic transfer: full axes coverage matrix, equal theory-type quotas, strict leakage/validity gates, and disjoint SFT→GRPO protocol.</p>
-        <div class="card-stats">
-            <span class="card-badge badge-purple">complete plan</span>
-            <span class="card-badge badge-blue">transfer-first</span>
-            <span class="card-badge badge-green">strict chain gates</span>
-            <span class="card-badge badge-amber">FOLIO-aware</span>
+            <span class="card-badge badge-purple">50K rows</span>
+            <span class="card-badge badge-green">full traces</span>
+            <span class="card-badge badge-blue">25 theories</span>
         </div>
     </a>
     <a class="card" href="grpo_prompt_spec.html" style="border: 2px solid #0ea5e9;">
@@ -192,36 +181,24 @@
 <h2 class="section-title">Safety Dataset Showcases</h2>
 
 <div class="card-grid">
-    <a class="card" href="proof_bank.html#trace-explorer" style="border: 2px solid #4f46e5;">
-        <div class="card-icon">&#x1F50E;</div>
-        <h3>Generated Trace Explorer</h3>
-        <p>Interactive browser for generated SFT data across LogicBench, FOLIO, ProofWriter, GSM8K, OpenR1-Math, MATH Hendrycks, SYNTHETIC-1 Code, MBPP, and CRUXEval. Filter, search, and inspect proof trees step-by-step.</p>
+    <a class="card" href="proof_bank_v6_explorer.html" style="border: 2px solid #7c3aed;">
+        <div class="card-icon">&#x1F4A0;</div>
+        <h3>Proof Bank v6 Explorer</h3>
+        <p>Interactive browser for the 200K Proof Bank v6 dataset. Explore SFT/GRPO/holdout splits across propositional, FOL, and non-monotonic logic with 20 inference rules.</p>
         <div class="card-stats">
-            <span class="card-badge badge-green">cross-dataset</span>
-            <span class="card-badge badge-blue">proof-tree view</span>
+            <span class="card-badge badge-green">200K records</span>
+            <span class="card-badge badge-blue">20 rules</span>
             <span class="card-badge badge-purple">new</span>
         </div>
     </a>
 
-    <a class="card" href="logicbench_compositional_examples.html" style="border: 2px solid #0d9488;">
-        <div class="card-icon">&#x1F9E9;</div>
-        <h3>Compositional LogicBench (New)</h3>
-        <p>Stage 1 logic-focused synthetic examples with v2 predicate-level logic plus typed compositional pilots. Includes strict chain verification and True/False/Unknown supervision.</p>
+    <a class="card" href="logicbench_equal25_explorer.html" style="border: 2px solid #4f46e5;">
+        <div class="card-icon">&#x1F50E;</div>
+        <h3>LogicBench Equal-25 Explorer</h3>
+        <p>Interactive browser for the equal-25 LogicBench dataset. Filter by split, logic type, subtype, theory, and inspect the full reasoning trace for each example.</p>
         <div class="card-stats">
-            <span class="card-badge badge-green">3,000 v2 examples</span>
-            <span class="card-badge badge-blue">typed plans + 3-class</span>
-            <span class="card-badge badge-amber">strict-chain ready</span>
-        </div>
-    </a>
-
-    <a class="card" href="logicbench_equal25_explorer.html" style="border: 2px solid #0284c7;">
-        <div class="card-icon">&#x1F50D;</div>
-        <h3>Equal-25 Dataset Explorer</h3>
-        <p>Interactive explorer for the 50K equal-theory logic SFT dataset. Filter by logic type/theory/answer, search by text, and browse examples with paginated views.</p>
-        <div class="card-stats">
-            <span class="card-badge badge-green">50,000 rows</span>
-            <span class="card-badge badge-blue">25 theory keys</span>
-            <span class="card-badge badge-purple">interactive filters</span>
+            <span class="card-badge badge-green">logicbench</span>
+            <span class="card-badge badge-blue">proof-tree view</span>
         </div>
     </a>
 

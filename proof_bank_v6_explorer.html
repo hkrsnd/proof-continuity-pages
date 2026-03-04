@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Proof Bank v6 Explorer</title>
+<style>
+  :root {
+    --bg: #f8fafc; --bg2: #eef2ff; --card: #fff; --border: #e2e8f0;
+    --text: #0f172a; --muted: #64748b; --accent: #1e40af; --accent-light: #dbeafe;
+    --green: #166534; --green-bg: #dcfce7; --red: #991b1b; --red-bg: #fee2e2;
+    --amber: #92400e; --amber-bg: #fef3c7; --purple: #6d28d9; --purple-bg: #ede9fe;
+    --blue: #1d4ed8; --blue-bg: #eff6ff; --teal: #0f766e; --teal-bg: #ccfbf1;
+    --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,.07);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--text); padding: 1.2rem; min-height: 100vh;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  a.back { display: inline-block; margin-bottom: .6rem; color: var(--blue); text-decoration: none; font-weight: 600; font-size: .88rem; }
+  a.back:hover { text-decoration: underline; }
+  h1 { font-size: 1.65rem; margin-bottom: .15rem; letter-spacing: -.02em; }
+  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 1rem; }
+
+  /* ── Stats cards ── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .5rem; margin-bottom: .9rem; }
+  .stat-card {
+    background: var(--card); border-radius: var(--radius); padding: .6rem .7rem;
+    box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border);
+  }
+  .stat-val { font-size: 1.25rem; font-weight: 800; color: var(--accent); }
+  .stat-lbl { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: .1rem; }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    background: var(--card); border-radius: var(--radius); padding: .7rem .85rem;
+    box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: .9rem;
+    display: flex; flex-wrap: wrap; gap: .5rem; align-items: end;
+  }
+  .filter-group { display: flex; flex-direction: column; min-width: 120px; }
+  .filter-group.search { flex: 1; min-width: 200px; }
+  .filter-group label { font-size: .7rem; color: var(--muted); margin-bottom: .18rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  .filter-group select, .filter-group input {
+    border: 1px solid var(--border); border-radius: 7px; padding: .38rem .5rem;
+    font-size: .82rem; background: var(--bg); color: var(--text);
+    transition: border-color .15s;
+  }
+  .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--blue); }
+  .filter-count { font-size: .78rem; color: var(--muted); align-self: center; padding: .38rem 0; white-space: nowrap; }
+
+  /* ── Main layout ── */
+  .main-layout { display: grid; grid-template-columns: 420px 1fr; gap: .9rem; }
+  @media (max-width: 1050px) { .main-layout { grid-template-columns: 1fr; } }
+
+  /* ── List panel ── */
+  .list-panel {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border); display: flex; flex-direction: column; max-height: 82vh;
+  }
+  .list-header { padding: .55rem .7rem; border-bottom: 1px solid var(--border); font-size: .78rem; color: var(--muted); font-weight: 600; }
+  .list-scroll { overflow-y: auto; flex: 1; }
+  .list-item {
+    padding: .55rem .7rem; border-bottom: 1px solid #f1f5f9; cursor: pointer;
+    transition: background .1s;
+  }
+  .list-item:hover { background: #f8fafc; }
+  .list-item.active { background: var(--accent-light); border-left: 3px solid var(--blue); }
+  .list-item-top { display: flex; align-items: center; gap: .4rem; margin-bottom: .2rem; }
+  .list-id { font-family: ui-monospace, monospace; font-size: .7rem; color: var(--muted); }
+  .list-question { font-size: .8rem; color: var(--text); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .list-meta { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .25rem; }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-flex; align-items: center; border-radius: 999px;
+    padding: .08rem .45rem; font-size: .65rem; font-weight: 700; letter-spacing: .02em;
+  }
+  .b-sft { background: var(--blue-bg); color: var(--blue); }
+  .b-grpo { background: var(--purple-bg); color: var(--purple); }
+  .b-holdout { background: var(--teal-bg); color: var(--teal); }
+  .b-true { background: var(--green-bg); color: var(--green); }
+  .b-false { background: var(--red-bg); color: var(--red); }
+  .b-unknown { background: var(--amber-bg); color: var(--amber); }
+  .b-prop { background: #e0e7ff; color: #3730a3; }
+  .b-fol { background: #fce7f3; color: #9d174d; }
+  .b-nm { background: #ecfccb; color: #3f6212; }
+  .b-rule { background: #f1f5f9; color: #475569; font-weight: 600; }
+  .b-steps { background: #f5f3ff; color: #6d28d9; }
+
+  /* ── Pager ── */
+  .list-pager {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .4rem .7rem; border-top: 1px solid var(--border); font-size: .78rem; color: var(--muted);
+  }
+  .list-pager button {
+    border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+    padding: .25rem .5rem; font-size: .78rem; cursor: pointer; color: var(--text);
+  }
+  .list-pager button:disabled { opacity: .4; cursor: not-allowed; }
+  .list-pager button:hover:not(:disabled) { background: var(--accent-light); }
+
+  /* ── Detail panel ── */
+  .detail-panel {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border); padding: 1rem 1.1rem; max-height: 82vh; overflow-y: auto;
+  }
+  .detail-empty { color: var(--muted); text-align: center; padding: 3rem 1rem; font-size: .9rem; }
+  .detail-header { margin-bottom: .8rem; }
+  .detail-title { font-size: 1.05rem; font-weight: 700; margin-bottom: .3rem; }
+  .detail-badges { display: flex; gap: .35rem; flex-wrap: wrap; }
+
+  .section { margin-bottom: .85rem; }
+  .section-label {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); font-weight: 700; margin-bottom: .25rem;
+    display: flex; align-items: center; gap: .3rem;
+  }
+  .section-label .icon { font-size: .8rem; }
+
+  .context-box {
+    background: #fefce8; border-left: 3px solid #eab308; border-radius: 0 8px 8px 0;
+    padding: .6rem .75rem; font-size: .82rem; line-height: 1.55; color: #422006;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .question-box {
+    background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0;
+    padding: .6rem .75rem; font-size: .88rem; line-height: 1.5; color: #1e3a5f;
+    font-weight: 600;
+  }
+  .query-box {
+    background: #f5f3ff; border-left: 3px solid #8b5cf6; border-radius: 0 8px 8px 0;
+    padding: .4rem .6rem; font-family: ui-monospace, monospace; font-size: .8rem; color: #5b21b6;
+  }
+
+  /* ── Completion rendering ── */
+  .completion-area { }
+  .think-block {
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .think-header {
+    background: #f1f5f9; padding: .35rem .65rem; font-size: .72rem; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .04em;
+    border-bottom: 1px solid var(--border);
+  }
+  .think-body { padding: .55rem .65rem; }
+  .free-text { font-size: .82rem; line-height: 1.5; color: #475569; margin: .4rem 0; white-space: pre-wrap; }
+
+  .step-card {
+    border-radius: 8px; margin: .45rem 0; overflow: hidden;
+    border: 1px solid var(--border); transition: box-shadow .15s;
+  }
+  .step-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .step-header {
+    display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem;
+    font-size: .75rem; font-weight: 700;
+  }
+  .step-premise .step-header { background: #f0fdf4; color: var(--green); border-bottom: 1px solid #bbf7d0; }
+  .step-derived .step-header { background: #eff6ff; color: var(--blue); border-bottom: 1px solid #bfdbfe; }
+  .step-other .step-header { background: #f8fafc; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .step-num { font-family: ui-monospace, monospace; font-size: .72rem; }
+  .step-type-badge { font-size: .62rem; text-transform: uppercase; letter-spacing: .03em; padding: .05rem .3rem; border-radius: 4px; }
+  .step-premise .step-type-badge { background: #dcfce7; }
+  .step-derived .step-type-badge { background: #dbeafe; }
+  .step-from { font-size: .68rem; color: var(--muted); margin-left: auto; }
+  .step-body { padding: .45rem .6rem; }
+  .step-text { font-size: .82rem; line-height: 1.5; color: var(--text); margin-bottom: .3rem; }
+  .step-logic {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .78rem; color: #7c3aed; background: #faf5ff;
+    padding: .25rem .5rem; border-radius: 5px; display: inline-block;
+    border: 1px solid #e9d5ff;
+  }
+  .answer-box {
+    background: linear-gradient(135deg, #f0f9ff, #eff6ff); border: 2px solid #3b82f6;
+    border-radius: 8px; padding: .55rem .75rem; margin-top: .55rem;
+    font-size: .9rem; font-weight: 700; color: var(--accent);
+  }
+
+  /* ── Formal KB section ── */
+  .kb-section { margin-top: .5rem; }
+  .kb-toggle {
+    font-size: .75rem; color: var(--blue); cursor: pointer; font-weight: 600;
+    user-select: none; display: flex; align-items: center; gap: .3rem;
+  }
+  .kb-toggle:hover { text-decoration: underline; }
+  .kb-content {
+    display: none; margin-top: .35rem; padding: .5rem .65rem;
+    background: #f8fafc; border-radius: 8px; border: 1px solid var(--border);
+    font-family: ui-monospace, monospace; font-size: .76rem; line-height: 1.55;
+    white-space: pre-wrap; color: #334155;
+  }
+  .kb-content.open { display: block; }
+  .kb-label { color: var(--muted); font-size: .68rem; text-transform: uppercase; margin-bottom: .2rem; font-weight: 700; }
+
+  /* ── Plan pills ── */
+  .plan-pills { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .15rem; }
+  .plan-pill {
+    font-family: ui-monospace, monospace; font-size: .72rem; font-weight: 700;
+    padding: .12rem .4rem; border-radius: 5px; background: #e0e7ff; color: #3730a3;
+  }
+  .plan-pill:nth-child(odd) { background: #fce7f3; color: #9d174d; }
+
+  .loading { text-align: center; padding: 3rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back" href="index.html">&larr; Back to Hub</a>
+<h1>Proof Bank v6 Explorer</h1>
+<p class="sub">Interactive browser for the assembled Proof Bank v6 dataset — 200K verified reasoning traces across propositional, FOL, and non-monotonic logic.</p>
+
+<!-- Stats -->
+<div class="stats-row" id="stats-row"></div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <div class="filter-group search">
+    <label for="q">Search</label>
+    <input id="q" type="text" placeholder="Search context, question, ID, or rule...">
+  </div>
+  <div class="filter-group">
+    <label for="f-split">Split</label>
+    <select id="f-split"><option value="all">All Splits</option></select>
+  </div>
+  <div class="filter-group">
+    <label for="f-logic">Logic Type</label>
+    <select id="f-logic"><option value="all">All Types</option></select>
+  </div>
+  <div class="filter-group">
+    <label for="f-answer">Answer</label>
+    <select id="f-answer"><option value="all">All Answers</option></select>
+  </div>
+  <div class="filter-group">
+    <label for="f-rule">Inference Rule</label>
+    <select id="f-rule"><option value="all">All Rules</option></select>
+  </div>
+  <div class="filter-group">
+    <label for="f-steps">Min Steps</label>
+    <select id="f-steps">
+      <option value="0">Any</option>
+      <option value="3">3+</option>
+      <option value="5">5+</option>
+      <option value="8">8+</option>
+      <option value="10">10+</option>
+    </select>
+  </div>
+  <div class="filter-count" id="filter-count">—</div>
+</div>
+
+<!-- Main layout -->
+<div class="main-layout">
+  <div class="list-panel">
+    <div class="list-header" id="list-header">Loading...</div>
+    <div class="list-scroll" id="list-scroll"></div>
+    <div class="list-pager">
+      <button id="pg-prev" disabled>&laquo; Prev</button>
+      <span id="pg-info">—</span>
+      <button id="pg-next" disabled>Next &raquo;</button>
+    </div>
+  </div>
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-empty">Select an example from the list to view its full content.</div>
+  </div>
+</div>
+</div>
+
+<script>
+const PAGE_SIZE = 30;
+const DATA_URL = "proof_bank_v6_explorer_data.json";
+
+let DATA = null;
+let filtered = [];
+let page = 0;
+let selectedIdx = -1;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function splitBadge(s) {
+  const cls = {sft:"b-sft", grpo:"b-grpo", holdout:"b-holdout"}[s] || "b-rule";
+  return `<span class="badge ${cls}">${esc(s.toUpperCase())}</span>`;
+}
+function answerBadge(a) {
+  const n = a.toLowerCase();
+  const cls = n === "true" ? "b-true" : n === "false" ? "b-false" : "b-unknown";
+  return `<span class="badge ${cls}">${esc(a)}</span>`;
+}
+function logicBadge(t) {
+  const short = {propositional_logic:"Propositional", first_order_logic:"FOL", nm_logic:"Non-Monotonic"}[t] || t;
+  const cls = {propositional_logic:"b-prop", first_order_logic:"b-fol", nm_logic:"b-nm"}[t] || "b-rule";
+  return `<span class="badge ${cls}">${esc(short)}</span>`;
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+
+function renderStats() {
+  const s = DATA.summary;
+  const t = DATA.split_totals;
+  const total = Object.values(t).reduce((a,b)=>a+b, 0);
+  const items = [
+    [total.toLocaleString(), "Total Records"],
+    [DATA.total_sampled.toLocaleString(), "Sampled"],
+    [t.sft?.toLocaleString() || "—", "SFT Split"],
+    [t.grpo?.toLocaleString() || "—", "GRPO Split"],
+    [t.holdout?.toLocaleString() || "—", "Holdout Split"],
+    [Object.keys(s.logic_type_counts).length, "Logic Types"],
+    [Object.keys(s.rule_counts).length, "Inference Rules"],
+    [s.avg_steps, "Avg Steps"],
+  ];
+  document.getElementById("stats-row").innerHTML = items.map(([v,l]) =>
+    `<div class="stat-card"><div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`
+  ).join("");
+}
+
+// ── Filters ──────────────────────────────────────────────────────────────────
+
+function populateFilters() {
+  const splits = [...new Set(DATA.examples.map(e=>e.split))].sort();
+  const logics = [...new Set(DATA.examples.map(e=>e.logic_type))].sort();
+  const answers = [...new Set(DATA.examples.map(e=>e.expected_answer))].sort();
+  const rules = [...new Set(DATA.examples.flatMap(e=>e.inference_rules))].sort();
+
+  const addOpts = (id, vals) => {
+    const sel = document.getElementById(id);
+    vals.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = v;
+      sel.appendChild(o);
+    });
+  };
+  addOpts("f-split", splits);
+  addOpts("f-logic", logics);
+  addOpts("f-answer", answers);
+  addOpts("f-rule", rules);
+}
+
+function applyFilters() {
+  const q = document.getElementById("q").value.toLowerCase();
+  const split = document.getElementById("f-split").value;
+  const logic = document.getElementById("f-logic").value;
+  const answer = document.getElementById("f-answer").value;
+  const rule = document.getElementById("f-rule").value;
+  const minSteps = parseInt(document.getElementById("f-steps").value) || 0;
+
+  filtered = DATA.examples.filter(e => {
+    if (split !== "all" && e.split !== split) return false;
+    if (logic !== "all" && e.logic_type !== logic) return false;
+    if (answer !== "all" && e.expected_answer !== answer) return false;
+    if (rule !== "all" && !e.inference_rules.includes(rule)) return false;
+    if (e.num_steps < minSteps) return false;
+    if (q) {
+      const hay = (e.id + " " + e.context + " " + e.question + " " + e.inference_rules.join(" ")).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  page = 0;
+  selectedIdx = -1;
+  document.getElementById("filter-count").textContent = `${filtered.length} matches`;
+  renderList();
+  renderDetail();
+}
+
+// ── List ─────────────────────────────────────────────────────────────────────
+
+function renderList() {
+  const start = page * PAGE_SIZE;
+  const end = Math.min(start + PAGE_SIZE, filtered.length);
+  const slice = filtered.slice(start, end);
+
+  document.getElementById("list-header").textContent =
+    `${filtered.length} examples · Page ${page + 1} of ${Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))}`;
+
+  const html = slice.map((e, i) => {
+    const idx = start + i;
+    const active = idx === selectedIdx ? " active" : "";
+    return `<div class="list-item${active}" data-idx="${idx}">
+      <div class="list-item-top">
+        <span class="list-id">${esc(e.id || "—")}</span>
+      </div>
+      <div class="list-question">${esc(e.question)}</div>
+      <div class="list-meta">
+        ${splitBadge(e.split)}
+        ${logicBadge(e.logic_type)}
+        ${answerBadge(e.expected_answer)}
+        <span class="badge b-steps">${e.num_steps} steps</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("list-scroll").innerHTML = html || '<div style="padding:1rem;color:var(--muted);text-align:center">No matches.</div>';
+
+  // Click handlers
+  document.querySelectorAll(".list-item").forEach(el => {
+    el.addEventListener("click", () => {
+      selectedIdx = parseInt(el.dataset.idx);
+      renderList();
+      renderDetail();
+    });
+  });
+
+  // Pager
+  document.getElementById("pg-prev").disabled = page === 0;
+  document.getElementById("pg-next").disabled = end >= filtered.length;
+  document.getElementById("pg-info").textContent = `${start + 1}–${end} of ${filtered.length}`;
+}
+
+// ── Detail ───────────────────────────────────────────────────────────────────
+
+function parseCompletion(comp) {
+  // Parse <think>...</think> and extract steps + free text
+  let inside = comp;
+  let beforeThink = "";
+  let afterThink = "";
+
+  const thinkOpen = comp.indexOf("<think>");
+  const thinkClose = comp.indexOf("</think>");
+  if (thinkOpen !== -1 && thinkClose !== -1) {
+    beforeThink = comp.substring(0, thinkOpen).trim();
+    inside = comp.substring(thinkOpen + 7, thinkClose);
+    afterThink = comp.substring(thinkClose + 8).trim();
+  } else if (thinkOpen !== -1) {
+    inside = comp.substring(thinkOpen + 7);
+  }
+
+  // Parse steps
+  const stepRe = /<step\s+n="(\d+)"\s+type="(\w+)"(?:\s+from="([^"]*)")?\s*>\s*<text>([\s\S]*?)<\/text>\s*<logic>([\s\S]*?)<\/logic>\s*<\/step>/g;
+  const parts = [];
+  let lastEnd = 0;
+  let m;
+
+  while ((m = stepRe.exec(inside)) !== null) {
+    // Free text before this step
+    const before = inside.substring(lastEnd, m.index).trim();
+    if (before) parts.push({type: "text", content: before});
+    parts.push({
+      type: "step",
+      n: m[1],
+      stepType: m[2],
+      from: m[3] || "",
+      text: m[4].trim(),
+      logic: m[5].trim(),
+    });
+    lastEnd = m.index + m[0].length;
+  }
+  // Trailing free text
+  const trailing = inside.substring(lastEnd).trim();
+  if (trailing) parts.push({type: "text", content: trailing});
+
+  return {beforeThink, parts, afterThink};
+}
+
+function renderDetail() {
+  const panel = document.getElementById("detail-panel");
+  if (selectedIdx < 0 || selectedIdx >= filtered.length) {
+    panel.innerHTML = '<div class="detail-empty">Select an example from the list to view its full content.</div>';
+    return;
+  }
+
+  const e = filtered[selectedIdx];
+  const parsed = parseCompletion(e.completion);
+
+  // Build step cards
+  const stepsHtml = parsed.parts.map(p => {
+    if (p.type === "text") {
+      return `<div class="free-text">${esc(p.content)}</div>`;
+    }
+    const cls = p.stepType === "premise" ? "step-premise" : p.stepType === "derived" ? "step-derived" : "step-other";
+    const fromHtml = p.from ? `<span class="step-from">from: ${esc(p.from)}</span>` : "";
+    return `<div class="step-card ${cls}">
+      <div class="step-header">
+        <span class="step-num">Step ${esc(p.n)}</span>
+        <span class="step-type-badge">${esc(p.stepType)}</span>
+        ${fromHtml}
+      </div>
+      <div class="step-body">
+        <div class="step-text">${esc(p.text)}</div>
+        <div class="step-logic">${esc(p.logic)}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Answer from afterThink
+  let answerHtml = "";
+  if (parsed.afterThink) {
+    answerHtml = `<div class="answer-box">${esc(parsed.afterThink)}</div>`;
+  }
+
+  // Formal KB
+  const facts = e.facts || [];
+  const imps = e.implications || [];
+  const disj = e.disjunctions || [];
+  const defaults = e.default_rules || [];
+  const hasKB = facts.length + imps.length + disj.length + defaults.length > 0;
+
+  let kbHtml = "";
+  if (hasKB) {
+    let kbInner = "";
+    if (facts.length) kbInner += `<div class="kb-label">Facts (${facts.length})</div>` + facts.map(f => esc(f)).join("\n") + "\n\n";
+    if (imps.length) kbInner += `<div class="kb-label">Implications (${imps.length})</div>` + imps.map(f => esc(f)).join("\n") + "\n\n";
+    if (disj.length) kbInner += `<div class="kb-label">Disjunctions (${disj.length})</div>` + disj.map(f => esc(f)).join("\n") + "\n\n";
+    if (defaults.length) kbInner += `<div class="kb-label">Default Rules (${defaults.length})</div>` + defaults.map(f => esc(f)).join("\n");
+    kbHtml = `<div class="kb-section">
+      <div class="kb-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+        ▸ Formal Knowledge Base (${facts.length + imps.length + disj.length + defaults.length} statements)
+      </div>
+      <div class="kb-content">${kbInner}</div>
+    </div>`;
+  }
+
+  // Inference plan
+  const planHtml = e.inference_plan?.length
+    ? `<div class="plan-pills">${e.inference_plan.map((r,i) => `<span class="plan-pill">${i+1}. ${esc(r)}</span>`).join("")}</div>`
+    : "";
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-title">${esc(e.id || "—")}</div>
+      <div class="detail-badges">
+        ${splitBadge(e.split)}
+        ${logicBadge(e.logic_type)}
+        ${answerBadge(e.expected_answer)}
+        <span class="badge b-steps">${e.num_steps} steps</span>
+        ${e.planned_hops ? `<span class="badge b-rule">${e.planned_hops} hops</span>` : ""}
+        ${e.profile ? `<span class="badge b-rule">${esc(e.profile)}</span>` : ""}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"><span class="icon">📖</span> Context</div>
+      <div class="context-box">${esc(e.context)}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"><span class="icon">❓</span> Question</div>
+      <div class="question-box">${esc(e.question)}</div>
+    </div>
+
+    ${e.query_literal ? `<div class="section">
+      <div class="section-label"><span class="icon">🔍</span> Query Literal</div>
+      <div class="query-box">${esc(e.query_literal)}</div>
+    </div>` : ""}
+
+    ${planHtml ? `<div class="section">
+      <div class="section-label"><span class="icon">🗺️</span> Inference Plan</div>
+      ${planHtml}
+    </div>` : ""}
+
+    <div class="section">
+      <div class="section-label"><span class="icon">🧠</span> Model Completion</div>
+      <div class="completion-area">
+        <div class="think-block">
+          <div class="think-header">Reasoning Chain</div>
+          <div class="think-body">${stepsHtml}</div>
+        </div>
+        ${answerHtml}
+      </div>
+    </div>
+
+    ${kbHtml}
+  `;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  document.getElementById("list-scroll").innerHTML = '<div class="loading">Loading dataset...</div>';
+  try {
+    const res = await fetch(DATA_URL);
+    DATA = await res.json();
+  } catch (err) {
+    document.getElementById("list-scroll").innerHTML = `<div class="loading">Error loading data: ${err.message}</div>`;
+    return;
+  }
+
+  renderStats();
+  populateFilters();
+  applyFilters();
+
+  // Event listeners
+  document.getElementById("q").addEventListener("input", debounce(applyFilters, 200));
+  ["f-split", "f-logic", "f-answer", "f-rule", "f-steps"].forEach(id => {
+    document.getElementById(id).addEventListener("change", applyFilters);
+  });
+  document.getElementById("pg-prev").addEventListener("click", () => { page--; renderList(); });
+  document.getElementById("pg-next").addEventListener("click", () => { page++; renderList(); });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", (ev) => {
+    if (ev.target.tagName === "INPUT" || ev.target.tagName === "SELECT") return;
+    if (ev.key === "ArrowDown" || ev.key === "j") {
+      ev.preventDefault();
+      if (selectedIdx < filtered.length - 1) {
+        selectedIdx++;
+        const newPage = Math.floor(selectedIdx / PAGE_SIZE);
+        if (newPage !== page) { page = newPage; }
+        renderList();
+        renderDetail();
+        scrollToActive();
+      }
+    } else if (ev.key === "ArrowUp" || ev.key === "k") {
+      ev.preventDefault();
+      if (selectedIdx > 0) {
+        selectedIdx--;
+        const newPage = Math.floor(selectedIdx / PAGE_SIZE);
+        if (newPage !== page) { page = newPage; }
+        renderList();
+        renderDetail();
+        scrollToActive();
+      }
+    }
+  });
+}
+
+function scrollToActive() {
+  const active = document.querySelector(".list-item.active");
+  if (active) active.scrollIntoView({block: "nearest", behavior: "smooth"});
+}
+
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+init();
+</script>
+</body>
+</html>
