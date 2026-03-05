@@ -317,14 +317,15 @@ function logicBadge(t) {
 
 function renderStats() {
   const s = DATA.summary;
-  const t = DATA.split_totals;
-  const total = Object.values(t).reduce((a,b)=>a+b, 0);
+  const t = DATA.split_totals || {};
+  const total = Object.values(t).reduce((a,b)=>a+b, 0) || DATA.total_sampled;
+  const v4Total = s.v4_total_rendered || 0;
   const items = [
     [total.toLocaleString(), "Total Records"],
     [DATA.total_sampled.toLocaleString(), "Sampled"],
-    [t.sft?.toLocaleString() || "—", "SFT Split"],
-    [t.grpo?.toLocaleString() || "—", "GRPO Split"],
-    [t.holdout?.toLocaleString() || "—", "Holdout Split"],
+    ...(v4Total ? [[v4Total.toLocaleString(), "v4 Rendered"]] : []),
+    ...(t.sft ? [[t.sft.toLocaleString(), "SFT Split"]] : []),
+    ...(t.grpo ? [[t.grpo.toLocaleString(), "GRPO Split"]] : []),
     [Object.keys(s.logic_type_counts).length, "Logic Types"],
     [Object.keys(s.rule_counts).length, "Inference Rules"],
     [s.avg_steps, "Avg Steps"],
