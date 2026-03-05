@@ -205,6 +205,35 @@
   .plan-pill:nth-child(odd) { background: #fce7f3; color: #9d174d; }
 
   .loading { text-align: center; padding: 3rem; color: var(--muted); }
+
+  /* ── Proof Graph ── */
+  .graph-toggle {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .75rem; font-weight: 700; color: var(--blue); cursor: pointer;
+    padding: .3rem .6rem; border-radius: 6px; border: 1px solid var(--blue);
+    background: var(--blue-bg); margin-bottom: .4rem; user-select: none;
+    transition: background .15s;
+  }
+  .graph-toggle:hover { background: #dbeafe; }
+  .graph-toggle.active { background: var(--blue); color: #fff; }
+  .graph-container {
+    background: #fff; border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: .6rem; overflow-x: auto; overflow-y: hidden;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,.04);
+  }
+  .graph-container svg { display: block; }
+  .graph-container .gnode { cursor: pointer; }
+  .graph-container .gnode rect { rx: 6; ry: 6; stroke-width: 1.5; transition: filter .15s; }
+  .graph-container .gnode:hover rect { filter: brightness(.92); }
+  .graph-container .gnode text { font-family: ui-monospace, monospace; font-size: 11px; fill: #1e293b; pointer-events: none; }
+  .graph-container .gnode .glabel { font-size: 9px; fill: #64748b; font-weight: 700; }
+  .graph-container .gedge { fill: none; stroke: #94a3b8; stroke-width: 1.5; marker-end: url(#arrowhead); }
+  .graph-legend {
+    display: flex; gap: .7rem; flex-wrap: wrap; padding: .35rem .6rem;
+    border-top: 1px solid var(--border); font-size: .68rem; color: var(--muted);
+  }
+  .graph-legend-item { display: flex; align-items: center; gap: .25rem; }
+  .graph-legend-swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); }
 </style>
 </head>
 <body>
@@ -480,6 +509,170 @@ function parseCompletion(comp) {
   return {beforeThink, parts, afterThink};
 }
 
+// ── Proof Graph ────────────────────────────────────────────────────────────
+
+const RULE_COLORS = {
+  MP:  {fill:"#dcfce7",stroke:"#16a34a"}, MT:  {fill:"#fee2e2",stroke:"#dc2626"},
+  DS:  {fill:"#ffedd5",stroke:"#ea580c"}, HS:  {fill:"#fef9c3",stroke:"#ca8a04"},
+  CD:  {fill:"#e0e7ff",stroke:"#4f46e5"}, BD:  {fill:"#fce7f3",stroke:"#db2777"},
+  MI:  {fill:"#ccfbf1",stroke:"#0d9488"}, DD:  {fill:"#fecaca",stroke:"#b91c1c"},
+  COMM:{fill:"#fed7aa",stroke:"#c2410c"}, UI:  {fill:"#c7d2fe",stroke:"#4338ca"},
+  EI:  {fill:"#ddd6fe",stroke:"#7c3aed"},
+  DEFAULT:{fill:"#e0f2fe",stroke:"#0284c7"}, EXCEPTION:{fill:"#fef3c7",stroke:"#d97706"},
+  EXCEPT_1:{fill:"#fef3c7",stroke:"#d97706"}, EXCEPT_2:{fill:"#fef3c7",stroke:"#d97706"},
+  EXCEPT_3:{fill:"#fef3c7",stroke:"#d97706"},
+  DEFAULT_IRR:{fill:"#e0f2fe",stroke:"#0369a1"}, DEFAULT_OPEN:{fill:"#e0f2fe",stroke:"#0369a1"},
+  DEFAULT_SEVERAL:{fill:"#e0f2fe",stroke:"#0369a1"}, PRIORITY:{fill:"#fae8ff",stroke:"#a21caf"},
+  premise_fact:{fill:"#f1f5f9",stroke:"#64748b"}, premise_rule:{fill:"#f5f3ff",stroke:"#8b5cf6"},
+  conclusion:{fill:"#fef3c7",stroke:"#b45309"}, _default:{fill:"#e2e8f0",stroke:"#475569"},
+};
+
+function inferRuleType(step, allSteps) {
+  // Try to guess rule type from the step's text field
+  const t = (step.text || "").toLowerCase();
+  if (t.includes("modus ponens") || t.includes("since the antecedent")) return "MP";
+  if (t.includes("modus tollens")) return "MT";
+  if (t.includes("disjunctive syllogism") || t.includes("one disjunct")) return "DS";
+  if (t.includes("hypothetical")) return "HS";
+  if (t.includes("default") && t.includes("irrelevant")) return "DEFAULT_IRR";
+  if (t.includes("default") && t.includes("open")) return "DEFAULT_OPEN";
+  if (t.includes("default") && t.includes("several")) return "DEFAULT_SEVERAL";
+  if (t.includes("exception") || t.includes("except")) return "EXCEPTION";
+  if (t.includes("priority")) return "PRIORITY";
+  if (t.includes("default")) return "DEFAULT";
+  if (t.includes("universal inst")) return "UI";
+  if (t.includes("existential")) return "EI";
+  return null;
+}
+
+function getNodeColor(step) {
+  if (step.stepType === "premise") {
+    return (step.logic.includes(":-") || step.logic.includes(" v ") || step.logic.includes("not "))
+      ? RULE_COLORS.premise_rule : RULE_COLORS.premise_fact;
+  }
+  const rule = inferRuleType(step);
+  return RULE_COLORS[rule] || RULE_COLORS._default;
+}
+
+function buildProofGraph(parts) {
+  // Extract steps only
+  const steps = parts.filter(p => p.type === "step");
+  if (steps.length === 0) return null;
+
+  const NODE_W = 180, NODE_H = 44, PAD_X = 30, PAD_Y = 22, LAYER_GAP_X = 210, LAYER_GAP_Y = 56;
+
+  // Build adjacency: step n -> [from refs]
+  const byN = {};
+  steps.forEach(s => { byN[s.n] = s; });
+
+  // Assign layers via topological sort (longest path from source)
+  const layer = {};
+  const visited = {};
+
+  function getLayer(n) {
+    if (layer[n] !== undefined) return layer[n];
+    if (visited[n]) return 0;
+    visited[n] = true;
+    const s = byN[n];
+    if (!s || !s.from) { layer[n] = 0; return 0; }
+    const refs = s.from.split(",").map(x => x.trim()).filter(x => x && byN[x]);
+    if (refs.length === 0) { layer[n] = 0; return 0; }
+    let maxParent = 0;
+    refs.forEach(r => { maxParent = Math.max(maxParent, getLayer(r)); });
+    layer[n] = maxParent + 1;
+    return layer[n];
+  }
+  steps.forEach(s => getLayer(s.n));
+
+  // Group by layer
+  const layers = {};
+  steps.forEach(s => {
+    const L = layer[s.n] || 0;
+    if (!layers[L]) layers[L] = [];
+    layers[L].push(s);
+  });
+  const maxLayer = Math.max(...Object.keys(layers).map(Number));
+
+  // Assign positions
+  const pos = {};
+  for (let L = 0; L <= maxLayer; L++) {
+    const col = layers[L] || [];
+    col.forEach((s, i) => {
+      pos[s.n] = {
+        x: PAD_X + L * LAYER_GAP_X,
+        y: PAD_Y + i * LAYER_GAP_Y,
+      };
+    });
+  }
+
+  const totalW = PAD_X * 2 + (maxLayer + 1) * LAYER_GAP_X;
+  const maxCol = Math.max(...Object.values(layers).map(a => a.length));
+  const totalH = PAD_Y * 2 + maxCol * LAYER_GAP_Y;
+
+  // Build SVG
+  let svg = `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<defs><marker id="arrowhead" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/></marker></defs>`;
+
+  // Draw edges first (behind nodes)
+  steps.forEach(s => {
+    if (!s.from) return;
+    const refs = s.from.split(",").map(x => x.trim()).filter(x => x && pos[x]);
+    const to = pos[s.n];
+    if (!to) return;
+    refs.forEach(r => {
+      const from = pos[r];
+      if (!from) return;
+      const x1 = from.x + NODE_W, y1 = from.y + NODE_H / 2;
+      const x2 = to.x, y2 = to.y + NODE_H / 2;
+      const cx1 = x1 + (x2 - x1) * 0.4, cx2 = x2 - (x2 - x1) * 0.4;
+      svg += `<path class="gedge" d="M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}"/>`;
+    });
+  });
+
+  // Draw nodes
+  steps.forEach(s => {
+    const p = pos[s.n];
+    if (!p) return;
+    const col = getNodeColor(s);
+    // Truncate logic for display
+    let logicShort = s.logic.length > 28 ? s.logic.substring(0, 26) + ".." : s.logic;
+    const typeLabel = s.stepType === "premise" ? "P" : inferRuleType(s) || "D";
+    svg += `<g class="gnode" data-step="${s.n}">`;
+    svg += `<rect x="${p.x}" y="${p.y}" width="${NODE_W}" height="${NODE_H}" fill="${col.fill}" stroke="${col.stroke}"/>`;
+    svg += `<text class="glabel" x="${p.x + 5}" y="${p.y + 12}">${typeLabel} #${s.n}</text>`;
+    svg += `<text x="${p.x + 5}" y="${p.y + 30}">${esc(logicShort)}</text>`;
+    svg += `</g>`;
+  });
+
+  svg += `</svg>`;
+
+  // Legend: collect used rule types
+  const usedRules = new Set();
+  steps.forEach(s => {
+    if (s.stepType === "premise") {
+      usedRules.add(s.logic.includes(":-") || s.logic.includes(" v ") ? "premise_rule" : "premise_fact");
+    } else {
+      usedRules.add(inferRuleType(s) || "_default");
+    }
+  });
+  const legendLabels = {
+    premise_fact: "Fact", premise_rule: "Rule/Disj", MP: "Modus Ponens", MT: "Modus Tollens",
+    DS: "Disj. Syllogism", HS: "Hyp. Syllogism", DEFAULT: "Default", EXCEPTION: "Exception",
+    EXCEPT_1: "Exception", PRIORITY: "Priority", DEFAULT_IRR: "Default (irr.)",
+    DEFAULT_OPEN: "Default (open)", UI: "Univ. Inst.", EI: "Exist. Inst.",
+    conclusion: "Conclusion", _default: "Derived",
+  };
+  let legend = '<div class="graph-legend">';
+  usedRules.forEach(r => {
+    const c = RULE_COLORS[r] || RULE_COLORS._default;
+    const lbl = legendLabels[r] || r;
+    legend += `<div class="graph-legend-item"><div class="graph-legend-swatch" style="background:${c.fill};border-color:${c.stroke}"></div>${lbl}</div>`;
+  });
+  legend += '</div>';
+
+  return `<div class="graph-container">${svg}${legend}</div>`;
+}
+
 function renderDetail() {
   const panel = document.getElementById("detail-panel");
   if (selectedIdx < 0 || selectedIdx >= filtered.length) {
@@ -579,6 +772,10 @@ function renderDetail() {
 
     <div class="section">
       <div class="section-label"><span class="icon">🧠</span> Model Completion</div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.4rem;">
+        <span class="graph-toggle" id="graph-toggle" onclick="toggleGraph()">&#9653; Proof Graph</span>
+      </div>
+      <div id="graph-area" style="display:none"></div>
       <div class="completion-area">
         <div class="think-block">
           <div class="think-header">Reasoning Chain</div>
@@ -650,6 +847,29 @@ function scrollToActive() {
 
 function debounce(fn, ms) {
   let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+let graphVisible = false;
+function toggleGraph() {
+  graphVisible = !graphVisible;
+  const area = document.getElementById("graph-area");
+  const btn = document.getElementById("graph-toggle");
+  if (!area || !btn) return;
+  if (graphVisible) {
+    btn.classList.add("active");
+    btn.innerHTML = "&#9663; Proof Graph";
+    // Build graph from current example
+    if (selectedIdx >= 0 && selectedIdx < filtered.length) {
+      const parsed = parseCompletion(filtered[selectedIdx].completion);
+      const graphHtml = buildProofGraph(parsed.parts);
+      area.innerHTML = graphHtml || '<div style="padding:.8rem;color:var(--muted);font-size:.82rem;">No steps to visualize.</div>';
+    }
+    area.style.display = "block";
+  } else {
+    btn.classList.remove("active");
+    btn.innerHTML = "&#9653; Proof Graph";
+    area.style.display = "none";
+  }
 }
 
 init();
