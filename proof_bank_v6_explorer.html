@@ -358,6 +358,7 @@ function renderStats() {
     [Object.keys(s.logic_type_counts).length, "Logic Types"],
     [Object.keys(s.rule_counts).length, "Inference Rules"],
     [s.avg_steps, "Avg Steps"],
+    ...(s.grounding_mean != null ? [[s.grounding_mean + "%", "Avg Grounding"]] : []),
   ];
   document.getElementById("stats-row").innerHTML = items.map(([v,l]) =>
     `<div class="stat-card"><div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`
@@ -747,6 +748,7 @@ function renderDetail() {
         ${e.planned_hops ? `<span class="badge b-rule">${e.planned_hops} hops</span>` : ""}
         ${e.profile ? `<span class="badge b-rule">${esc(e.profile)}</span>` : ""}
         ${renderBadge(e.rendering_mode)}
+        ${e.grounding_pct != null ? `<span class="badge" style="background:${e.grounding_pct >= 90 ? 'var(--green-bg);color:var(--green)' : e.grounding_pct >= 50 ? 'var(--amber-bg);color:var(--amber)' : 'var(--red-bg);color:var(--red)'}">${e.grounding_pct}% grounded</span>` : ""}
       </div>
     </div>
 
