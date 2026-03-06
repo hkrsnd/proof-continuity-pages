@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS — Proof Bank v7 Dataset Overview</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #fff; --border: #e2e8f0;
+    --text: #0f172a; --muted: #64748b; --accent: #1e40af;
+    --green: #166534; --green-bg: #dcfce7; --red: #991b1b; --red-bg: #fee2e2;
+    --amber: #92400e; --amber-bg: #fef3c7; --blue: #1d4ed8; --blue-bg: #eff6ff;
+    --purple: #6d28d9; --purple-bg: #ede9fe; --teal: #0f766e; --teal-bg: #ccfbf1;
+    --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,.07);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, #eef2ff 100%);
+    color: var(--text); padding: 2rem 1.2rem; min-height: 100vh;
+    line-height: 1.65;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a.back { display: inline-block; margin-bottom: .8rem; font-weight: 600; font-size: .88rem; }
+
+  h1 { font-size: 1.8rem; margin-bottom: .2rem; letter-spacing: -.02em; }
+  .subtitle { color: var(--muted); font-size: .95rem; margin-bottom: 1.5rem; }
+  h2 { font-size: 1.3rem; margin: 2rem 0 .7rem; padding-bottom: .35rem; border-bottom: 2px solid var(--border); }
+  h3 { font-size: 1.05rem; margin: 1.3rem 0 .5rem; color: var(--accent); }
+
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 1.2rem 1.4rem;
+    box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 1rem;
+  }
+  .highlight-card {
+    background: linear-gradient(135deg, var(--blue-bg) 0%, var(--purple-bg) 100%);
+    border: 1px solid #c7d2fe;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: .6rem; margin: 1rem 0;
+  }
+  .stat-box {
+    background: var(--card); border-radius: var(--radius); padding: .7rem;
+    box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center;
+  }
+  .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+  .stat-lbl { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: .15rem; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: .8rem 0; font-size: .88rem; }
+  th { text-align: left; padding: .5rem .6rem; background: var(--bg); border-bottom: 2px solid var(--border);
+       font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  td { padding: .45rem .6rem; border-bottom: 1px solid var(--border); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:hover td { background: #f8fafc; }
+
+  /* Pipeline diagram */
+  .pipeline { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; align-items: stretch; }
+  .pipe-step {
+    flex: 1; min-width: 180px; background: var(--card); border-radius: var(--radius);
+    padding: .8rem; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative;
+  }
+  .pipe-step::after {
+    content: "\2192"; position: absolute; right: -.7rem; top: 50%; transform: translateY(-50%);
+    font-size: 1.2rem; color: var(--muted); font-weight: 700;
+  }
+  .pipe-step:last-child::after { display: none; }
+  .pipe-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+    font-size: .7rem; font-weight: 800; margin-bottom: .3rem;
+  }
+  .pipe-title { font-weight: 700; font-size: .85rem; margin-bottom: .2rem; }
+  .pipe-desc { font-size: .78rem; color: var(--muted); line-height: 1.4; }
+
+  /* Code blocks */
+  pre {
+    background: #1e293b; color: #e2e8f0; border-radius: 8px; padding: 1rem;
+    overflow-x: auto; font-size: .82rem; line-height: 1.5; margin: .8rem 0;
+  }
+  code { font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace; }
+  p code, li code {
+    background: #f1f5f9; padding: .1rem .35rem; border-radius: 4px;
+    font-size: .85em; color: #334155;
+  }
+
+  /* Key points */
+  .key-points { list-style: none; padding: 0; }
+  .key-points li {
+    padding: .6rem .8rem; margin-bottom: .5rem; background: var(--card);
+    border-radius: 8px; border-left: 4px solid var(--accent);
+    box-shadow: var(--shadow); font-size: .88rem;
+  }
+  .key-points li strong { color: var(--accent); }
+
+  /* Comparison */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 1rem 0; }
+  @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+  .compare-box { border-radius: var(--radius); padding: .9rem 1rem; }
+  .compare-old { background: var(--red-bg); border: 1px solid #fca5a5; }
+  .compare-new { background: var(--green-bg); border: 1px solid #86efac; }
+  .compare-label { font-weight: 800; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
+  .compare-old .compare-label { color: var(--red); }
+  .compare-new .compare-label { color: var(--green); }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; border-radius: 999px;
+    padding: .12rem .5rem; font-size: .7rem; font-weight: 700;
+  }
+  .b-green { background: var(--green-bg); color: var(--green); }
+  .b-blue { background: var(--blue-bg); color: var(--blue); }
+  .b-amber { background: var(--amber-bg); color: var(--amber); }
+
+  p, li { margin-bottom: .4rem; }
+  ul { padding-left: 1.3rem; }
+  .section-sep { border: none; border-top: 2px solid var(--border); margin: 2rem 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<a class="back" href="index.html">&larr; Back to Project Hub</a>
+
+<h1>Proof Bank v7 &mdash; Dataset Overview</h1>
+<p class="subtitle">March 2026 &middot; Targeting 135K verified logical reasoning examples</p>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-box"><div class="stat-val">98K</div><div class="stat-lbl">Records Generated</div></div>
+  <div class="stat-box"><div class="stat-val">33/33/33</div><div class="stat-lbl">True / False / Unknown</div></div>
+  <div class="stat-box"><div class="stat-val">3</div><div class="stat-lbl">Logic Types</div></div>
+  <div class="stat-box"><div class="stat-val">20+</div><div class="stat-lbl">Inference Rules</div></div>
+  <div class="stat-box"><div class="stat-val">13.0</div><div class="stat-lbl">Avg Steps</div></div>
+  <div class="stat-box"><div class="stat-val">100%</div><div class="stat-lbl">Structural Correctness</div></div>
+</div>
+
+<hr class="section-sep">
+
+<!-- What's New -->
+<h2>What's New (v7 vs v6)</h2>
+
+<div class="compare">
+  <div class="compare-box compare-old">
+    <div class="compare-label">v6 &mdash; LLM-Rendered</div>
+    <p style="font-size:.88rem">The LLM generated <em>both</em> the formal structure (<code>&lt;step&gt;</code> types, <code>from=</code> references, <code>&lt;logic&gt;</code> fields) and the natural language.</p>
+    <ul style="font-size:.85rem; margin-top:.4rem">
+      <li><strong>74%</strong> of steps had incorrect type labels</li>
+      <li><strong>13%</strong> of derived steps had missing <code>from=</code> references</li>
+      <li>Derived steps often didn't reference all required premises</li>
+    </ul>
+  </div>
+  <div class="compare-box compare-new">
+    <div class="compare-label">v7 &mdash; Programmatic + LLM Text</div>
+    <p style="font-size:.88rem">The formal proof chain is built <strong>programmatically</strong> from the skeleton. The LLM only generates natural language text.</p>
+    <ul style="font-size:.85rem; margin-top:.4rem">
+      <li><strong>100%</strong> correct step type labels</li>
+      <li><strong>100%</strong> correct <code>from=</code> references</li>
+      <li>Natural, varied text across diverse domains</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- Pipeline -->
+<h2>How the Dataset Is Generated</h2>
+
+<div class="pipeline">
+  <div class="pipe-step">
+    <div class="pipe-num">1</div>
+    <div class="pipe-title">Skeleton Library</div>
+    <div class="pipe-desc">270K abstract logical problems with facts, rules, proof steps, and answers across propositional, FOL, and non-monotonic logic.</div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-num">2</div>
+    <div class="pipe-title">Chain Builder</div>
+    <div class="pipe-desc">Programmatically constructs correct <code>&lt;step&gt;</code> XML with types, from-refs, and logic fields. Guaranteed correct.</div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-num">3</div>
+    <div class="pipe-title">LLM Text Gen</div>
+    <div class="pipe-desc">gpt-oss-120b generates entity/predicate maps, context paragraph, question, step descriptions, and inter-step reasoning.</div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-num">4</div>
+    <div class="pipe-title">Validation</div>
+    <div class="pipe-desc">6-stage check: JSON parse, mapping completeness, identifier validity, text quality, reasoning coverage, context grounding.</div>
+  </div>
+</div>
+
+<h3>Step 1: Skeleton Library</h3>
+<p>Each skeleton defines an abstract logical problem:</p>
+<pre><code>Facts:         clear_headed(indie), well_prepared(walter)
+Rules:         logical(X) :- clear_headed(X)
+               intuitive(X) :- logical(X)
+Disjunctions:  brave(indie) v cautious(indie)
+Default rules: flies(X) :- bird(X), not ab_flies(X)
+Proof steps:   Complete derivation chain with types and from-refs
+Answer:        True / False / Unknown</code></pre>
+
+<h3>Step 2: Programmatic Chain Builder</h3>
+<p><code>build_programmatic_chain()</code> converts each skeleton's proof steps into correct XML. The chain builder guarantees:</p>
+<ul>
+  <li>Correct <code>type="premise"</code> vs <code>type="derived"</code> labels</li>
+  <li>Correct <code>from=</code> references (which premises each derived step depends on)</li>
+  <li>Correct <code>&lt;logic&gt;</code> fields with entity/predicate name mapping applied</li>
+  <li>Proper handling of Unknown answers (backward-chaining with <code>unreachable()</code>/<code>unknown()</code> meta-predicates)</li>
+</ul>
+
+<h3>Step 3: LLM Text Generation</h3>
+<p>The LLM receives the skeleton structure and produces:</p>
+<ul>
+  <li><strong>entity_map</strong> &mdash; Maps abstract names to domain-appropriate names (e.g., <code>alice</code> &rarr; <code>coral_reef</code>)</li>
+  <li><strong>predicate_map</strong> &mdash; Maps abstract predicates to domain properties (e.g., <code>happy</code> &rarr; <code>thriving</code>)</li>
+  <li><strong>context</strong> &mdash; A natural language paragraph that explicitly grounds all premises</li>
+  <li><strong>question</strong> &mdash; The query in natural language</li>
+  <li><strong>step_texts</strong> &mdash; Natural language descriptions for each step</li>
+  <li><strong>inter_step_reasoning</strong> &mdash; Explanatory text between steps</li>
+</ul>
+
+<h3>Step 4: Assembly &amp; Validation</h3>
+<p>The programmatic chain and LLM text are combined into a complete completion. Multi-stage validation checks:</p>
+<ol>
+  <li>JSON parsing (with truncation repair for long responses)</li>
+  <li>Mapping completeness (all entities/predicates in proof chain are mapped)</li>
+  <li>Identifier validity (mapped names are valid Prolog identifiers)</li>
+  <li>Context/question quality (minimum length)</li>
+  <li>Inter-step reasoning coverage</li>
+  <li>Context grounding (mapped predicates and entities appear in context text)</li>
+</ol>
+
+<hr class="section-sep">
+
+<!-- Statistics -->
+<h2>Current Statistics</h2>
+
+<div class="card">
+<h3 style="margin-top:0">Answer Distribution</h3>
+<table>
+  <thead><tr><th>Answer</th><th class="num">Count</th><th class="num">Percentage</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge b-green">True</span></td><td class="num">32,884</td><td class="num">33.4%</td></tr>
+    <tr><td><span class="badge" style="background:#fee2e2;color:#991b1b">False</span></td><td class="num">32,457</td><td class="num">33.0%</td></tr>
+    <tr><td><span class="badge b-amber">Unknown</span></td><td class="num">33,008</td><td class="num">33.6%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Logic Type Distribution</h3>
+<table>
+  <thead><tr><th>Logic Type</th><th class="num">Count</th><th class="num">Percentage</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge b-blue">Propositional</span></td><td class="num">44,999</td><td class="num">45.8%</td></tr>
+    <tr><td><span class="badge" style="background:#fce7f3;color:#9d174d">First-Order Logic</span></td><td class="num">41,018</td><td class="num">41.7%</td></tr>
+    <tr><td><span class="badge" style="background:#ecfccb;color:#3f6212">Non-Monotonic</span></td><td class="num">12,332</td><td class="num">12.5%</td></tr>
+  </tbody>
+</table>
+<p style="font-size:.82rem;color:var(--muted);margin-top:.3rem">NM proportion will grow to ~33% once shards 9&ndash;11 complete.</p>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">Quality Metrics <span style="font-weight:400;font-size:.82rem;color:var(--muted)">(audited on 300 random samples)</span></h3>
+<table>
+  <thead><tr><th>Metric</th><th class="num">Score</th></tr></thead>
+  <tbody>
+    <tr><td>Premise text&ndash;logic alignment</td><td class="num">96.8%</td></tr>
+    <tr><td>Derived text&ndash;logic alignment</td><td class="num">97.4%</td></tr>
+    <tr><td>Non-meta <code>from=</code> refs present</td><td class="num">100%</td></tr>
+    <tr><td>Context grounding (avg)</td><td class="num">96.6%</td></tr>
+    <tr><td>Valid answer present</td><td class="num">100%</td></tr>
+    <tr><td>Average steps per example</td><td class="num">13.0</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr class="section-sep">
+
+<!-- Key Design Points -->
+<h2>Key Design Points</h2>
+
+<ul class="key-points">
+  <li><strong>Structural correctness is guaranteed, not probabilistic.</strong> The formal proof chain (step types, from-references, logic expressions) comes from programmatic construction, not LLM generation. This eliminates the mislabeling and missing-reference problems of v6.</li>
+  <li><strong>Three-class balanced.</strong> True/False/Unknown are evenly distributed (~33% each), which is critical for training models that don't collapse to a majority class.</li>
+  <li><strong>Context grounds all premises.</strong> Every fact, rule, and disjunction in the formal proof appears as an explicit statement in the natural language context paragraph. Validation enforces this.</li>
+  <li><strong>Unknown reasoning uses meta-predicates.</strong> For Unknown answers, the proof trace uses backward-chaining with <code>unreachable(P)</code> (P cannot be derived) and <code>unknown(P)</code> (neither P nor &not;P derivable), verified by both SAT and ASP solvers.</li>
+  <li><strong>20+ inference rules.</strong> Modus ponens, modus tollens, disjunctive syllogism, hypothetical syllogism, constructive/destructive dilemma, material implication, commutation, default reasoning, reasoning about exceptions, and priority-based reasoning.</li>
+  <li><strong>Domain variety.</strong> The LLM maps each skeleton to a randomly assigned domain (marine biology, ancient history, nutrition, aviation, etc.), producing diverse and natural-sounding text.</li>
+</ul>
+
+<hr class="section-sep">
+
+<!-- Links -->
+<h2>Explore the Data</h2>
+
+<div class="card highlight-card" style="text-align:center; padding:1.5rem">
+  <p style="font-size:1.1rem; font-weight:700; margin-bottom:.5rem">Interactive Explorer</p>
+  <p style="margin-bottom:.8rem; color:var(--muted)">Browse 500 sampled examples with filters by logic type, answer, and search.</p>
+  <a href="proof_bank_v6_explorer.html" style="display:inline-block; padding:.5rem 1.5rem; background:var(--accent); color:#fff; border-radius:8px; font-weight:700; text-decoration:none; font-size:.9rem">Open Explorer &rarr;</a>
+</div>
+
+<p style="font-size:.85rem;color:var(--muted);margin-top:2rem;text-align:center">RAILS &mdash; Reasoning with Automatically Integrated Logical Supervision</p>
+
+</div>
+</body>
+</html>
