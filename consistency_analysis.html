@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS Consistency vs Answer-Only Analysis</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #bc8cff;
+    --consist-color: #58a6ff; --ansonly-color: #f85149; --sft-color: #8b949e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+  h1 { font-size: 1.8em; margin-bottom: 8px; }
+  h2 { font-size: 1.3em; margin: 30px 0 12px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h3 { font-size: 1.1em; margin: 20px 0 8px; color: var(--text2); }
+  .subtitle { color: var(--text2); margin-bottom: 20px; font-size: 0.95em; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+  th, td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--border); }
+  th { background: var(--bg); color: var(--text2); font-weight: 600; position: sticky; top: 0; }
+  td:first-child, th:first-child { text-align: left; }
+  .winner { font-weight: bold; }
+  .win-consist { color: var(--consist-color); }
+  .win-ansonly { color: var(--ansonly-color); }
+  .win-sft { color: var(--text2); }
+  .correct { color: var(--green); }
+  .incorrect { color: var(--red); }
+  .metric-big { font-size: 2em; font-weight: bold; }
+  .metric-label { font-size: 0.85em; color: var(--text2); }
+  .stat-row { display: flex; justify-content: space-around; text-align: center; padding: 12px 0; }
+  .finding { background: #1c2333; border-left: 3px solid var(--accent); padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+  .finding.warn { border-left-color: var(--yellow); }
+  .finding.good { border-left-color: var(--green); }
+  .finding.bad { border-left-color: var(--red); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.78em; font-weight: 600; }
+  .tag-correct { background: #1a3a2a; color: var(--green); }
+  .tag-wrong { background: #3a1a1a; color: var(--red); }
+  .tag-faithful { background: #1a2a3a; color: var(--consist-color); }
+  .tag-unfaithful { background: #3a2a1a; color: var(--yellow); }
+  .trace-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 10px; }
+  @media (max-width: 1100px) { .trace-container { grid-template-columns: 1fr; } }
+  .trace-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.82em; overflow-x: auto; }
+  .trace-box.highlight-good { border-color: var(--green); }
+  .trace-box.highlight-bad { border-color: var(--red); }
+  .trace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .trace-header .model-name { font-weight: bold; font-size: 0.95em; }
+  .trace-text { white-space: pre-wrap; word-break: break-word; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; line-height: 1.5; max-height: 400px; overflow-y: auto; }
+  .trace-text .step-tag { color: var(--accent); }
+  .trace-text .logic-tag { color: var(--purple); }
+  .example-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .example-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.82em; }
+  .example-btn:hover { border-color: var(--accent); color: var(--text); }
+  .example-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+  .filter-bar select, .filter-bar button { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 4px; font-size: 0.88em; }
+  .filter-bar button { cursor: pointer; }
+  .filter-bar button:hover { border-color: var(--accent); }
+  .filter-bar button.active { background: var(--accent); color: var(--bg); }
+  .chart-container { position: relative; height: 350px; }
+  .legend-custom { display: flex; gap: 20px; justify-content: center; margin: 10px 0; font-size: 0.88em; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .nav-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .nav-bar a { color: var(--accent); text-decoration: none; padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.88em; }
+  .nav-bar a:hover { background: var(--surface); }
+  .tooltip { position: relative; cursor: help; border-bottom: 1px dotted var(--text2); }
+  .delta-pos { color: var(--green); }
+  .delta-neg { color: var(--red); }
+  .delta-neutral { color: var(--text2); }
+  .section-anchor { scroll-margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>RAILS: Consistency Training Analysis</h1>
+<p class="subtitle">
+  Qwen3-8B evaluated on 6 benchmarks &mdash; comparing SFT baseline, GRPO+consistency (w=1.0), and GRPO answer-only (w=0.0).<br>
+  Training was ~24-28% complete (killed by 48h SLURM time limit). Generated 2026-03-19.
+</p>
+
+<div class="nav-bar">
+  <a href="#summary">Summary</a>
+  <a href="#benchmarks">Benchmarks</a>
+  <a href="#per-theory">Per-Theory</a>
+  <a href="#reasoning-quality">Reasoning Quality</a>
+  <a href="#traces">Trace Comparison</a>
+  <a href="#findings">Key Findings</a>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<h2 id="summary" class="section-anchor">Executive Summary</h2>
+
+<div class="grid3">
+  <div class="card" style="text-align:center">
+    <div class="metric-label">SFT Baseline</div>
+    <div class="metric-big" style="color:var(--text2)" id="sft-acc">--</div>
+    <div class="metric-label">LogicBench Accuracy</div>
+  </div>
+  <div class="card" style="text-align:center">
+    <div class="metric-label">GRPO + Consistency</div>
+    <div class="metric-big" style="color:var(--consist-color)" id="consist-acc">--</div>
+    <div class="metric-label">LogicBench Accuracy</div>
+  </div>
+  <div class="card" style="text-align:center">
+    <div class="metric-label">GRPO Answer-Only</div>
+    <div class="metric-big" style="color:var(--ansonly-color)" id="ansonly-acc">--</div>
+    <div class="metric-label">LogicBench Accuracy</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Training Status</h3>
+    <div id="training-status"></div>
+  </div>
+  <div class="card">
+    <h3>Agreement Matrix (125 sampled examples)</h3>
+    <div id="agreement-matrix"></div>
+  </div>
+</div>
+
+<!-- BENCHMARK COMPARISON -->
+<h2 id="benchmarks" class="section-anchor">Benchmark Comparison</h2>
+
+<div class="card">
+  <div class="legend-custom">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--sft-color)"></div> SFT baseline</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--consist-color)"></div> GRPO+consistency</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--ansonly-color)"></div> GRPO answer-only</div>
+  </div>
+  <div class="grid2">
+    <div class="chart-container"><canvas id="chart-accuracy"></canvas></div>
+    <div class="chart-container"><canvas id="chart-consistency"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="grid2">
+    <div class="chart-container"><canvas id="chart-faithfulness"></canvas></div>
+    <div class="chart-container"><canvas id="chart-steps"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <table id="benchmark-table">
+    <thead>
+      <tr>
+        <th>Benchmark</th>
+        <th colspan="2">SFT Baseline</th>
+        <th colspan="2">GRPO+Consistency</th>
+        <th colspan="2">GRPO Answer-Only</th>
+        <th>N</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th>Acc</th><th>Consist</th>
+        <th>Acc</th><th>Consist</th>
+        <th>Acc</th><th>Consist</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="benchmark-tbody"></tbody>
+  </table>
+</div>
+
+<!-- PER-THEORY HEATMAP -->
+<h2 id="per-theory" class="section-anchor">Per-Theory LogicBench Breakdown</h2>
+
+<div class="card">
+  <div class="filter-bar">
+    <span style="color:var(--text2)">Metric:</span>
+    <button class="active" onclick="setTheoryMetric('accuracy',this)">Accuracy</button>
+    <button onclick="setTheoryMetric('consistency_rate',this)">Consistency</button>
+    <button onclick="setTheoryMetric('faithfulness',this)">Faithfulness</button>
+    <span style="color:var(--text2);margin-left:10px">Show:</span>
+    <button class="active" onclick="setTheoryView('values',this)">Values</button>
+    <button onclick="setTheoryView('delta',this)">SFT&rarr;Consist &Delta;</button>
+  </div>
+  <table>
+    <thead id="theory-thead"></thead>
+    <tbody id="theory-tbody"></tbody>
+  </table>
+</div>
+
+<!-- REASONING QUALITY -->
+<h2 id="reasoning-quality" class="section-anchor">Reasoning Quality Analysis</h2>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Right Answer, Wrong Reasoning</h3>
+    <div class="chart-container" style="height:300px"><canvas id="chart-rawrr"></canvas></div>
+    <p style="font-size:0.85em;color:var(--text2);margin-top:8px">
+      Among correct answers: what fraction has <em>unfaithful</em> reasoning (faithfulness=0)?
+    </p>
+  </div>
+  <div class="card">
+    <h3>Faithful Accuracy</h3>
+    <div class="chart-container" style="height:300px"><canvas id="chart-faithful-acc"></canvas></div>
+    <p style="font-size:0.85em;color:var(--text2);margin-top:8px">
+      Accuracy &times; Faithfulness: correct answer <em>for the right reasons</em>.
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Reasoning Depth (Average Steps per Example)</h3>
+  <div class="chart-container" style="height:280px"><canvas id="chart-depth"></canvas></div>
+</div>
+
+<!-- QUALITATIVE TRACE COMPARISON -->
+<h2 id="traces" class="section-anchor">Side-by-Side Trace Comparison</h2>
+
+<div class="card">
+  <div class="filter-bar">
+    <span style="color:var(--text2)">Filter:</span>
+    <select id="trace-filter" onchange="filterTraces()">
+      <option value="all">All examples</option>
+      <option value="consist-wins">Consistency correct, Answer-only wrong</option>
+      <option value="ansonly-wins">Answer-only correct, Consistency wrong</option>
+      <option value="both-correct">Both correct</option>
+      <option value="both-wrong">Both wrong</option>
+      <option value="faithful-vs-not">Both correct, Consistency faithful, Answer-only not</option>
+    </select>
+    <select id="trace-theory" onchange="filterTraces()">
+      <option value="all">All theories</option>
+    </select>
+    <span id="trace-count" style="color:var(--text2);margin-left:auto"></span>
+  </div>
+  <div id="trace-nav" class="example-nav"></div>
+  <div id="trace-display"></div>
+</div>
+
+<!-- KEY FINDINGS -->
+<h2 id="findings" class="section-anchor">Key Findings</h2>
+
+<div class="finding good">
+  <strong>Transfer advantage:</strong> The consistency model is the only one that transfers to ProntoQA (30.3% vs ~0% for both others)
+  and wins on FOLIO (56.4% vs 47.5% SFT, 46.6% answer-only). Models trained with consistency reward
+  learn reasoning patterns that generalize beyond the training distribution.
+</div>
+
+<div class="finding good">
+  <strong>Per-theory consistency improvement:</strong> Consistency training improved consistency rate in 16/25 LogicBench theories
+  over the SFT baseline. Largest gains: disjunctive syllogism (+0.44), existential generalization (+0.29),
+  modus tollens (+0.12), default reasoning (+0.14).
+</div>
+
+<div class="finding warn">
+  <strong>Answer-only shortcuts:</strong> The answer-only model achieves 72.5% LogicBench accuracy but with only 4.9 steps
+  per example (vs 20.7 for consistency). It learned to compress disjunctions into single literals (e.g., encoding
+  "A or not B" as just "A"), making proofs trivially verifiable but semantically unfaithful.
+</div>
+
+<div class="finding bad">
+  <strong>Accuracy gap:</strong> Consistency model's LogicBench accuracy (30.0%) barely improved over SFT (28.8%).
+  The model produces longer, more careful reasoning but struggles to convert valid chains into correct final answers.
+  Training was only 24% complete &mdash; this may improve with more training.
+</div>
+
+<div class="finding warn">
+  <strong>Overthinking on complex rules:</strong> On dilemma-type theories, the consistency model produces 26-34 step
+  traces that loop and fail to converge, while the answer-only model's 5-step shortcuts land the right answer.
+  The consistency reward creates a harder optimization landscape that needs more training to navigate.
+</div>
+
+<div class="finding good">
+  <strong>ProofWriter consistency:</strong> Answer-only's ProofWriter consistency is near zero (0.032) &mdash; it learned to skip
+  reasoning entirely. Consistency model maintains 0.375, and SFT baseline achieves 0.463. The answer-only model's
+  "proofs" are structurally empty on out-of-distribution benchmarks.
+</div>
+
+<p style="color:var(--text2);margin-top:20px;font-size:0.88em">
+  Generated from eval results of SLURM jobs 101941 (GRPO+consistency, ckpt-5400) and 101943 (GRPO answer-only, ckpt-6200).
+  SFT baseline: qwen-sft-think-mixed-100133. All models: Qwen3-8B with 4-bit QLoRA.
+</p>
+
+</div><!-- container -->
+
+<script>
+// Load data
+const DATA_URL = 'consistency_analysis_data.json';
+let DATA = null;
+
+async function init() {
+  const resp = await fetch(DATA_URL);
+  DATA = await resp.json();
+  renderSummary();
+  renderBenchmarkCharts();
+  renderBenchmarkTable();
+  renderTheoryTable('accuracy', 'values');
+  renderReasoningQuality();
+  renderTraces();
+}
+
+function pct(v) { return (v * 100).toFixed(1) + '%'; }
+function fmt(v, d=3) { return v.toFixed(d); }
+
+function renderSummary() {
+  const lb = DATA.benchmarks.logicbench;
+  document.getElementById('sft-acc').textContent = pct(lb['SFT baseline'].accuracy);
+  document.getElementById('consist-acc').textContent = pct(lb['GRPO+consistency'].accuracy);
+  document.getElementById('ansonly-acc').textContent = pct(lb['GRPO answer-only'].accuracy);
+
+  // Training status
+  const ti = DATA.training_info;
+  let html = '<table style="width:100%">';
+  for (const [name, info] of Object.entries(ti)) {
+    html += `<tr><td style="text-align:left">${name}</td><td>${info.steps}/${info.total_steps} steps (${info.pct}%)</td></tr>`;
+  }
+  html += '</table>';
+  document.getElementById('training-status').innerHTML = html;
+
+  // Agreement matrix
+  const a = DATA.agreement;
+  const total = a.total;
+  document.getElementById('agreement-matrix').innerHTML = `
+    <table>
+      <tr><td style="text-align:left">Both correct</td><td class="correct">${a.both_correct} (${(100*a.both_correct/total).toFixed(1)}%)</td></tr>
+      <tr><td style="text-align:left">Consistency only correct</td><td style="color:var(--consist-color)">${a.consistency_only} (${(100*a.consistency_only/total).toFixed(1)}%)</td></tr>
+      <tr><td style="text-align:left">Answer-only only correct</td><td style="color:var(--ansonly-color)">${a.answer_only_only} (${(100*a.answer_only_only/total).toFixed(1)}%)</td></tr>
+      <tr><td style="text-align:left">Both wrong</td><td style="color:var(--text2)">${a.both_wrong} (${(100*a.both_wrong/total).toFixed(1)}%)</td></tr>
+    </table>`;
+}
+
+function makeBarChart(canvasId, labels, datasets, title, yMax=1) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { title: { display: true, text: title, color: '#e6edf3', font: { size: 14 } }, legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: yMax, ticks: { color: '#8b949e', callback: v => (v*100)+'%' }, grid: { color: '#21262d' } },
+        x: { ticks: { color: '#8b949e', font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderBenchmarkCharts() {
+  const benchLabels = { logicbench: 'LogicBench', folio_cot: 'FOLIO', prontoqa_cot: 'ProntoQA', proofwriter_cot: 'ProofWriter' };
+  const benchKeys = Object.keys(benchLabels);
+  const labels = benchKeys.map(k => benchLabels[k]);
+
+  function getVals(metric) {
+    return ['SFT baseline', 'GRPO+consistency', 'GRPO answer-only'].map(model =>
+      benchKeys.map(b => (DATA.benchmarks[b]?.[model]?.[metric]) || 0)
+    );
+  }
+
+  const colors = ['#8b949e', '#58a6ff', '#f85149'];
+  const mkDS = (metric) => ['SFT baseline', 'GRPO+consistency', 'GRPO answer-only'].map((m, i) => ({
+    label: m, data: benchKeys.map(b => DATA.benchmarks[b]?.[m]?.[metric] || 0),
+    backgroundColor: colors[i] + '99', borderColor: colors[i], borderWidth: 1
+  }));
+
+  makeBarChart('chart-accuracy', labels, mkDS('accuracy'), 'Accuracy');
+  makeBarChart('chart-consistency', labels, mkDS('consistency_rate'), 'Consistency Rate');
+  makeBarChart('chart-faithfulness', labels, mkDS('faithfulness'), 'Faithfulness');
+  makeBarChart('chart-steps', labels, mkDS('avg_num_steps'), 'Avg Reasoning Steps', 35);
+}
+
+function renderBenchmarkTable() {
+  const benchmarks = ['logicbench', 'folio_cot', 'prontoqa_cot', 'proofwriter_cot', 'sara', 'lsat'];
+  const names = { logicbench: 'LogicBench', folio_cot: 'FOLIO', prontoqa_cot: 'ProntoQA', proofwriter_cot: 'ProofWriter', sara: 'SARA', lsat: 'LSAT' };
+  const tbody = document.getElementById('benchmark-tbody');
+
+  for (const b of benchmarks) {
+    const d = DATA.benchmarks[b];
+    if (!d) continue;
+    const sft = d['SFT baseline'] || {};
+    const con = d['GRPO+consistency'] || {};
+    const ans = d['GRPO answer-only'] || {};
+
+    const accs = [sft.accuracy||0, con.accuracy||0, ans.accuracy||0];
+    const maxAcc = Math.max(...accs);
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${names[b]}</strong></td>
+      <td class="${sft.accuracy===maxAcc?'winner win-sft':''}">${pct(sft.accuracy||0)}</td>
+      <td>${fmt(sft.consistency_rate||0)}</td>
+      <td class="${con.accuracy===maxAcc?'winner win-consist':''}">${pct(con.accuracy||0)}</td>
+      <td>${fmt(con.consistency_rate||0)}</td>
+      <td class="${ans.accuracy===maxAcc?'winner win-ansonly':''}">${pct(ans.accuracy||0)}</td>
+      <td>${fmt(ans.consistency_rate||0)}</td>
+      <td style="color:var(--text2)">${sft.total||con.total||ans.total||'?'}</td>
+    `;
+    tbody.appendChild(row);
+  }
+}
+
+let currentMetric = 'accuracy';
+let currentView = 'values';
+
+function setTheoryMetric(metric, btn) {
+  currentMetric = metric;
+  document.querySelectorAll('.filter-bar button').forEach(b => {
+    if (b.textContent.match(/Accuracy|Consistency|Faithfulness/)) b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  renderTheoryTable(currentMetric, currentView);
+}
+
+function setTheoryView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.filter-bar button').forEach(b => {
+    if (b.textContent.match(/Values|Delta/i)) b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  renderTheoryTable(currentMetric, currentView);
+}
+
+function renderTheoryTable(metric, view) {
+  const thead = document.getElementById('theory-thead');
+  const tbody = document.getElementById('theory-tbody');
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  if (view === 'values') {
+    thead.innerHTML = '<tr><th>Theory</th><th>SFT</th><th>GRPO+Consist</th><th>GRPO Ans-Only</th><th>N</th></tr>';
+  } else {
+    thead.innerHTML = '<tr><th>Theory</th><th>SFT</th><th>GRPO+Consist</th><th>&Delta; (SFT&rarr;Consist)</th><th>N</th></tr>';
+  }
+
+  const logicTypes = ['propositional_logic', 'first_order_logic', 'nm_logic'];
+  const typeNames = { propositional_logic: 'Propositional Logic', first_order_logic: 'First-Order Logic', nm_logic: 'Non-Monotonic Logic' };
+
+  for (const lt of logicTypes) {
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `<td colspan="5" style="font-weight:bold;color:var(--accent);padding-top:14px">${typeNames[lt]}</td>`;
+    tbody.appendChild(headerRow);
+
+    const theories = Object.keys(DATA.per_theory).filter(k => k.startsWith(lt + '/')).sort();
+    for (const theory of theories) {
+      const tName = theory.split('/')[1].replace(/_/g, ' ');
+      const td = DATA.per_theory[theory];
+      const sft = td['SFT baseline']?.[metric] || 0;
+      const con = td['GRPO+consistency']?.[metric] || 0;
+      const ans = td['GRPO answer-only']?.[metric] || 0;
+      const n = td['SFT baseline']?.total || td['GRPO+consistency']?.total || 0;
+
+      const row = document.createElement('tr');
+      if (view === 'values') {
+        const vals = [sft, con, ans];
+        const maxV = Math.max(...vals);
+        row.innerHTML = `
+          <td style="padding-left:16px">${tName}</td>
+          <td class="${sft===maxV?'winner win-sft':''}">${pct(sft)}</td>
+          <td class="${con===maxV?'winner win-consist':''}">${pct(con)}</td>
+          <td class="${ans===maxV?'winner win-ansonly':''}">${pct(ans)}</td>
+          <td style="color:var(--text2)">${n}</td>
+        `;
+      } else {
+        const delta = con - sft;
+        const cls = delta > 0.02 ? 'delta-pos' : (delta < -0.02 ? 'delta-neg' : 'delta-neutral');
+        const arrow = delta > 0.02 ? '&#9650;' : (delta < -0.02 ? '&#9660;' : '&mdash;');
+        row.innerHTML = `
+          <td style="padding-left:16px">${tName}</td>
+          <td>${pct(sft)}</td>
+          <td>${pct(con)}</td>
+          <td class="${cls}">${(delta>0?'+':'') + pct(delta)} ${arrow}</td>
+          <td style="color:var(--text2)">${n}</td>
+        `;
+      }
+      tbody.appendChild(row);
+    }
+  }
+}
+
+function renderReasoningQuality() {
+  // Right answer wrong reasoning chart
+  const benchKeys = ['logicbench', 'folio_cot', 'prontoqa_cot', 'proofwriter_cot'];
+  const benchLabels = ['LogicBench', 'FOLIO', 'ProntoQA', 'ProofWriter'];
+  const models = ['SFT baseline', 'GRPO+consistency', 'GRPO answer-only'];
+  const colors = ['#8b949e99', '#58a6ff99', '#f8514999'];
+  const borderColors = ['#8b949e', '#58a6ff', '#f85149'];
+
+  // Unfaithfulness rate: 1 - faithfulness/accuracy (approx)
+  // Actually: for each benchmark, unfaithfulness = (accuracy - accuracy*faithfulness) / accuracy = 1 - faithfulness
+  // But faithfulness is computed over all samples, not just correct ones. Let's use:
+  // "right for wrong reasons" proxy = accuracy * (1 - faithfulness)
+  const datasets_rawrr = models.map((m, i) => ({
+    label: m,
+    data: benchKeys.map(b => {
+      const d = DATA.benchmarks[b]?.[m];
+      if (!d) return 0;
+      return 1 - (d.faithfulness || 0);  // fraction of all samples that are unfaithful
+    }),
+    backgroundColor: colors[i],
+    borderColor: borderColors[i],
+    borderWidth: 1
+  }));
+  makeBarChart('chart-rawrr', benchLabels, datasets_rawrr, 'Unfaithfulness Rate (1 - faithfulness)');
+
+  // Faithful accuracy
+  const datasets_facc = models.map((m, i) => ({
+    label: m,
+    data: benchKeys.map(b => {
+      const d = DATA.benchmarks[b]?.[m];
+      if (!d) return 0;
+      return d.accuracy * d.faithfulness;
+    }),
+    backgroundColor: colors[i],
+    borderColor: borderColors[i],
+    borderWidth: 1
+  }));
+  makeBarChart('chart-faithful-acc', benchLabels, datasets_facc, 'Faithful Accuracy (Accuracy x Faithfulness)', 0.5);
+
+  // Depth chart
+  const datasets_depth = models.map((m, i) => ({
+    label: m,
+    data: benchKeys.map(b => DATA.benchmarks[b]?.[m]?.avg_num_steps || 0),
+    backgroundColor: colors[i],
+    borderColor: borderColors[i],
+    borderWidth: 1
+  }));
+  makeBarChart('chart-depth', benchLabels, datasets_depth, 'Average Reasoning Steps', 35);
+}
+
+// Trace rendering
+let filteredExamples = [];
+let currentTraceIdx = 0;
+
+function filterTraces() {
+  const filter = document.getElementById('trace-filter').value;
+  const theoryFilter = document.getElementById('trace-theory').value;
+
+  filteredExamples = DATA.qualitative.filter(ex => {
+    if (theoryFilter !== 'all' && ex.theory !== theoryFilter) return false;
+    const c = ex.models['GRPO+consistency'];
+    const a = ex.models['GRPO answer-only'];
+    switch (filter) {
+      case 'consist-wins': return c.correct && !a.correct;
+      case 'ansonly-wins': return !c.correct && a.correct;
+      case 'both-correct': return c.correct && a.correct;
+      case 'both-wrong': return !c.correct && !a.correct;
+      case 'faithful-vs-not': return c.correct && a.correct && c.faithfulness > 0 && a.faithfulness === 0;
+      default: return true;
+    }
+  });
+
+  currentTraceIdx = 0;
+  document.getElementById('trace-count').textContent = `${filteredExamples.length} examples`;
+  renderTraceNav();
+  renderTraceExample();
+}
+
+function renderTraceNav() {
+  const nav = document.getElementById('trace-nav');
+  nav.innerHTML = '';
+  filteredExamples.forEach((ex, i) => {
+    const btn = document.createElement('button');
+    btn.className = `example-btn${i === currentTraceIdx ? ' active' : ''}`;
+    const theory = ex.theory.split('/')[1].replace(/_/g, ' ');
+    const c = ex.models['GRPO+consistency'];
+    const a = ex.models['GRPO answer-only'];
+    const icon = c.correct && !a.correct ? '+' : (!c.correct && a.correct ? '-' : (c.correct ? '=' : 'x'));
+    btn.textContent = `${i+1}. ${theory} [${icon}]`;
+    btn.onclick = () => { currentTraceIdx = i; renderTraceNav(); renderTraceExample(); };
+    nav.appendChild(btn);
+  });
+}
+
+function highlightTrace(text) {
+  return text
+    .replace(/(<step[^>]*>)/g, '<span class="step-tag">$1</span>')
+    .replace(/(<\/step>)/g, '<span class="step-tag">$1</span>')
+    .replace(/(<logic>)(.*?)(<\/logic>)/g, '<span class="logic-tag">$1$2$3</span>')
+    .replace(/(<text>)(.*?)(<\/text>)/g, '$1$2$3');
+}
+
+function renderTraceExample() {
+  const display = document.getElementById('trace-display');
+  if (filteredExamples.length === 0) {
+    display.innerHTML = '<p style="color:var(--text2)">No examples match the current filter.</p>';
+    return;
+  }
+
+  const ex = filteredExamples[currentTraceIdx];
+  const theory = ex.theory.replace(/_/g, ' ');
+
+  let html = `<div class="card">
+    <h3>${theory} &mdash; Ground truth: <strong>${ex.ground_truth}</strong></h3>
+    <div class="trace-container">`;
+
+  for (const model of ['SFT baseline', 'GRPO+consistency', 'GRPO answer-only']) {
+    const m = ex.models[model];
+    const borderClass = m.correct && m.faithfulness ? 'highlight-good' : (!m.correct ? 'highlight-bad' : '');
+
+    html += `<div class="trace-box ${borderClass}">
+      <div class="trace-header">
+        <span class="model-name">${model}</span>
+        <span>
+          <span class="tag ${m.correct ? 'tag-correct' : 'tag-wrong'}">${m.correct ? 'Correct' : 'Wrong'}</span>
+          <span class="tag ${m.faithfulness ? 'tag-faithful' : 'tag-unfaithful'}">${m.faithfulness ? 'Faithful' : 'Unfaithful'}</span>
+        </span>
+      </div>
+      <div style="font-size:0.82em;color:var(--text2);margin-bottom:6px">
+        predicted: ${m.predicted} | consistency: ${m.consistency_rate} | steps: ${m.num_steps}
+      </div>
+      <div class="trace-text">${highlightTrace(escapeHtml(m.generated_text))}</div>
+    </div>`;
+  }
+
+  html += '</div></div>';
+  display.innerHTML = html;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function renderTraces() {
+  // Populate theory dropdown
+  const select = document.getElementById('trace-theory');
+  const theories = [...new Set(DATA.qualitative.map(e => e.theory))].sort();
+  for (const t of theories) {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t.replace(/_/g, ' ');
+    select.appendChild(opt);
+  }
+  filterTraces();
+}
+
+init();
+</script>
+</body>
+</html>
