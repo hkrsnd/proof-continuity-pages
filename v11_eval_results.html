@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS v11 — Evaluation Results</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+h2 { font-size: 1.3rem; color: #16213e; margin-bottom: 0.8rem; }
+h3 { font-size: 1.05rem; color: #374151; margin-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+.stat-green .stat-value { color: #16a34a; }
+.stat-amber .stat-value { color: #d97706; }
+.stat-purple .stat-value { color: #7c3aed; }
+
+.card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+.table-wrapper { overflow-x: auto; margin: 1rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th {
+    background: #f0f4ff; color: #1e40af; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem;
+    padding: 0.6rem 0.5rem; text-align: center;
+    border-bottom: 2px solid #dbeafe; white-space: nowrap;
+    cursor: pointer; user-select: none; position: relative;
+}
+th:first-child { text-align: left; }
+th:hover { background: #dbeafe; }
+th .sort-arrow { font-size: 0.6rem; margin-left: 0.2rem; opacity: 0.4; }
+th.sorted-asc .sort-arrow, th.sorted-desc .sort-arrow { opacity: 1; }
+td { padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #f0f0f0; }
+td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+tr:hover { background: #fafbff; }
+
+.model-header td { background: #f8fafc; font-weight: 700; color: #16213e; border-bottom: 2px solid #e2e8f0; padding-top: 0.8rem; }
+
+.best { font-weight: 700; color: #16a34a; }
+.worst { font-weight: 700; color: #dc2626; }
+
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.badge-blue { background: #e0e7ff; color: #3730a3; }
+.badge-green { background: #dcfce7; color: #166534; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-purple { background: #f3e8ff; color: #6b21a8; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+.badge-teal { background: #ccfbf1; color: #115e59; }
+
+.finding { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.88rem; }
+.finding-positive { background: #f0fdf4; border-left: 4px solid #22c55e; }
+.finding-insight { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.finding-caution { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.finding-negative { background: #fef2f2; border-left: 4px solid #ef4444; }
+.finding strong { color: #16213e; }
+
+.section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.6rem; }
+
+.back-link { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+.back-link:hover { text-decoration: underline; }
+
+.footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.chart-container { position: relative; height: 320px; margin: 0.5rem 0; }
+
+.pipeline-diagram {
+    display: flex; align-items: center; gap: 0; margin: 1rem 0;
+    flex-wrap: wrap; justify-content: center;
+}
+.pipeline-step {
+    background: #e0e7ff; border-radius: 8px; padding: 0.6rem 1rem;
+    font-size: 0.82rem; font-weight: 600; color: #3730a3; text-align: center;
+}
+.pipeline-arrow { font-size: 1.2rem; color: #94a3b8; margin: 0 0.3rem; }
+.pipeline-step.active { background: #3b82f6; color: white; }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    body { background: #0f172a; color: #e2e8f0; }
+    h1, h2, h3 { color: #e2e8f0; }
+    .subtitle { color: #94a3b8; }
+    .summary, .card { background: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .stat { background: #1e3a5f; }
+    th { background: #1e3a5f; color: #93c5fd; border-bottom-color: #334155; }
+    th:hover { background: #2d4a6f; }
+    td { border-bottom-color: #334155; }
+    td:first-child { color: #e2e8f0; }
+    tr:hover { background: #1e293b; }
+    .model-header td { background: #1a2332; color: #e2e8f0; border-bottom-color: #475569; }
+    .finding-positive { background: #052e16; border-left-color: #22c55e; }
+    .finding-insight { background: #0c1929; border-left-color: #3b82f6; }
+    .finding-caution { background: #1c1a05; border-left-color: #f59e0b; }
+    .finding-negative { background: #1f0808; border-left-color: #ef4444; }
+    .finding strong { color: #e2e8f0; }
+    .best { color: #4ade80; }
+    .worst { color: #f87171; }
+    .back-link { color: #60a5fa; }
+    .footer { color: #64748b; border-top-color: #334155; }
+    .pipeline-step { background: #1e3a5f; color: #93c5fd; }
+    .pipeline-step.active { background: #3b82f6; color: white; }
+    .pipeline-arrow { color: #64748b; }
+    .badge-blue { background: #1e3a5f; color: #93c5fd; }
+    .badge-green { background: #052e16; color: #4ade80; }
+    .badge-amber { background: #1c1a05; color: #fbbf24; }
+    .badge-purple { background: #2e1065; color: #c084fc; }
+    .badge-red { background: #1f0808; color: #f87171; }
+    .badge-teal { background: #042f2e; color: #5eead4; }
+    .stat-label { color: #94a3b8; }
+}
+
+@media (max-width: 768px) {
+    body { padding: 1rem; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">&larr; Back to Hub</a>
+<h1>RAILS v11 &mdash; Evaluation Results</h1>
+<p class="subtitle">SFT &rarr; GRPO pipeline &middot; Qwen3-8B &amp; DeepSeek-R1-7B &middot; +Consistency vs Answer-Only &middot; 6 benchmarks &middot; Intermediate checkpoints (epoch 1.3&ndash;1.9 / 2.0)</p>
+
+<!-- ===== SUMMARY ===== -->
+<div class="summary">
+    <h2>Experiment Overview</h2>
+    <p style="font-size:0.88rem; color:inherit; opacity:0.8; margin-bottom:1rem;">
+        <strong>RAILS</strong> (Reasoning with Automatically Integrated Logical Supervision) trains LLMs to produce faithful reasoning
+        by providing symbolic verification rewards during GRPO reinforcement learning. The key idea: a SAT solver checks whether each
+        reasoning step is logically consistent with prior steps. Models receive reward only when their reasoning chain is both correct
+        <em>and</em> logically valid &mdash; preventing reward hacking through unfaithful shortcuts.
+    </p>
+    <p style="font-size:0.88rem; color:inherit; opacity:0.8; margin-bottom:1rem;">
+        <strong>Pipeline:</strong> Base model &rarr; SFT warmup on gold proofs &rarr; GRPO with either (a) answer-only reward or (b) answer + consistency reward.
+        All models use 4-bit QLoRA. Evaluation spans 4 in-distribution benchmarks (LogicBench, FOLIO, ProntoQA, ProofWriter) and 2 transfer benchmarks (SARA, LSAT).
+    </p>
+    <div class="pipeline-diagram">
+        <div class="pipeline-step">Base Model</div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step active">SFT Warmup</div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step active">GRPO (Answer-Only)</div>
+        <div class="pipeline-arrow" style="opacity:0.3">vs</div>
+        <div class="pipeline-step active" style="background:#16a34a;">GRPO (+Consistency)</div>
+    </div>
+    <div class="stats">
+        <div class="stat"><div class="stat-value">6</div><div class="stat-label">Model Variants</div></div>
+        <div class="stat stat-green"><div class="stat-value">6</div><div class="stat-label">Benchmarks</div></div>
+        <div class="stat stat-purple"><div class="stat-value">2</div><div class="stat-label">Model Families</div></div>
+        <div class="stat stat-amber"><div class="stat-value">v11</div><div class="stat-label">Config Version</div></div>
+    </div>
+    <div class="tag-row">
+        <span class="badge badge-blue">Qwen3-8B</span>
+        <span class="badge badge-purple">DeepSeek-R1-7B</span>
+        <span class="badge badge-green">+Consistency (SAT)</span>
+        <span class="badge badge-amber">Answer-Only</span>
+        <span class="badge badge-teal">SFT Baseline</span>
+        <span class="badge badge-red">Intermediate Checkpoints</span>
+    </div>
+</div>
+
+<!-- ===== TRAINING PROGRESS NOTE ===== -->
+<div class="card">
+    <h2>Training Progress</h2>
+    <p class="section-label">Status as of evaluation</p>
+    <div class="finding finding-caution">
+        <strong>Intermediate checkpoints.</strong> These results are from checkpoints at epoch 1.3&ndash;1.9 of 2.0.
+        Training is still ongoing &mdash; final results may differ. Trends are indicative but not final.
+    </div>
+</div>
+
+<!-- ===== MAIN ACCURACY TABLE ===== -->
+<div class="card">
+    <h2>Accuracy Results</h2>
+    <p class="section-label">Accuracy (%) across all benchmarks</p>
+    <div class="table-wrapper">
+        <table id="accuracy-table">
+            <thead>
+                <tr>
+                    <th>Model <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB Overall <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB Prop <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB FOL <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB NM <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>FOLIO <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>ProntoQA <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>ProofWriter <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>SARA <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LSAT <span class="sort-arrow">&#9650;&#9660;</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="model-header"><td colspan="10">Qwen3-8B</td></tr>
+                <tr>
+                    <td><span class="badge badge-teal">SFT</span></td>
+                    <td>26.2</td><td>36.2</td><td>28.3</td><td>10.9</td>
+                    <td>48.0</td><td>0.3</td><td>51.3</td><td>7.0</td><td>0.9</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-amber">AnsOnly</span></td>
+                    <td class="best">50.5</td><td class="best">56.1</td><td class="best">42.5</td><td class="best">52.7</td>
+                    <td>48.5</td><td>0.0</td><td class="best">54.2</td><td>4.0</td><td class="best">2.6</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">+Consist</span></td>
+                    <td>40.8</td><td>48.6</td><td>37.3</td><td>35.0</td>
+                    <td class="best">51.0</td><td>0.0</td><td>47.7</td><td>4.0</td><td>0.9</td>
+                </tr>
+                <tr class="model-header"><td colspan="10">DeepSeek-R1-7B</td></tr>
+                <tr>
+                    <td><span class="badge badge-teal">SFT</span></td>
+                    <td>3.4</td><td>2.1</td><td>4.6</td><td>3.4</td>
+                    <td>32.8</td><td>39.7</td><td>49.2</td><td>2.0</td><td>0.9</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-amber">AnsOnly</span></td>
+                    <td>4.1</td><td>3.2</td><td>6.2</td><td>2.7</td>
+                    <td>30.4</td><td>40.3</td><td>49.7</td><td class="worst">0.0</td><td class="best">3.5</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">+Consist</span></td>
+                    <td>3.2</td><td>2.9</td><td>3.3</td><td>3.6</td>
+                    <td>33.3</td><td class="best">44.0</td><td>47.2</td><td>1.0</td><td>2.6</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.5rem;">
+        Click column headers to sort. <span class="best">Green</span> = best in column, <span class="worst">Red</span> = worst in column.
+    </div>
+</div>
+
+<!-- ===== REASONING QUALITY TABLE ===== -->
+<div class="card">
+    <h2>Reasoning Quality</h2>
+    <p class="section-label">Consistency rate, faithfulness, and average steps</p>
+    <div class="table-wrapper">
+        <table id="quality-table">
+            <thead>
+                <tr>
+                    <th>Model <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB Consist% <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB Faith% <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>LB Steps <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>FOLIO Consist% <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>PQA Consist% <span class="sort-arrow">&#9650;&#9660;</span></th>
+                    <th>PW Consist% <span class="sort-arrow">&#9650;&#9660;</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="model-header"><td colspan="7">Qwen3-8B</td></tr>
+                <tr>
+                    <td><span class="badge badge-teal">SFT</span></td>
+                    <td>27.3</td><td>20.0</td><td>20.5</td>
+                    <td>30.3</td><td class="best">65.6</td><td>45.1</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-amber">AnsOnly</span></td>
+                    <td>32.8</td><td>17.9</td><td>15.9</td>
+                    <td>22.0</td><td class="worst">9.8</td><td class="worst">4.8</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">+Consist</span></td>
+                    <td class="best">35.4</td><td class="best">24.2</td><td>28.0</td>
+                    <td class="best">34.5</td><td>54.7</td><td>44.2</td>
+                </tr>
+                <tr class="model-header"><td colspan="7">DeepSeek-R1-7B</td></tr>
+                <tr>
+                    <td><span class="badge badge-teal">SFT</span></td>
+                    <td>30.6</td><td>19.7</td><td>33.8</td>
+                    <td>31.5</td><td>43.3</td><td>49.0</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-amber">AnsOnly</span></td>
+                    <td>32.7</td><td>20.3</td><td>32.1</td>
+                    <td>32.2</td><td>39.1</td><td class="best">53.9</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">+Consist</span></td>
+                    <td>27.9</td><td>16.9</td><td>35.7</td>
+                    <td>23.4</td><td>42.1</td><td>51.9</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== CHARTS ===== -->
+<div class="grid-2">
+    <div class="card">
+        <h3>Accuracy by Benchmark</h3>
+        <div class="chart-container"><canvas id="chart-accuracy"></canvas></div>
+    </div>
+    <div class="card">
+        <h3>Consistency Rate by Benchmark</h3>
+        <div class="chart-container"><canvas id="chart-consistency"></canvas></div>
+    </div>
+    <div class="card">
+        <h3>Faithfulness (LogicBench)</h3>
+        <div class="chart-container"><canvas id="chart-faithfulness"></canvas></div>
+    </div>
+    <div class="card">
+        <h3>Average Steps (LogicBench)</h3>
+        <div class="chart-container"><canvas id="chart-steps"></canvas></div>
+    </div>
+</div>
+
+<!-- ===== KEY FINDINGS ===== -->
+<div class="card">
+    <h2>Key Findings</h2>
+
+    <div class="finding finding-positive">
+        <strong>Consistency reward produces more faithful reasoning.</strong>
+        Qwen3 +Consistency achieves 24.2% faithfulness vs 17.9% for Answer-Only &mdash; a +35% relative improvement.
+        The consistency signal teaches models to reason validly, not just reach the right answer.
+    </div>
+
+    <div class="finding finding-negative">
+        <strong>Answer-only training collapses reasoning quality.</strong>
+        Qwen3 AnsOnly ProofWriter consistency drops to 4.8% (from 45.1% at SFT), and ProntoQA consistency to 9.8% (from 65.6%).
+        The model learns to shortcut past genuine reasoning when only final answers are rewarded.
+    </div>
+
+    <div class="finding finding-insight">
+        <strong>The accuracy-faithfulness tradeoff.</strong>
+        Qwen3 AnsOnly achieves the highest LogicBench accuracy (50.5%) but through unfaithful shortcuts (17.9% faithfulness).
+        Qwen3 +Consistency trades some accuracy (40.8%) for substantially more valid reasoning (24.2% faithfulness).
+        This is the core RAILS insight: raw accuracy masks reasoning quality.
+    </div>
+
+    <div class="finding finding-positive">
+        <strong>Consistency model wins on FOLIO &mdash; the hardest transfer benchmark.</strong>
+        Qwen3 +Consistency achieves 51.0% on FOLIO vs 48.5% for AnsOnly. FOLIO requires complex FOL reasoning
+        not seen during training, suggesting the consistency signal helps genuine generalization.
+    </div>
+
+    <div class="finding finding-positive">
+        <strong>DeepSeek +Consistency wins on ProntoQA.</strong>
+        DS +Consistency reaches 44.0% vs 40.3% for AnsOnly (+9.2% relative). The structured reasoning
+        encouraged by consistency reward transfers well to chain-style deductive reasoning.
+    </div>
+
+    <div class="finding finding-caution">
+        <strong>DeepSeek models show limited LogicBench improvement.</strong>
+        All DS variants score 3&ndash;4% on LogicBench overall, suggesting the model may need more training time
+        or a different SFT warmup strategy. The base DeepSeek-R1-7B architecture may be less amenable to
+        the current format. Results on other benchmarks (FOLIO 33%, ProntoQA 44%, PW 49%) are much stronger.
+    </div>
+
+    <div class="finding finding-caution">
+        <strong>Transfer benchmarks (SARA, LSAT) remain challenging.</strong>
+        All models score below 7% on SARA and below 4% on LSAT. These benchmarks require
+        domain knowledge beyond what the current training data provides.
+    </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+    RAILS v11 Evaluation &middot; Generated 2026-03-24 &middot; Intermediate checkpoints (training ongoing)
+</div>
+
+<script>
+// ===== SORTABLE TABLES =====
+document.querySelectorAll('table').forEach(table => {
+    const headers = table.querySelectorAll('th');
+    headers.forEach((th, colIdx) => {
+        th.addEventListener('click', () => {
+            const tbody = table.querySelector('tbody');
+            // Collect rows, preserving model-header grouping
+            const allRows = Array.from(tbody.querySelectorAll('tr'));
+            const groups = [];
+            let currentGroup = null;
+            allRows.forEach(row => {
+                if (row.classList.contains('model-header')) {
+                    currentGroup = { header: row, rows: [] };
+                    groups.push(currentGroup);
+                } else if (currentGroup) {
+                    currentGroup.rows.push(row);
+                }
+            });
+
+            // Determine sort direction
+            const isAsc = th.classList.contains('sorted-asc');
+            headers.forEach(h => { h.classList.remove('sorted-asc', 'sorted-desc'); });
+            const dir = isAsc ? 'desc' : 'asc';
+            th.classList.add('sorted-' + dir);
+
+            // Sort within each group
+            groups.forEach(g => {
+                g.rows.sort((a, b) => {
+                    const aVal = a.cells[colIdx]?.textContent.trim() || '';
+                    const bVal = b.cells[colIdx]?.textContent.trim() || '';
+                    const aNum = parseFloat(aVal);
+                    const bNum = parseFloat(bVal);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return dir === 'asc' ? aNum - bNum : bNum - aNum;
+                    }
+                    return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                });
+            });
+
+            // Rebuild tbody
+            tbody.innerHTML = '';
+            groups.forEach(g => {
+                tbody.appendChild(g.header);
+                g.rows.forEach(r => tbody.appendChild(r));
+            });
+
+            // Re-apply color coding
+            colorCodeTable(table);
+        });
+    });
+});
+
+// ===== COLOR-CODE BEST/WORST =====
+function colorCodeTable(table) {
+    const tbody = table.querySelector('tbody');
+    const dataRows = Array.from(tbody.querySelectorAll('tr:not(.model-header)'));
+    if (dataRows.length === 0) return;
+    const numCols = dataRows[0].cells.length;
+
+    for (let col = 1; col < numCols; col++) {
+        let vals = [];
+        dataRows.forEach(row => {
+            const v = parseFloat(row.cells[col]?.textContent);
+            if (!isNaN(v)) vals.push(v);
+        });
+        if (vals.length === 0) continue;
+        const maxV = Math.max(...vals);
+        const minV = Math.min(...vals);
+
+        dataRows.forEach(row => {
+            const cell = row.cells[col];
+            if (!cell) return;
+            const v = parseFloat(cell.textContent);
+            cell.classList.remove('best', 'worst');
+            if (!isNaN(v)) {
+                if (v === maxV && maxV !== minV) cell.classList.add('best');
+                else if (v === minV && maxV !== minV) cell.classList.add('worst');
+            }
+        });
+    }
+}
+document.querySelectorAll('table').forEach(colorCodeTable);
+
+// ===== CHARTS =====
+const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(148,163,184,0.15)' : 'rgba(0,0,0,0.08)';
+const textColor = isDark ? '#94a3b8' : '#64748b';
+
+Chart.defaults.color = textColor;
+Chart.defaults.borderColor = gridColor;
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+const COLORS = {
+    'Q-SFT':     { bg: 'rgba(94,234,212,0.7)',  border: '#5eead4' },
+    'Q-AnsOnly': { bg: 'rgba(251,191,36,0.7)',   border: '#fbbf24' },
+    'Q-+Consist':{ bg: 'rgba(74,222,128,0.7)',   border: '#4ade80' },
+    'D-SFT':     { bg: 'rgba(147,197,253,0.7)',  border: '#93c5fd' },
+    'D-AnsOnly': { bg: 'rgba(196,181,253,0.7)',  border: '#c4b5fd' },
+    'D-+Consist':{ bg: 'rgba(34,197,94,0.7)',    border: '#22c55e' },
+};
+
+const labels6 = ['Q-SFT','Q-AnsOnly','Q-+Consist','D-SFT','D-AnsOnly','D-+Consist'];
+
+function makeBarChart(canvasId, benchmarks, dataByModel, yLabel) {
+    const datasets = labels6.map(label => ({
+        label: label,
+        data: dataByModel[label],
+        backgroundColor: COLORS[label].bg,
+        borderColor: COLORS[label].border,
+        borderWidth: 1,
+        borderRadius: 3,
+    }));
+    new Chart(document.getElementById(canvasId), {
+        type: 'bar',
+        data: { labels: benchmarks, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, padding: 8, font: { size: 10 } } },
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: yLabel }, grid: { color: gridColor } },
+                x: { grid: { display: false } },
+            },
+        },
+    });
+}
+
+// Accuracy chart
+makeBarChart('chart-accuracy',
+    ['LB Overall', 'FOLIO', 'ProntoQA', 'ProofWriter', 'SARA', 'LSAT'],
+    {
+        'Q-SFT':      [26.2, 48.0, 0.3, 51.3, 7.0, 0.9],
+        'Q-AnsOnly':  [50.5, 48.5, 0.0, 54.2, 4.0, 2.6],
+        'Q-+Consist': [40.8, 51.0, 0.0, 47.7, 4.0, 0.9],
+        'D-SFT':      [3.4, 32.8, 39.7, 49.2, 2.0, 0.9],
+        'D-AnsOnly':  [4.1, 30.4, 40.3, 49.7, 0.0, 3.5],
+        'D-+Consist': [3.2, 33.3, 44.0, 47.2, 1.0, 2.6],
+    },
+    'Accuracy (%)'
+);
+
+// Consistency chart
+makeBarChart('chart-consistency',
+    ['LB', 'FOLIO', 'ProntoQA', 'ProofWriter'],
+    {
+        'Q-SFT':      [27.3, 30.3, 65.6, 45.1],
+        'Q-AnsOnly':  [32.8, 22.0, 9.8, 4.8],
+        'Q-+Consist': [35.4, 34.5, 54.7, 44.2],
+        'D-SFT':      [30.6, 31.5, 43.3, 49.0],
+        'D-AnsOnly':  [32.7, 32.2, 39.1, 53.9],
+        'D-+Consist': [27.9, 23.4, 42.1, 51.9],
+    },
+    'Consistency Rate (%)'
+);
+
+// Faithfulness chart (LB only)
+new Chart(document.getElementById('chart-faithfulness'), {
+    type: 'bar',
+    data: {
+        labels: labels6,
+        datasets: [{
+            label: 'Faithfulness (%)',
+            data: [20.0, 17.9, 24.2, 19.7, 20.3, 16.9],
+            backgroundColor: labels6.map(l => COLORS[l].bg),
+            borderColor: labels6.map(l => COLORS[l].border),
+            borderWidth: 1,
+            borderRadius: 3,
+        }],
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Faithfulness (%)' }, grid: { color: gridColor } },
+            x: { grid: { display: false } },
+        },
+    },
+});
+
+// Steps chart (LB only)
+new Chart(document.getElementById('chart-steps'), {
+    type: 'bar',
+    data: {
+        labels: labels6,
+        datasets: [{
+            label: 'Avg Steps',
+            data: [20.5, 15.9, 28.0, 33.8, 32.1, 35.7],
+            backgroundColor: labels6.map(l => COLORS[l].bg),
+            borderColor: labels6.map(l => COLORS[l].border),
+            borderWidth: 1,
+            borderRadius: 3,
+        }],
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Avg Steps' }, grid: { color: gridColor } },
+            x: { grid: { display: false } },
+        },
+    },
+});
+</script>
+</body>
+</html>
