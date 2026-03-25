@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Debug: Qwen3-8B</title>
+<style>
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.6rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.6rem; text-align: center; }
+.stat-value { font-size: 1.3rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.7rem; color: #666; }
+</style></head><body>
+<h1>Debug Output: Qwen3-8B</h1>
+<p class="subtitle">Generated 2026-03-25 19:38 | 5 examples</p>
+<div class="summary">
+<div class="stats">
+    <div class="stat"><div class="stat-value">5/5</div><div class="stat-label">Correct</div></div>
+    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Truncated</div></div>
+    <div class="stat"><div class="stat-value">0.0</div><div class="stat-label">Avg Steps</div></div>
+    <div class="stat"><div class="stat-value">2560</div><div class="stat-label">Avg Chars</div></div>
+</div>
+<div style="margin-top:1rem;font-size:0.85rem">
+<strong>Issue breakdown:</strong> 
+</div>
+</div>
+
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 1</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">0 steps | 2287 chars | 14.4s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Either she is not making a cake for the party, or he is writing a report for his boss, or both. We don&#x27;t know for sure which one is true. However, it turns out that she is indeed making a cake for the party.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this mean that he is writing a report for his boss?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+Okay, let&#x27;s tackle this problem. So, the context is that either she is not making a cake for the party, or he is writing a report for his boss, or both. Then we&#x27;re told that she is making a cake for the party. The question is whether this means he is writing a report for his boss.
+
+First, I need to translate the given information into logical terms. The original statement is an &quot;either...or...or both&quot; scenario. In logic, that translates to a disjunction. So the premise is that either ~C (she is not making a cake) or R (he is writing a report), or both. So in symbols, that&#x27;s ~C ∨ R. 
+
+Then, we&#x27;re told that she is making a cake for the party. That means C is true. So we have C as a fact. 
+
+Now, the question is whether C being true leads us to conclude R. Let&#x27;s think. The original premise is ~C ∨ R. If we know that C is true, then ~C is false. In a disjunction, if one part is false, the other must be true for the whole statement to hold. So from ~C ∨ R and ~C being false, we can infer R must be true. 
+
+Wait, but how does that work exactly? Let me recall the logical rules. Disjunctive Syllogism says that if we have A ∨ B and ~A, then we can conclude B. Here, the premise is ~C ∨ R. If we have C (so ~C is false), then applying Disjunctive Syllogism would let us conclude R. 
+
+So the steps would be: 
+
+1. The original premise is ~C ∨ R.
+2. We are given that C is true (she is making the cake).
+3. From C, we get ~C is false.
+4. Using Disjunctive Syllogism on ~C ∨ R and ~C being false, we conclude R. 
+
+Therefore, the conclusion is that he is writing a report for his boss. So the answer should be Yes.
+&lt;/think&gt;
+
+Step 1:  
+(Text) The premise states that either she is not making a cake for the party or he is writing a report for his boss, or both. This is a logical disjunction.  
+(Logic) ~cake(making, party) ∨ report(writing, boss).  
+
+Step 2:  
+(Text) We are told that she is making a cake for the party, which means the first disjunct (~cake(making, party)) is false.  
+(Logic) cake(making, party).  
+
+Step 3:  
+(Text) Using Disjunctive Syllogism on the disjunction ~cake(making, party) ∨ report(writing, boss) and the fact that ~cake(making, party) is false, we conclude that report(writing, boss) must be true.  
+(Logic) report(writing, boss).  
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 2</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">0 steps | 2238 chars | 12.5s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Either she is not making a cake for the party, or he is writing a report for his boss, or both. We don&#x27;t know for sure which one is true. However, it turns out that she is indeed making a cake for the party.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this imply that he isn&#x27;t writing a report for his boss?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: no | Predicted: Answer: No.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+Okay, let&#x27;s tackle this problem. So, the context is that either she isn&#x27;t making a cake for the party, or he is writing a report for his boss, or both. Then we&#x27;re told that she is making a cake for the party. The question is whether this implies that he isn&#x27;t writing a report for his boss.
+
+First, I need to translate the given information into logical terms. The original statement is an exclusive or? Wait, no, the problem says &quot;either... or... or both,&quot; which in logic is a standard inclusive OR. So the premise is that (¬C ∨ R), where C is &quot;she is making a cake&quot; and R is &quot;he is writing a report.&quot; 
+
+Then, we&#x27;re told that she is making a cake, so C is true. The question is whether this leads to ¬R. 
+
+So, starting with the premise ¬C ∨ R. If we know that C is true (she is making the cake), then ¬C is false. In a disjunction, if one part is false, the other must be true for the whole to hold. So from ¬C ∨ R and ¬C being false, we can infer R must be true. Therefore, R is true, meaning he is writing a report. So the conclusion that he isn&#x27;t writing a report (¬R) would be false. 
+
+Wait, but the question is asking if the fact that she is making the cake implies that he isn&#x27;t writing the report. But according to the logic, since the original premise is ¬C ∨ R, and C is true, then R must be true. Therefore, the conclusion ¬R would be incorrect. So the answer should be No, because the premises don&#x27;t support that he isn&#x27;t writing the report; in fact, they suggest he is.
+&lt;/think&gt;
+
+Step 1:  
+(Text) The premise states that either she is not making a cake for the party or he is writing a report for his boss, or both. This is a logical disjunction.  
+(Logic) ¬cake(she) ∨ report(he).  
+
+Step 2:  
+(Text) We are told that she is making a cake for the party, which means the negation of the first disjunct is false.  
+(Logic) cake(she).  
+
+Step 3:  
+(Text) From the disjunction ¬cake(she) ∨ report(he) and the fact that cake(she) is true, we infer that report(he) must be true via Disjunctive Syllogism.  
+(Logic) report(he).  
+
+Step 4:  
+(Text) The conclusion that &quot;he isn&#x27;t writing a report for his boss&quot; (¬report(he)) directly contradicts the derived truth of report(he).  
+(Logic) ¬report(he) is false.  
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: No.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 3</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">0 steps | 4148 chars | 22.9s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">We know that John is not at school or if Mary is taking a break from her job. It could be possible that only one of these situations is true, or both could be true. However, we do know that John is indeed at school.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this entail that mary is taking a break from her job?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+Okay, let&#x27;s try to figure this out. The problem says that we know either John is not at school or Mary is taking a break from her job. Then it adds that John is indeed at school. The question is whether this means Mary is taking a break.
+
+First, I need to translate the given information into logical terms. The first part is a disjunction: &quot;John is not at school OR Mary is taking a break.&quot; In logical terms, that&#x27;s ~J ∨ M, where J represents &quot;John is at school&quot; and M represents &quot;Mary is taking a break.&quot;
+
+Then we&#x27;re told that John is at school, so J is true. Now, if we have ~J ∨ M and we know J is true, then ~J is false. In a disjunction, if one part is false, the other must be true for the whole statement to hold. So from ~J ∨ M and ~J being false, we can conclude M must be true. That&#x27;s Disjunctive Syllogism: if we have A ∨ B and ~A, then B. Here, A is ~J and B is M. Since ~A (because J is true), we get M.
+
+Wait, but the original statement was &quot;John is not at school or if Mary is taking a break.&quot; Wait, maybe I misread. Let me check again. The original says: &quot;We know that John is not at school or if Mary is taking a break from her job.&quot; Wait, the structure here might be different. Maybe it&#x27;s &quot;John is not at school OR (if Mary is taking a break...)&quot;? Or is it &quot;John is not at school OR Mary is taking a break&quot;? The wording is a bit ambiguous. Let me parse the original sentence again.
+
+Original: &quot;We know that John is not at school or if Mary is taking a break from her job.&quot; Hmm, the phrasing is a bit unclear. It could be interpreted as &quot;John is not at school OR (if Mary is taking a break, then something else)&quot;? But the next part says &quot;It could be possible that only one of these situations is true, or both could be true.&quot; So the two situations are &quot;John is not at school&quot; and &quot;Mary is taking a break.&quot; So the original statement is that at least one of these two is true. So the logical form is ~J ∨ M.
+
+Then, given that John is at school (so J is true), which makes ~J false. Therefore, for the disjunction ~J ∨ M to hold, M must be true. So yes, Mary is taking a break. Therefore, the answer should be Yes. But wait, the user&#x27;s example had a similar structure and the answer was No in one case. Let me check again.
+
+Wait, in the example, the premise was &quot;at least one of (1) he is not attending the concert or (2) she is studying for her exams.&quot; Then, if he is attending the concert, they concluded she is studying. So that&#x27;s similar. So in this case, the same logic applies. The original premise is ~J ∨ M. Given J is true, so ~J is false. Therefore, M must be true. So the answer is Yes. But the user&#x27;s example had a similar structure and the answer was Yes. So in this case, the answer should be Yes. But let me make sure I didn&#x27;t misread the original problem.
+
+Wait, the original problem says: &quot;We know that John is not at school or if Mary is taking a break from her job.&quot; Wait, maybe the structure is different. Maybe it&#x27;s &quot;John is not at school OR (if Mary is taking a break, then something else)&quot;? But the next part says &quot;It could be possible that only one of these situations is true, or both could be true.&quot; So the two situations are &quot;John is not at school&quot; and &quot;Mary is taking a break.&quot; So the original statement is that at least one of these two is true. So the logical form is ~J ∨ M. Then, given J is true, so ~J is false, so M must be true. Therefore, the answer is Yes. So the reasoning steps would be:
+
+1. Premise: ~J ∨ M
+2. Premise: J (John is at school)
+3. From ~J ∨ M and J, by Disjunctive Syllogism, conclude M.
+
+So the answer is Yes.
+&lt;/think&gt;
+
+Step 1:  
+(Text) The premise states that either John is not at school or Mary is taking a break. This is a disjunction.  
+(Logic) ~atSchool(John) ∨ takingBreak(Mary).  
+
+Step 2:  
+(Text) We are told that John is indeed at school, which negates the first part of the disjunction.  
+(Logic) atSchool(John).  
+
+Step 3:  
+(Text) Using Disjunctive Syllogism on the disjunction and the negation of the first disjunct, we conclude that Mary is taking a break.  
+(Logic) ~atSchool(John) ∨ takingBreak(Mary), atSchool(John) ⇒ takingBreak(Mary).  
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 4</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">0 steps | 2121 chars | 12.0s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">We know that John is not at school or if Mary is taking a break from her job. It could be possible that only one of these situations is true, or both could be true. However, we do know that John is indeed at school.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this entail that mary is not taking a break from her job?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: no | Predicted: Answer: No.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+Okay, let&#x27;s try to figure this out. The problem says that we know two things: either John is not at school or Mary is taking a break from her job. Also, we&#x27;re told that John is indeed at school. The question is whether this means Mary is not taking a break.
+
+First, I need to translate the given information into logical terms. The first part says &quot;John is not at school or Mary is taking a break.&quot; In logical terms, that&#x27;s a disjunction: ¬J ∨ M, where J represents &quot;John is at school&quot; and M represents &quot;Mary is taking a break.&quot;
+
+Then, we&#x27;re told that John is at school. So J is true. Now, if we have ¬J ∨ M and we know J is true, then ¬J is false. In a disjunction, if one part is false, the other must be true for the whole statement to hold. So since ¬J is false, M must be true. Wait, but the question is asking if this entails that Mary is not taking a break, which would be ¬M. But according to this reasoning, M is true, so ¬M is false. Therefore, the conclusion would be that Mary is taking a break, not that she isn&#x27;t. So the answer should be No, because the premises lead to M being true, not ¬M.
+
+Let me check again. The original statement is ¬J ∨ M. Given J is true, so ¬J is false. Therefore, M must be true. So the conclusion that Mary is not taking a break (¬M) would be false. Hence, the answer is No.
+&lt;/think&gt;
+
+Step 1:  
+(Text) The premise states that either John is not at school or Mary is taking a break. This is a logical disjunction.  
+(Logic) ¬school(John) ∨ break(Mary).  
+
+Step 2:  
+(Text) We are told that John is indeed at school, which directly contradicts the first part of the disjunction.  
+(Logic) school(John).  
+
+Step 3:  
+(Text) Since ¬school(John) is false (as school(John) is true), the disjunction ¬school(John) ∨ break(Mary) can only hold if break(Mary) is true.  
+(Logic) ¬school(John) ∨ break(Mary), school(John) ⇒ break(Mary) (by Disjunctive Syllogism).  
+
+Step 4:  
+(Text) The conclusion that Mary is not taking a break (¬break(Mary)) directly contradicts the derived fact that break(Mary) is true.  
+(Logic) break(Mary) ∧ ¬break(Mary) is a contradiction.  
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: No.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 5</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">0 steps | 2007 chars | 11.0s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Either Levi is not studying for his exams or Maya is writing a book, or maybe both. It was unclear which choice to make as he didn&#x27;t know if either of the options was true. However, it turned out that Levi decided to prioritize his exams and focus on studying. He knew that in order to succeed, he needed to dedicate his time and energy to preparing for the upcoming tests.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this mean that maya is writing a book?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+Okay, let&#x27;s break this down. The user is asking if Maya is writing a book based on the given context. Let me start by restating the premises.
+
+First, the initial statement is an exclusive or (XOR) between two possibilities: either Levi is not studying for his exams or Maya is writing a book. Wait, actually, the original says &quot;Either Levi is not studying... or Maya is writing... or maybe both.&quot; So that&#x27;s an inclusive OR, meaning at least one of them is true. So the logical form is ~L ∨ M, where L is Levi studying and M is Maya writing.
+
+Then, the context says that Levi decided to prioritize his exams and focus on studying. So that means Levi is studying, right? Because he&#x27;s dedicating time to prepare for tests. So L is true. 
+
+Now, if we have ~L ∨ M, and we know that L is true (so ~L is false), then for the OR statement to hold, M must be true. Because in an OR, if one part is false, the other must be true. That&#x27;s Disjunctive Syllogism. So from ~L ∨ M and ~L being false (since L is true), we can conclude M. Therefore, Maya is writing a book. 
+
+Wait, but the original statement was &quot;Either Levi is not studying... or Maya is writing...&quot; So the premise is that at least one of those is true. Then, since Levi is studying (so the first part is false), the second part must be true. So yes, Maya is writing a book. Therefore, the answer should be Yes.
+&lt;/think&gt;
+
+Step 1:  
+(Text) The premise states that either Levi is not studying for his exams or Maya is writing a book (or both). This is an inclusive disjunction.  
+(Logic) ~studyingLevi ∨ writingMaya.  
+
+Step 2:  
+(Text) Levi decided to prioritize studying, meaning he is studying for his exams. This negates the first disjunct.  
+(Logic) studyingLevi.  
+
+Step 3:  
+(Text) Using Disjunctive Syllogism on ~studyingLevi ∨ writingMaya and the fact that studyingLevi is true (so ~studyingLevi is false), we conclude writingMaya must be true.  
+(Logic) ~studyingLevi ∨ writingMaya.  
+studyingLevi.  
+Therefore, writingMaya.  
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+</body></html>

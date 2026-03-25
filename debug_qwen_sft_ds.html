@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Debug: qwen-sft-think-mixed-100133</title>
+<style>
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.6rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.6rem; text-align: center; }
+.stat-value { font-size: 1.3rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.7rem; color: #666; }
+</style></head><body>
+<h1>Debug Output: qwen-sft-think-mixed-100133</h1>
+<p class="subtitle">Generated 2026-03-25 19:40 | 5 examples</p>
+<div class="summary">
+<div class="stats">
+    <div class="stat"><div class="stat-value">5/5</div><div class="stat-label">Correct</div></div>
+    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Truncated</div></div>
+    <div class="stat"><div class="stat-value">3.0</div><div class="stat-label">Avg Steps</div></div>
+    <div class="stat"><div class="stat-value">1402</div><div class="stat-label">Avg Chars</div></div>
+</div>
+<div style="margin-top:1rem;font-size:0.85rem">
+<strong>Issue breakdown:</strong> 
+</div>
+</div>
+
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 1</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1481 chars | 11.0s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Either she is not making a cake for the party, or he is writing a report for his boss, or both. We don&#x27;t know for sure which one is true. However, it turns out that she is indeed making a cake for the party.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this mean that he is writing a report for his boss?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are given a disjunction involving two possibilities and a concrete fact about one of them. The goal is to see whether the fact forces the other possibility to be true.
+&lt;/think&gt;
+
+The premise provides a logical alternative: either she is not making a cake for the party, or he is writing a report for his boss. This sets up a choice between two statements.
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The information tells us that either she is not making a cake for the party, or he is writing a report for his boss, or possibly both.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~makingCake(she) v writingReport(he)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+The second premise tells us directly that she is making a cake for the party, which settles the first part of the disjunction.
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;We also know that she is making a cake for the party.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;makingCake(she)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+Because we now know that she is making a cake, the first disjunct (~makingCake) is false. By Disjunctive Syllogism, the only remaining way for the disjunction to hold is that the second disjunct, he is writing a report, must be true.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2,1&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Since we have established that she is making a cake, the first alternative (~making cake) is false, so the disjunction forces the second alternative to be true, giving us that he is writing a report.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;writingReport(he)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived that he is writing a report, so the conclusion is Yes.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 2</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1326 chars | 9.7s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Either she is not making a cake for the party, or he is writing a report for his boss, or both. We don&#x27;t know for sure which one is true. However, it turns out that she is indeed making a cake for the party.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this imply that he isn&#x27;t writing a report for his boss?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: no | Predicted: Answer: False.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are given a disjunction involving two possibilities about she and he, and we also have a concrete fact about she. The goal is to see whether the fact forces the negation of the other possibility.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The disjunction states that either she is not making a cake for the party or he is writing a report for his boss (or both). This is the first premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~makingCake(she) v writingReport(he)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;It is a fact that she is making a cake for the party. This is the second premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;makingCake(she)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+Because she is making a cake, the first part of the disjunction (~makingCake) is false. Disjunctive syllogism then lets us conclude that the second part, writing a report, must be true. This gives us writingReport(he).
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Since she is making a cake for the party, the first part of the disjunction (~makingCake) is false, so by Disjunctive Syllogism the second part must hold, giving us that he is writing a report for his boss.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;writingReport(he)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived that he is writing a report, which directly contradicts the query that he is not writing a report. Therefore the conclusion to the query is False.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: False.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 3</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1347 chars | 9.5s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">We know that John is not at school or if Mary is taking a break from her job. It could be possible that only one of these situations is true, or both could be true. However, we do know that John is indeed at school.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this entail that mary is taking a break from her job?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are given a disjunction involving two possibilities about John and Mary, together with a concrete fact about John. The goal is to see whether the information forces the conclusion that Mary is taking a break from her job.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The information tells us that either John is not at school or Mary is taking a break from her job.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~at_school(john) v taking_break(mary)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;It is explicitly stated that John is at school.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;at_school(john)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We have the statement that John is at school, which directly contradicts the first part of the disjunction (~at_school(john)). Because the disjunction must be true, the only way for it to hold is for the second part, taking_break(mary), to be true. This is a classic application of Disjunctive Syllogism.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Since John is at school, the first part of the disjunction (~at_school(john)) is false, so the disjunction forces the second part to be true, giving us that Mary is taking a break from her job.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;taking_break(mary)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+Therefore Mary is taking a break, so the conclusion is derived. The derived conclusion is that Mary is taking a break from her job, which directly answers the query.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 4</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1300 chars | 9.4s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">We know that John is not at school or if Mary is taking a break from her job. It could be possible that only one of these situations is true, or both could be true. However, we do know that John is indeed at school.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this entail that mary is not taking a break from her job?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: no | Predicted: Answer: False.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to decide whether the statement &quot;Mary is not taking a break from her job&quot; follows from the given information. The premises involve a disjunction about John and Mary, plus a concrete fact about John.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The information tells us that either John is not at school or Mary is taking a break from her job.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~at_school(john) v taking_break(mary)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;We also have the explicit fact that John is at school.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;at_school(john)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We have the disjunction &quot;not at school or taking break&quot; and the fact that John is at school. Since the first part of the disjunction is false, the only way for the disjunction to hold is for the second part, &quot;Mary is taking a break,&quot; to be true. This is a classic application of Disjunctive Syllogism.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Because we know John is at school, the first part of the disjunction is false, so the only way the disjunction can hold is if Mary is taking a break from her job.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;taking_break(mary)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived that Mary is taking a break, which directly contradicts the query that she is not taking a break. Therefore the conclusion to the query is False.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: False.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 5</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/disjunctive_syllogism</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1556 chars | 10.9s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Either Levi is not studying for his exams or Maya is writing a book, or maybe both. It was unclear which choice to make as he didn&#x27;t know if either of the options was true. However, it turned out that Levi decided to prioritize his exams and focus on studying. He knew that in order to succeed, he needed to dedicate his time and energy to preparing for the upcoming tests.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this mean that maya is writing a book?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to decide whether Maya is writing a book given the information about Levi&#x27;s priorities. The goal is to see if the premises force Maya to be writing a book or not.
+
+The disjunction tells us that at least one of two possibilities holds: Levi is not studying for his exams, or Maya is writing a book. This sets up a logical alternative that we will later resolve.
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The information states that either Levi is not studying for his exams or Maya is writing a book.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~studyingForExams(levi) v writingBook(maya)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+The fact that Levi is studying for his exams directly contradicts the first part of the disjunction, because if he were not studying, the disjunction would still be satisfied by Maya&#x27;s action. Knowing he is studying narrows the options.
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;It is explicitly stated that Levi is studying for his exams.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;studyingForExams(levi)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+Because Levi is indeed studying for his exams, the condition &quot;Levi is not studying&quot; is false. In a disjunction, if one disjunct is false, the other must be true for the whole statement to hold. Hence Maya must be writing a book.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2,1&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Since Levi is studying for his exams, the first part of the disjunction is false, so the only way the disjunction can be true is if Maya is writing a book.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;writingBook(maya)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived Maya is writing book, so the conclusion Maya is writing book is true.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+</body></html>

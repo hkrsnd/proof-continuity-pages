@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Debug: qwen-sft-think-mixed-100133</title>
+<style>
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+.summary { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.6rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.6rem; text-align: center; }
+.stat-value { font-size: 1.3rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.7rem; color: #666; }
+</style></head><body>
+<h1>Debug Output: qwen-sft-think-mixed-100133</h1>
+<p class="subtitle">Generated 2026-03-25 19:43 | 5 examples</p>
+<div class="summary">
+<div class="stats">
+    <div class="stat"><div class="stat-value">4/5</div><div class="stat-label">Correct</div></div>
+    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Truncated</div></div>
+    <div class="stat"><div class="stat-value">3.0</div><div class="stat-label">Avg Steps</div></div>
+    <div class="stat"><div class="stat-value">1390</div><div class="stat-label">Avg Chars</div></div>
+</div>
+<div style="margin-top:1rem;font-size:0.85rem">
+<strong>Issue breakdown:</strong> WRONG ANSWER: 1 | NON-STANDARD ANSWER: 1
+</div>
+</div>
+
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 1</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/modus_tollens</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1590 chars | 11.0s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Liam had finished his work early for the day, which meant that he would typically have ordered pizza for dinner. However, on this particular day, he decided against ordering pizza and opted for something else instead.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this imply that liam didn&#x27;t finish his work early?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to determine whether Liam did not finish his work early, given two pieces of information about his actions. The goal is to see if the facts force the negation of the early finish.
+
+The first premise tells us that Liam&#x27;s early finish would normally lead to ordering pizza. This conditional links the property of finishing early to the behavior of ordering pizza, setting up a possible inference.
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The rule states that if Liam finishes his work early, then he will order pizza for dinner.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;ordersPizza(liam) :- finishesEarly(liam)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+The second premise states that Liam actually did not order pizza. This fact directly contradicts the consequent of the conditional from the first premise, providing the data needed for a logical test.
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;It is known that Liam did not order pizza for dinner.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~ordersPizza(liam)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+Using Modus Tollens, we combine the fact that Liam did not order pizza with the conditional that ordering pizza follows from finishing early. Since the consequent is false, the antecedent must also be false, leading us to conclude that Liam did not finish his work early.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Because Liam did not order pizza and ordering pizza would follow from finishing early, we infer by Modus Tollens that Liam did not finish his work early.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~finishesEarly(liam)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived Liam is not finishes early, so the conclusion Liam is not finishes early is True.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 2</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/modus_tollens</span>
+                    <span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Wrong</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1660 chars | 10.9s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Liam had finished his work early for the day, which meant that he would typically have ordered pizza for dinner. However, on this particular day, he decided against ordering pizza and opted for something else instead.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this entail that liam finished his work early?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: no | Predicted: Answer: It is not entailed that Liam finished his work early.</div>
+            <div style="color:#dc2626;font-size:0.85rem">! WRONG ANSWER: says &#x27;it is not entailed that liam finished his work early&#x27; (gold: &#x27;no&#x27;)</div><div style="color:#d97706;font-size:0.85rem">! NON-STANDARD ANSWER: &#x27;it is not entailed that liam finished his work early&#x27; — may cause extraction failure</div>
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to determine whether Liam finishing his work early can be concluded from the information given. The goal is to see if the premises force the conclusion that Liam finished his work early.
+
+The first premise tells us that Liam&#x27;s decision to order pizza is a consequence of him finishing his work early. This establishes a direct link between the antecedent (finishing work) and the consequent (ordering pizza).
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;The rule states that if Liam finished his work early, then he would have ordered pizza for dinner.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;orderedPizza(liam) :- finishedWorkEarly(liam)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+The second premise provides the actual fact: Liam did not order pizza. This fact will be used together with the conditional to test whether the antecedent must hold.
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;It is explicitly stated that Liam did not order pizza for dinner.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~orderedPizza(liam)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+Using Modus Tollens, we combine the fact that Liam did not order pizza with the conditional that ordering pizza follows from finishing work early. Since the consequent is false, the antecedent must also be false, leading us to conclude that Liam did not finish his work early.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;2,1&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Because Liam did not order pizza and ordering pizza follows from finishing work early, we infer by Modus Tollens that Liam did not finish his work early.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~finishedWorkEarly(liam)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived Liam is not finished work early, so the conclusion Liam is finished work early is False.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: It is not entailed that Liam finished his work early.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 3</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/modus_tollens</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1308 chars | 9.5s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Isabella had been working hard on her project, knowing that if she finished it on time, she would receive a bonus from her company. However, despite her efforts, Isabella realized that she wouldn&#x27;t be receiving a bonus as she had hoped.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this entail that isabella didn&#x27;t finish her project on time?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to decide whether Isabella did not finish her project on time, given that she would have received a bonus if she had. The goal is to see if the information about the bonus leads to a conclusion about the project&#x27;s completion.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;If Isabella finishes her project on time, then she will receive a bonus. This is given as a premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;receivesBonus(isabella) :- finishesOnTime(isabella).&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Isabella does not receive a bonus. This is given as a premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~receivesBonus(isabella).&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We have the conditional that a timely finish guarantees a bonus, and we also know that Isabella does not get a bonus. By applying Modus Tollens, the lack of the consequent (~receivesBonus) lets us infer the negation of the antecedent, so Isabella did not finish on time.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Because Isabella does not receive a bonus and a bonus would follow from finishing on time, by Modus Tollens we infer that Isabella did not finish her project on time.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~finishesOnTime(isabella).&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived Isabella is not finishes on time, so the conclusion Isabella is not finishes on time is true. The answer is Yes.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 4</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/modus_tollens</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1278 chars | 9.2s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">Isabella had been working hard on her project, knowing that if she finished it on time, she would receive a bonus from her company. However, despite her efforts, Isabella realized that she wouldn&#x27;t be receiving a bonus as she had hoped.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this infer that isabella finished her project on time?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: no | Predicted: Answer: No.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to decide whether Isabella finished her project on time given the information about a bonus. The goal is to see if the premises allow us to infer the antecedent of the conditional.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;If Isabella finishes her project on time, then she will receive a bonus. This is given as a premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;receivesBonus(isabella) :- finishesOnTime(isabella).&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Isabella does not receive a bonus. This is given as a premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~receivesBonus(isabella).&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+The conditional tells us that finishing on time guarantees a bonus. The fact we have is that Isabella does not receive a bonus. Using Modus Tollens, we can conclude that the antecedent (finishing on time) must be false, i.e., Isabella did not finish on time.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Because Isabella does not receive a bonus and finishing on time would guarantee a bonus, we infer that Isabella did not finish her project on time.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~finishesOnTime(isabella).&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived that Isabella did not finish on time, which directly contradicts the statement that she did. Therefore, the conclusion that Isabella finished on time is false.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: No.</span></pre>
+            </details>
+        </div>
+        <div style="background:white;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <span style="font-weight:700">Example 5</span>
+                    <span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.5rem">propositional_logic/modus_tollens</span>
+                    <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-left:0.3rem">Correct</span>
+                </div>
+                <div style="font-size:0.8rem;color:#666">3 steps | 1113 chars | 8.1s</div>
+            </div>
+            <div style="background:#fafafa;border-left:3px solid #94a3b8;padding:0.6rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.85rem">If Mason decides to leave his job, he will not receive any salary. However, against all odds, Mason still receives his salary. He finds himself receiving his regular paycheck.</div>
+            <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:0.5rem 1rem;margin-bottom:0.5rem;border-radius:0 6px 6px 0;font-size:0.88rem;font-weight:500">Q: Does this infer that mason didn&#x27;t leave his job?</div>
+            <div style="font-size:0.82rem;color:#16a34a;font-weight:600;margin-bottom:0.5rem">Gold: yes | Predicted: Answer: Yes.</div>
+            
+            <details style="margin-top:0.8rem">
+                <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;color:#2563eb">Show full output</summary>
+                <pre style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;font-size:0.78rem;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;margin-top:0.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace">&lt;think&gt;
+We are asked to determine whether Mason did not leave his job given the information about his salary. The goal is to see if the premises force the negation of the antecedent.
+
+&lt;step n=&quot;1&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;If Mason leaves his job, then he will not receive any salary. This is given as a premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~receivesSalary(mason) :- leftJob(mason)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+&lt;step n=&quot;2&quot; type=&quot;premise&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Mason receives his salary. This is given as a premise.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;receivesSalary(mason)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+The conditional tells us that leaving the job guarantees no salary. Since we observe that Mason does receive a salary, the antecedent (leaving the job) cannot be true; otherwise the consequent would be violated. This is a classic Modus Tollens application.
+&lt;step n=&quot;3&quot; type=&quot;derived&quot; from=&quot;1,2&quot;&gt;
+<span style="color:#059669">&lt;text&gt;Because Mason receives his salary, and the rule says leaving the job would prevent salary, we infer that Mason did not leave his job.&lt;/text&gt;</span>
+<span style="color:#0891b2">&lt;logic&gt;~leftJob(mason)&lt;/logic&gt;</span>
+<span style="color:#7c3aed;font-weight:600">&lt;/step&gt;</span>
+
+We derived Mason is not left job, so the conclusion Mason is not left job is correct.
+&lt;/think&gt;
+
+<span style="background:#fef3c7;padding:2px 4px;border-radius:3px;font-weight:700">Answer: Yes.</span></pre>
+            </details>
+        </div>
+</body></html>
