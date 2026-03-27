@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAILS - Reward Architecture</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color: #0f172a;
+    margin: 0;
+    padding: 1.25rem;
+    max-width: 1100px;
+    margin-inline: auto;
+    line-height: 1.6;
+  }
+  .back { display: inline-block; margin-bottom: .7rem; color: #1d4ed8; text-decoration: none; font-weight: 600; font-size: .9rem; }
+  h1 { margin: .1rem 0 .15rem 0; font-size: 1.7rem; }
+  .sub { color: #475569; margin-bottom: 1rem; font-size: .93rem; }
+  h2 { font-size: 1.15rem; color: #1e293b; margin: 1.2rem 0 .5rem 0; border-bottom: 2px solid #e2e8f0; padding-bottom: .3rem; }
+  h3 { font-size: .95rem; color: #334155; margin: .8rem 0 .35rem 0; }
+
+  .card {
+    background: #fff; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: .9rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+
+  /* Equation box */
+  .equation {
+    background: #f0f4ff; border: 2px solid #bfdbfe; border-radius: 10px;
+    padding: 1rem 1.2rem; margin: .8rem 0; font-size: 1rem; text-align: center;
+    font-family: "Georgia", "Times New Roman", serif; line-height: 2;
+  }
+  .equation .term { display: inline-block; margin: 0 .15rem; }
+  .eq-label { font-size: .72rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; display: block; }
+  .eq-var { font-weight: 700; color: #1e40af; font-style: italic; }
+  .eq-weight { color: #6b7280; font-size: .85rem; }
+  .eq-op { color: #94a3b8; font-weight: 700; margin: 0 .2rem; }
+
+  /* Component cards */
+  .components { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+  .comp {
+    border-radius: 10px; padding: .8rem .9rem;
+    border-left: 4px solid #cbd5e1;
+  }
+  .comp h3 { margin: 0 0 .3rem 0; font-size: .9rem; display: flex; align-items: center; gap: .4rem; }
+  .comp p { font-size: .82rem; color: #475569; margin: 0 0 .3rem 0; }
+  .comp .range { font-size: .72rem; color: #64748b; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .comp-consistency { border-color: #3b82f6; background: #eff6ff; }
+  .comp-format { border-color: #8b5cf6; background: #f5f3ff; }
+  .comp-answer { border-color: #16a34a; background: #f0fdf4; }
+  .comp-grounding { border-color: #f59e0b; background: #fffbeb; }
+  .comp-length { border-color: #ef4444; background: #fef2f2; }
+  .comp-gate { border-color: #06b6d4; background: #ecfeff; }
+
+  .icon { font-size: 1.1rem; }
+
+  /* Check lists */
+  .checks { list-style: none; padding: 0; margin: .3rem 0 0 0; font-size: .8rem; }
+  .checks li { padding: .15rem 0; padding-left: 1.2rem; position: relative; }
+  .checks li::before { content: ""; position: absolute; left: 0; top: .45rem; width: .55rem; height: .55rem; border-radius: 50%; }
+  .checks .pos::before { background: #22c55e; }
+  .checks .neg::before { background: #ef4444; }
+  .checks .neu::before { background: #f59e0b; }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: stretch; gap: 0; margin: .8rem 0; flex-wrap: wrap; justify-content: center; }
+  .flow-step {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: .5rem .7rem; min-width: 120px; text-align: center; position: relative;
+    font-size: .78rem;
+  }
+  .flow-step .fl { font-weight: 700; font-size: .82rem; color: #1e293b; }
+  .flow-step .fd { color: #64748b; font-size: .7rem; margin-top: .15rem; }
+  .flow-arrow {
+    display: flex; align-items: center; color: #94a3b8; font-size: 1.2rem;
+    padding: 0 .2rem; font-weight: 700;
+  }
+
+  /* Config table */
+  table.config { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: .4rem; }
+  table.config th, table.config td { padding: .45rem .55rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+  table.config th { background: #f8fafc; color: #334155; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  table.config td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; color: #1e40af; }
+  table.config td:nth-child(2) { font-weight: 600; text-align: center; }
+
+  /* Failure mapping table */
+  table.failures { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: .4rem; }
+  table.failures th, table.failures td { padding: .45rem .55rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+  table.failures th { background: #f8fafc; color: #334155; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  .badge { display: inline-block; border-radius: 999px; padding: .1rem .45rem; font-size: .68rem; font-weight: 700; }
+  .b-fix { background: #dcfce7; color: #166534; }
+  .b-new { background: #dbeafe; color: #1e40af; }
+  .b-existing { background: #f1f5f9; color: #475569; }
+
+  /* Detail blocks */
+  .detail { background: #f8fafc; border-radius: 8px; padding: .7rem .8rem; margin: .4rem 0; font-size: .82rem; }
+  .detail code { background: #e2e8f0; padding: .1rem .3rem; border-radius: 4px; font-size: .78rem; }
+  .detail .math { font-family: "Georgia", serif; font-style: italic; }
+
+  /* New vs existing markers */
+  .tag-new { background: #dbeafe; color: #1e40af; font-size: .65rem; font-weight: 700; padding: .1rem .35rem; border-radius: 4px; vertical-align: middle; }
+  .tag-changed { background: #fef3c7; color: #92400e; font-size: .65rem; font-weight: 700; padding: .1rem .35rem; border-radius: 4px; vertical-align: middle; }
+
+  @media (max-width: 700px) {
+    .components { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; align-items: center; }
+    .flow-arrow { transform: rotate(90deg); padding: .2rem 0; }
+  }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">&larr; Back to Hub</a>
+<h1>RAILS Reward Architecture</h1>
+<p class="sub">How the GRPO reward function scores each reasoning trace. 7 signals combine to train faithful, concise, and correct chain-of-thought reasoning.</p>
+
+<!-- ─── Total Reward Equation ─── -->
+<div class="card">
+  <h2>Total Reward</h2>
+  <div class="equation">
+    <span class="eq-var">R</span> <span class="eq-op">=</span>
+    <span class="term"><span class="eq-weight">w<sub>c</sub></span> <span class="eq-op">&times;</span> <span class="eq-var">consistency</span></span>
+    <span class="eq-op">+</span>
+    <span class="term"><span class="eq-weight">w<sub>f</sub></span> <span class="eq-op">&times;</span> <span class="eq-var">format</span></span>
+    <span class="eq-op">+</span>
+    <span class="term"><span class="eq-weight">w<sub>a</sub></span> <span class="eq-op">&times;</span> <span class="eq-var">gate</span>(<span class="eq-var">answer</span>)</span>
+    <span class="eq-op">+</span>
+    <span class="term"><span class="eq-var">length_penalty</span></span>
+    <span class="eq-op">+</span>
+    <span class="term"><span class="eq-weight">w<sub>g</sub></span> <span class="eq-op">&times;</span> <span class="eq-var">grounding</span></span>
+    <br>
+    <span style="font-size:.78rem;color:#64748b;">clipped to [&minus;3.0, +3.0]</span>
+  </div>
+</div>
+
+<!-- ─── Signal Flow ─── -->
+<div class="card">
+  <h2>Signal Flow</h2>
+  <div class="flow">
+    <div class="flow-step" style="background:#f0f4ff;border-color:#93c5fd;">
+      <div class="fl">Input</div>
+      <div class="fd">completion + context<br>+ answer + answer_type</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="fl">decompose_cot()</div>
+      <div class="fd">Parse into<br>StepSequence</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="background:#f0fdf4;border-color:#86efac;">
+      <div class="fl">7 Reward Signals</div>
+      <div class="fd">Computed in<br>parallel per example</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="background:#fffbeb;border-color:#fcd34d;">
+      <div class="fl">Weighted Sum</div>
+      <div class="fd">Clip &amp; NaN guard<br>&rarr; scalar reward</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="background:#fdf2f8;border-color:#f9a8d4;">
+      <div class="fl">GRPO Loss</div>
+      <div class="fd">Policy gradient<br>update</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Component Details ─── -->
+<div class="card">
+  <h2>Reward Components</h2>
+  <div class="components">
+
+    <!-- Consistency -->
+    <div class="comp comp-consistency">
+      <h3><span class="icon">&#x1F50D;</span> Consistency <span class="tag-changed">UPDATED</span></h3>
+      <p>Per-step SAT/ASP verification. Each derived step is checked against the <em>clean context</em> (only validated steps propagate forward).</p>
+      <div class="range">Range: [&minus;1.0, +1.0] &middot; Default weight: 1.0</div>
+      <ul class="checks">
+        <li class="pos">Valid entailment: +1.0</li>
+        <li class="neg">Invalid entailment: &minus;1.0</li>
+        <li class="neg"><strong>Duplicate derivation: &minus;0.5</strong> (new: penalizes reasoning loops)</li>
+        <li class="pos">Meta-predicates: subgoal/unreachable/unknown supported</li>
+      </ul>
+      <div class="detail" style="margin-top:.4rem">
+        <strong>Repetition detection:</strong> A <code>derived_logic_set</code> tracks every derived expression. If a step re-derives an already-known fact, it receives &minus;0.5 instead of +1.0 and does not enter the clean context. This directly penalizes the reasoning loops that caused 15 of 22 failures.
+      </div>
+    </div>
+
+    <!-- Format -->
+    <div class="comp comp-format">
+      <h3><span class="icon">&#x1F4DD;</span> Format</h3>
+      <p>Structural compliance with the <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> generation format. 5 sub-checks, each worth 0.20.</p>
+      <div class="range">Range: [&minus;1.0, +1.0] &middot; Default weight: 1.0 &middot; Capped at 1.0</div>
+      <ul class="checks">
+        <li class="pos">&lt;think&gt;...&lt;/think&gt; wrapper present</li>
+        <li class="pos">At least one &lt;step&gt; tag parsed</li>
+        <li class="pos">Steps use &lt;text&gt;/&lt;logic&gt; sub-tags</li>
+        <li class="pos">Valid logic syntax in each step</li>
+        <li class="pos">Answer line present after &lt;/think&gt;</li>
+      </ul>
+    </div>
+
+    <!-- Answer -->
+    <div class="comp comp-answer">
+      <h3><span class="icon">&#x2705;</span> Answer <span class="tag-changed">UPDATED</span></h3>
+      <p>Final answer correctness. Supports binary, ternary, numeric, expression, and multi-choice matching.</p>
+      <div class="range">Range: [&minus;1.0, +1.0] &middot; Default weight: 1.0</div>
+      <ul class="checks">
+        <li class="pos">Correct answer: +1.0</li>
+        <li class="neg">Wrong answer: &minus;1.0</li>
+        <li class="neg"><strong>No answer produced: &minus;0.5</strong> (was 0.0 &mdash; looping is no longer free)</li>
+        <li class="neg"><strong>"Unknown" on binary task: &minus;1.0</strong> (new: answer-type-aware validation)</li>
+      </ul>
+      <div class="detail" style="margin-top:.4rem">
+        <strong>Answer-type awareness:</strong> Each training example now carries an <code>answer_type</code> tag (binary, ternary, ternary_unknown). When the task is binary (yes/no), predicting "unknown" is immediately penalized &minus;1.0. This addresses the dominant failure mode where 67.9% of LogicBench errors were "unknown" predictions on a binary task.
+      </div>
+    </div>
+
+    <!-- Grounding -->
+    <div class="comp comp-grounding">
+      <h3><span class="icon">&#x1F4CD;</span> Premise Grounding <span class="tag-new">NEW</span></h3>
+      <p>Checks that each premise step actually corresponds to a sentence in the input context. Catches hallucinated rules.</p>
+      <div class="range">Range: [&minus;1.0, +1.0] &middot; Default weight: 0.5</div>
+      <ul class="checks">
+        <li class="pos">Premise matches context sentence (Jaccard &ge; 0.5 or substring): +1.0</li>
+        <li class="neg">Premise has no match in context (hallucinated): &minus;1.0</li>
+        <li class="neu">No premise steps: 0.0 (neutral)</li>
+      </ul>
+      <div class="detail" style="margin-top:.4rem">
+        <strong>Why this matters:</strong> The model learned to state fabricated rules as <code>type="premise"</code> to bypass SAT verification (premises are unconditionally trusted in the clean context). This includes reversed implications ("A&rarr;B" stated as "B&rarr;A") and entirely invented rules. The grounding check uses Jaccard token overlap + substring containment against the input context sentences to detect these.
+      </div>
+    </div>
+
+    <!-- Length Penalty -->
+    <div class="comp comp-length">
+      <h3><span class="icon">&#x1F4CF;</span> Length Penalty</h3>
+      <p>Multi-factor penalty for degenerate output lengths. Always &le; 0 (penalizes, never rewards).</p>
+      <div class="range">Range: (&minus;&infin;, 0.0] &middot; Weight: built into penalty</div>
+      <ul class="checks">
+        <li class="neg">Too few derived steps (&lt; min_steps): &minus;2.0 &times; w<sub>lp</sub></li>
+        <li class="neg">Too many total steps (&gt; max_steps): quadratic penalty</li>
+        <li class="neg">Low validity ratio (&lt; 30% valid steps): proportional penalty</li>
+        <li class="neg">Truncation detected (~95% of max tokens): &minus;0.5</li>
+      </ul>
+    </div>
+
+    <!-- Soft Gate -->
+    <div class="comp comp-gate">
+      <h3><span class="icon">&#x1F6AA;</span> Soft Answer Gate <span class="tag-changed">UPDATED</span></h3>
+      <p>Modulates the answer reward based on reasoning quality. Prevents lucky guesses from being rewarded.</p>
+      <div class="range">Applies to: answer component</div>
+      <ul class="checks">
+        <li class="pos">Valid chain + right answer: full +1.0 credit</li>
+        <li class="neg">Any chain + wrong answer: full &minus;1.0 penalty</li>
+        <li class="neu"><strong>Invalid chain + right answer: partial credit (20&ndash;100%)</strong></li>
+      </ul>
+      <div class="detail" style="margin-top:.4rem">
+        <strong>Soft gating (new):</strong> Previously, the gate was binary &mdash; invalid reasoning zeroed the answer reward entirely, creating a chicken-and-egg problem for hard theories. Now, a configurable floor (default 20%) ensures some answer signal always flows through:<br><br>
+        <span class="math">gate = floor + (1 &minus; floor) &times; max(0, (consistency + 1) / 2)</span><br><br>
+        <table style="font-size:.78rem;width:auto;margin:.3rem 0;">
+          <tr><td>consistency = &minus;1.0</td><td>&rarr;</td><td>gate = 0.20 (floor)</td></tr>
+          <tr><td>consistency = &ensp;0.0</td><td>&rarr;</td><td>gate = 0.60</td></tr>
+          <tr><td>consistency = +1.0</td><td>&rarr;</td><td>gate = 1.00 (full)</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── Failure Mode Mapping ─── -->
+<div class="card">
+  <h2>Failure Mode Mapping</h2>
+  <p style="font-size:.85rem;color:#475569;margin-bottom:.5rem;">Each observed failure mode from the L1 evaluation analysis, mapped to the reward signal that addresses it.</p>
+  <table class="failures">
+    <thead>
+      <tr><th>Failure Mode</th><th>Frequency</th><th>Fix</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Reasoning loops (re-deriving same facts 40+ times)</td>
+        <td>15/22</td>
+        <td>Repetition penalty in consistency + length penalty</td>
+        <td><span class="badge b-new">NEW</span></td>
+      </tr>
+      <tr>
+        <td>Hallucinated premises (inventing rules not in context)</td>
+        <td>14/22</td>
+        <td>Premise grounding reward</td>
+        <td><span class="badge b-new">NEW</span></td>
+      </tr>
+      <tr>
+        <td>Defaulting to "unknown" (looping until truncation)</td>
+        <td>14/22</td>
+        <td>No-answer penalty (&minus;0.5) + truncation penalty</td>
+        <td><span class="badge b-new">NEW</span> + <span class="badge b-existing">EXISTING</span></td>
+      </tr>
+      <tr>
+        <td>"Unknown" on binary tasks (67.9% of LogicBench errors)</td>
+        <td>Dominant</td>
+        <td>Answer-type-aware validation</td>
+        <td><span class="badge b-new">NEW</span></td>
+      </tr>
+      <tr>
+        <td>Affirming the consequent (reversing A&rarr;B to B&rarr;A)</td>
+        <td>8/22</td>
+        <td>Premise grounding catches reversed rules stated as premises</td>
+        <td><span class="badge b-new">NEW</span></td>
+      </tr>
+      <tr>
+        <td>Chicken-and-egg (hard theories get no answer signal)</td>
+        <td>Systemic</td>
+        <td>Soft answer gate with 20% floor</td>
+        <td><span class="badge b-new">NEW</span></td>
+      </tr>
+      <tr>
+        <td>Overthinking (&gt;50 steps for simple problems)</td>
+        <td>5/22</td>
+        <td>Quadratic length penalty + repetition penalty</td>
+        <td><span class="badge b-existing">EXISTING</span> + <span class="badge b-new">NEW</span></td>
+      </tr>
+      <tr>
+        <td>Invalid logical steps (wrong inference rules)</td>
+        <td>7/22</td>
+        <td>SAT/ASP consistency check</td>
+        <td><span class="badge b-existing">EXISTING</span></td>
+      </tr>
+      <tr>
+        <td>CWA failure (can't reason about "unknown")</td>
+        <td>4/6</td>
+        <td>Meta-predicates (unknown/unreachable) + SFT data</td>
+        <td><span class="badge b-existing">EXISTING</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ─── Configuration ─── -->
+<div class="card">
+  <h2>Configuration Reference</h2>
+  <table class="config">
+    <thead>
+      <tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>consistency_weight</td><td>1.0</td><td>Weight for SAT/ASP/NSFR step verification signal</td></tr>
+      <tr><td>format_weight</td><td>1.0</td><td>Weight for structural format compliance</td></tr>
+      <tr><td>answer_weight</td><td>1.0</td><td>Weight for answer correctness (after gating)</td></tr>
+      <tr><td>grounding_weight</td><td>0.5</td><td>Weight for premise grounding vs hallucination <span class="tag-new">NEW</span></td></tr>
+      <tr><td>length_penalty_weight</td><td>0.5</td><td>Scale factor for all length-related penalties</td></tr>
+      <tr><td>answer_gate_floor</td><td>0.2</td><td>Minimum fraction of answer credit with low consistency <span class="tag-new">NEW</span></td></tr>
+      <tr><td>max_reasoning_steps</td><td>10</td><td>Step count threshold before quadratic penalty kicks in</td></tr>
+      <tr><td>min_reasoning_steps</td><td>2</td><td>Minimum derived steps (below this: heavy penalty)</td></tr>
+      <tr><td>min_derived_for_gate</td><td>2</td><td>Minimum derived steps to pass the answer gate</td></tr>
+      <tr><td>truncation_penalty</td><td>&minus;0.5</td><td>Penalty when output appears truncated (near max tokens)</td></tr>
+      <tr><td>reward_clip_range</td><td>3.0</td><td>Total reward clipped to [&minus;clip, +clip]</td></tr>
+      <tr><td>min_valid_step_ratio</td><td>0.3</td><td>Below this ratio of valid steps, extra penalty applied</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ─── Example Walkthrough ─── -->
+<div class="card">
+  <h2>Example: How a Reasoning Loop Gets Penalized</h2>
+  <p style="font-size:.85rem;color:#475569;margin-bottom:.5rem;">Before vs after the reward changes, for a model that re-derives <code>big(lion)</code> 40 times and outputs "unknown" on a binary task.</p>
+  <div class="components">
+    <div class="comp" style="border-color:#ef4444;background:#fff5f5;">
+      <h3 style="color:#991b1b;">Before (old reward)</h3>
+      <ul class="checks" style="font-size:.78rem;">
+        <li class="pos">Consistency: 40 valid SAT checks &rarr; +1.0</li>
+        <li class="pos">Format: well-formed steps &rarr; +0.8</li>
+        <li class="neu">Answer: no answer extracted &rarr; 0.0</li>
+        <li class="neg">Length: quadratic penalty &rarr; &minus;0.7</li>
+        <li class="neu">Grounding: did not exist &rarr; 0.0</li>
+      </ul>
+      <div style="font-size:.85rem;font-weight:700;color:#991b1b;margin-top:.3rem;">
+        Total &asymp; +1.1 (positive reward for looping!)
+      </div>
+    </div>
+    <div class="comp" style="border-color:#16a34a;background:#f0fdf4;">
+      <h3 style="color:#166534;">After (new reward)</h3>
+      <ul class="checks" style="font-size:.78rem;">
+        <li class="pos">Consistency: 1st derivation +1.0, 39 duplicates &times; &minus;0.5 &rarr; <strong>&minus;0.93</strong></li>
+        <li class="pos">Format: well-formed steps &rarr; +0.8</li>
+        <li class="neg">Answer: no answer &rarr; &minus;0.5; "unknown" on binary &rarr; <strong>&minus;1.0</strong></li>
+        <li class="neg">Length: quadratic + truncation &rarr; &minus;1.2</li>
+        <li class="neg">Grounding: 3 hallucinated premises &rarr; <strong>&minus;0.3</strong></li>
+      </ul>
+      <div style="font-size:.85rem;font-weight:700;color:#166534;margin-top:.3rem;">
+        Total &asymp; &minus;2.6 (strong negative signal)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;color:#94a3b8;font-size:.78rem;margin-top:1.5rem;padding-top:.8rem;border-top:1px solid #e5e7eb;">
+  RAILS &mdash; Reasoning with Automatically Integrated Logical Supervision &middot; Updated 2026-03-25
+</div>
+
+</body>
+</html>

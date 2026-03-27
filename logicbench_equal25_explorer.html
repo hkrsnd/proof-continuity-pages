@@ -3,44 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAILS - LogicBench Equal-25 Dataset Explorer</title>
+<title>RAILS - LogicBench Equal-25 Explorer</title>
 <style>
   * { box-sizing: border-box; }
   body {
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    background: #f8fafc;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
     color: #0f172a;
     margin: 0;
     padding: 1.25rem;
-    max-width: 1250px;
+    max-width: 1300px;
     margin-inline: auto;
   }
-  .back { display: inline-block; margin-bottom: .7rem; color: #2563eb; text-decoration: none; font-weight: 600; font-size: .9rem; }
-  h1 { margin: .1rem 0 .2rem 0; font-size: 1.65rem; }
+  .back { display: inline-block; margin-bottom: .7rem; color: #1d4ed8; text-decoration: none; font-weight: 600; font-size: .9rem; }
+  h1 { margin: .1rem 0 .2rem 0; font-size: 1.7rem; }
   .sub { color: #475569; margin-bottom: .9rem; font-size: .93rem; }
   .card {
     background: #fff; border-radius: 12px; padding: .9rem 1rem; margin-bottom: .9rem;
     box-shadow: 0 1px 3px rgba(0,0,0,.08);
   }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: .55rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: .55rem; }
   .stat { background: #f1f5f9; border-radius: 8px; padding: .6rem; text-align: center; }
-  .sv { font-size: 1.18rem; font-weight: 800; color: #1d4ed8; }
+  .sv { font-size: 1.15rem; font-weight: 800; color: #1e40af; }
   .sl { font-size: .72rem; color: #64748b; }
-  .controls { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr 1fr; gap: .6rem; align-items: end; }
+  .controls { display: grid; grid-template-columns: 1.2fr 0.7fr 0.9fr 1fr 1fr 0.8fr 0.7fr; gap: .55rem; align-items: end; }
   .controls label { display: block; font-size: .73rem; color: #64748b; margin-bottom: .2rem; }
-  .controls input, .controls select {
+  .controls input, .controls select, .controls button {
     width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: .44rem .52rem; font-size: .84rem; background: #fff;
   }
+  .controls button { cursor: pointer; background: #eff6ff; border-color: #93c5fd; font-weight: 600; }
   .hint { margin-top: .45rem; color: #64748b; font-size: .76rem; }
-  .layout { display: grid; grid-template-columns: minmax(520px,1.1fr) minmax(360px,.9fr); gap: .9rem; }
+  .mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  .mini-table-wrap { border: 1px solid #e2e8f0; border-radius: 8px; overflow: auto; max-height: 220px; }
+  .mini-title { font-size: .78rem; color: #475569; margin-bottom: .3rem; font-weight: 700; }
+  .mini-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+  .mini-table th, .mini-table td { padding: .35rem .45rem; border-bottom: 1px solid #f1f5f9; text-align: left; }
+  .mini-table th { background: #f8fafc; color: #334155; position: sticky; top: 0; z-index: 1; }
+  .layout { display: grid; grid-template-columns: minmax(540px,1.08fr) minmax(360px,.92fr); gap: .9rem; }
   .panel { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: .72rem; }
   .table-wrap { max-height: 68vh; overflow: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
   table { border-collapse: collapse; width: 100%; font-size: .8rem; }
-  th, td { border-bottom: 1px solid #f1f5f9; text-align: left; padding: .43rem; vertical-align: top; }
+  th, td { border-bottom: 1px solid #f1f5f9; text-align: left; padding: .42rem; vertical-align: top; }
   th { background: #f8fafc; position: sticky; top: 0; z-index: 1; color: #334155; }
   tr.row { cursor: pointer; }
   tr.row:hover { background: #f8fafc; }
-  tr.row.active { background: #e0e7ff; }
+  tr.row.active { background: #dbeafe; }
   .badge { display:inline-block; border-radius: 999px; padding: .07rem .42rem; font-size:.68rem; font-weight:700; }
   .b-yes { background:#dcfce7; color:#166534; }
   .b-no { background:#fee2e2; color:#991b1b; }
@@ -53,8 +60,9 @@
   .lbl { font-size: .71rem; text-transform: uppercase; letter-spacing: .05em; color: #64748b; margin-bottom: .12rem; font-weight: 700; }
   .txt { background: #f8fafc; border-left: 3px solid #cbd5e1; border-radius: 0 6px 6px 0; padding: .44rem .54rem; white-space: pre-wrap; font-size: .81rem; color: #334155; }
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .77rem; }
-  @media (max-width: 980px) {
-    .controls { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 1050px) {
+    .controls { grid-template-columns: 1fr 1fr 1fr; }
+    .mini-grid { grid-template-columns: 1fr; }
     .layout { grid-template-columns: 1fr; }
     .table-wrap { max-height: 42vh; }
   }
@@ -63,15 +71,16 @@
 <body>
 <a class="back" href="index.html">&larr; Back to Hub</a>
 <h1>LogicBench Equal-25 Dataset Explorer</h1>
-<p class="sub">Interactive browser for <code>proof_bank_logicbench_equal25_50k</code> with filters, search, and pagination.</p>
+<p class="sub">Full-trace browser for <code>proof_bank_logicbench_equal25_50k_split_subtyped</code> with split, logic-type, theory, and instance-level exploration.</p>
 
 <div class="card">
   <div class="stats">
     <div class="stat"><div class="sv" id="st-total">-</div><div class="sl">Total Rows</div></div>
+    <div class="stat"><div class="sv" id="st-splits">-</div><div class="sl">Splits</div></div>
     <div class="stat"><div class="sv" id="st-ltype">-</div><div class="sl">Logic Types</div></div>
+    <div class="stat"><div class="sv" id="st-subtype">-</div><div class="sl">Subtypes</div></div>
     <div class="stat"><div class="sv" id="st-tkeys">-</div><div class="sl">Theory Keys</div></div>
-    <div class="stat"><div class="sv" id="st-yes">-</div><div class="sl">Yes</div></div>
-    <div class="stat"><div class="sv" id="st-no">-</div><div class="sl">No</div></div>
+    <div class="stat"><div class="sv" id="st-steps">-</div><div class="sl">Avg Steps</div></div>
     <div class="stat"><div class="sv" id="st-upd">-</div><div class="sl">Generated</div></div>
   </div>
 </div>
@@ -79,12 +88,20 @@
 <div class="card">
   <div class="controls">
     <div>
-      <label for="q">Search (id/question/context preview)</label>
-      <input id="q" type="text" placeholder="e.g. modus_tollens or john is angry">
+      <label for="q">Search (id/question/context)</label>
+      <input id="q" type="text" placeholder="e.g. modus_tollens or exceptions">
+    </div>
+    <div>
+      <label for="split">Split</label>
+      <select id="split"><option value="all">All</option></select>
     </div>
     <div>
       <label for="logic">Logic Type</label>
       <select id="logic"><option value="all">All</option></select>
+    </div>
+    <div>
+      <label for="subtype">Logic Subtype</label>
+      <select id="subtype"><option value="all">All</option></select>
     </div>
     <div>
       <label for="theory">Theory Key</label>
@@ -106,8 +123,35 @@
         <option value="100">100</option>
       </select>
     </div>
+    <div>
+      <label>&nbsp;</label>
+      <button id="pick-random" type="button">Pick Random</button>
+    </div>
   </div>
   <div class="hint" id="summary">Loading...</div>
+</div>
+
+<div class="card">
+  <div class="mini-grid">
+    <div>
+      <div class="mini-title">Reasoning Length by Split</div>
+      <div class="mini-table-wrap">
+        <table class="mini-table">
+          <thead><tr><th>Split</th><th>Rows</th><th>Avg Steps</th><th>Median</th><th>P90</th></tr></thead>
+          <tbody id="tbl-split-steps"><tr><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="mini-title">Reasoning Length by Logic Type</div>
+      <div class="mini-table-wrap">
+        <table class="mini-table">
+          <thead><tr><th>Logic Type</th><th>Rows</th><th>Avg Steps</th><th>Median</th><th>P90</th></tr></thead>
+          <tbody id="tbl-logic-steps"><tr><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="layout">
@@ -117,7 +161,8 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Type</th>
+            <th>Split</th>
+            <th>Logic</th>
             <th>Theory</th>
             <th>Ans</th>
             <th>Steps</th>
@@ -135,21 +180,21 @@
     </div>
   </div>
   <div class="panel">
-    <div id="empty" class="hint">Select a row to inspect details.</div>
+    <div id="empty" class="hint">Select a row to inspect full reasoning trace.</div>
     <div id="detail" style="display:none;">
       <div class="detail-title" id="d-id"></div>
       <div class="block"><div class="lbl">Metadata</div><div class="txt" id="d-meta"></div></div>
       <div class="block"><div class="lbl">Question</div><div class="txt" id="d-q"></div></div>
       <div class="block"><div class="lbl">Context</div><div class="txt" id="d-c"></div></div>
-      <div class="block"><div class="lbl">Completion</div><div class="txt mono" id="d-comp"></div></div>
+      <div class="block"><div class="lbl">Completion (Full Trace)</div><div class="txt mono" id="d-comp"></div></div>
     </div>
   </div>
 </div>
 
 <script>
-const DATA_PATH = "logicbench_equal25_explorer_data.json?v=20260225-1428";
+const DATA_PATH = "logicbench_equal25_explorer_data.json";
 const FULL_BASE = "logicbench_equal25_full";
-const FULL_VERSION = "20260225-1434";
+
 const state = {
   data: null,
   filtered: [],
@@ -160,71 +205,159 @@ const state = {
   fullShardCache: new Map(),
 };
 
-function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
-function esc(x){ return String(x||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function fmt(n){ return Number(n || 0).toLocaleString("en-US"); }
+function esc(x){ return String(x || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
 function badge(answer){
-  const a = String(answer||'').toLowerCase();
-  if (a === 'yes' || a === 'true') return `<span class="badge b-yes">${esc(answer)}</span>`;
-  if (a === 'no' || a === 'false') return `<span class="badge b-no">${esc(answer)}</span>`;
-  return `<span class="badge b-unk">${esc(answer||'unknown')}</span>`;
+  const a = String(answer || "").toLowerCase();
+  if (a === "yes" || a === "true") return `<span class="badge b-yes">${esc(answer)}</span>`;
+  if (a === "no" || a === "false") return `<span class="badge b-no">${esc(answer)}</span>`;
+  return `<span class="badge b-unk">${esc(answer || "unknown")}</span>`;
+}
+
+function shardKey(rec){
+  const safe = (x) => String(x || "unknown").replace(/[^a-zA-Z0-9_]+/g, "_");
+  return `${safe(rec.logic_type)}__${safe(rec.theory)}`;
 }
 
 function setStats(data){
   const s = data.summary || {};
-  document.getElementById('st-total').textContent = fmt(data.total_records || 0);
-  document.getElementById('st-ltype').textContent = fmt(Object.keys(s.logic_type_counts || {}).length);
-  document.getElementById('st-tkeys').textContent = fmt(s.theory_key_count || 0);
-  document.getElementById('st-yes').textContent = fmt((s.answer_counts || {}).yes || (s.answer_counts || {}).Yes || 0);
-  document.getElementById('st-no').textContent = fmt((s.answer_counts || {}).no || (s.answer_counts || {}).No || 0);
-  document.getElementById('st-upd').textContent = (data.generated_at_utc || 'n/a').slice(0,16).replace('T',' ');
+  document.getElementById("st-total").textContent = fmt(data.total_records || 0);
+  document.getElementById("st-splits").textContent = fmt(Object.keys(s.split_counts || {}).length);
+  document.getElementById("st-ltype").textContent = fmt(Object.keys(s.logic_type_counts || {}).length);
+  document.getElementById("st-subtype").textContent = fmt(Object.keys(s.logic_subtype_counts || {}).length);
+  document.getElementById("st-tkeys").textContent = fmt(s.theory_key_count || 0);
+  document.getElementById("st-steps").textContent = Number(s.avg_steps || 0).toFixed(2);
+  document.getElementById("st-upd").textContent = (data.generated_at_utc || "n/a").slice(0,16).replace("T"," ");
+}
+
+function median(sortedVals){
+  const n = sortedVals.length;
+  if (!n) return 0;
+  const mid = Math.floor(n / 2);
+  return n % 2 ? sortedVals[mid] : (sortedVals[mid - 1] + sortedVals[mid]) / 2;
+}
+
+function pctl(sortedVals, p){
+  const n = sortedVals.length;
+  if (!n) return 0;
+  const idx = Math.round((n - 1) * p);
+  return sortedVals[idx];
+}
+
+function rowStats(vals){
+  const s = [...vals].sort((a,b) => a-b);
+  const n = s.length;
+  const mean = n ? (s.reduce((acc, x) => acc + x, 0) / n) : 0;
+  return {
+    n,
+    mean: Number(mean.toFixed(3)),
+    med: median(s),
+    p90: pctl(s, 0.9),
+  };
+}
+
+function renderStepTables(){
+  const bySplit = new Map();
+  const byLogic = new Map();
+  for (const x of state.data.examples){
+    if (!bySplit.has(x.split)) bySplit.set(x.split, []);
+    if (!byLogic.has(x.logic_type)) byLogic.set(x.logic_type, []);
+    bySplit.get(x.split).push(Number(x.num_steps || 0));
+    byLogic.get(x.logic_type).push(Number(x.num_steps || 0));
+  }
+
+  const splitBody = document.getElementById("tbl-split-steps");
+  splitBody.innerHTML = "";
+  for (const key of [...bySplit.keys()].sort()){
+    const st = rowStats(bySplit.get(key));
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${esc(key)}</td><td>${fmt(st.n)}</td><td>${st.mean.toFixed(3)}</td><td>${st.med}</td><td>${st.p90}</td>`;
+    splitBody.appendChild(tr);
+  }
+
+  const logicBody = document.getElementById("tbl-logic-steps");
+  logicBody.innerHTML = "";
+  for (const key of [...byLogic.keys()].sort()){
+    const st = rowStats(byLogic.get(key));
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${esc(key)}</td><td>${fmt(st.n)}</td><td>${st.mean.toFixed(3)}</td><td>${st.med}</td><td>${st.p90}</td>`;
+    logicBody.appendChild(tr);
+  }
+}
+
+function setSelectOptions(el, values){
+  const current = el.value;
+  el.innerHTML = "";
+  const all = document.createElement("option");
+  all.value = "all";
+  all.textContent = "All";
+  el.appendChild(all);
+  for (const v of values){
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = v;
+    el.appendChild(o);
+  }
+  if ([...el.options].some(o => o.value === current)) {
+    el.value = current;
+  }
 }
 
 function fillFilters(){
-  const logic = document.getElementById('logic');
-  const theory = document.getElementById('theory');
-  const lset = Array.from(new Set(state.data.examples.map(x => x.logic_type))).sort();
-  const tset = Array.from(new Set(state.data.examples.map(x => x.theory_key))).sort();
-  for (const v of lset){
-    const o=document.createElement('option'); o.value=v; o.textContent=v; logic.appendChild(o);
-  }
-  for (const v of tset){
-    const o=document.createElement('option'); o.value=v; o.textContent=v; theory.appendChild(o);
-  }
+  const rows = state.data.examples;
+  setSelectOptions(document.getElementById("split"), Array.from(new Set(rows.map(x => x.split))).sort());
+  setSelectOptions(document.getElementById("logic"), Array.from(new Set(rows.map(x => x.logic_type))).sort());
+  setSelectOptions(document.getElementById("subtype"), Array.from(new Set(rows.map(x => x.logic_subtype))).sort());
+  refreshTheoryOptions();
+}
+
+function refreshTheoryOptions(){
+  const logic = document.getElementById("logic").value;
+  const rows = state.data.examples;
+  const theories = Array.from(new Set(rows
+    .filter(x => logic === "all" || x.logic_type === logic)
+    .map(x => x.theory_key))).sort();
+  setSelectOptions(document.getElementById("theory"), theories);
 }
 
 function currentFilter(){
   return {
-    q: document.getElementById('q').value.trim().toLowerCase(),
-    logic: document.getElementById('logic').value,
-    theory: document.getElementById('theory').value,
-    ans: document.getElementById('ans').value,
+    q: document.getElementById("q").value.trim().toLowerCase(),
+    split: document.getElementById("split").value,
+    logic: document.getElementById("logic").value,
+    subtype: document.getElementById("subtype").value,
+    theory: document.getElementById("theory").value,
+    ans: document.getElementById("ans").value,
   };
 }
 
 function applyFilter(resetPage=true){
   if (!state.data) return;
   if (resetPage) state.page = 1;
+
   const f = currentFilter();
   const arr = state.data.examples;
   state.filtered = arr.filter(x => {
-    if (f.logic !== 'all' && x.logic_type !== f.logic) return false;
-    if (f.theory !== 'all' && x.theory_key !== f.theory) return false;
-    if (f.ans !== 'all' && String(x.expected_answer).toLowerCase() !== f.ans) return false;
+    if (f.split !== "all" && x.split !== f.split) return false;
+    if (f.logic !== "all" && x.logic_type !== f.logic) return false;
+    if (f.subtype !== "all" && x.logic_subtype !== f.subtype) return false;
+    if (f.theory !== "all" && x.theory_key !== f.theory) return false;
+    if (f.ans !== "all" && String(x.expected_answer || "").toLowerCase() !== f.ans) return false;
     if (f.q){
-      const blob = `${x.id} ${x.theory_key} ${x.question} ${x.context_preview}`.toLowerCase();
+      const blob = `${x.id} ${x.logic_type} ${x.logic_subtype} ${x.theory_key} ${x.question} ${x.context_preview}`.toLowerCase();
       if (!blob.includes(f.q)) return false;
     }
     return true;
   });
 
   const total = state.filtered.length;
-  document.getElementById('summary').textContent = `Filtered ${fmt(total)} / ${fmt(state.data.total_records)} rows. Click a row to lazy-load full context/completion.`;
+  document.getElementById("summary").textContent = `Filtered ${fmt(total)} / ${fmt(state.data.total_records)} rows. Selecting a row lazy-loads full context and completion trace.`;
 
   const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
   if (state.page > maxPage) state.page = maxPage;
-
   if (!state.activeId || !state.filtered.some(x => x.id === state.activeId)) {
-    state.activeId = total ? state.filtered[(state.page-1)*state.pageSize]?.id || state.filtered[0].id : null;
+    state.activeId = total ? (state.filtered[(state.page - 1) * state.pageSize] || state.filtered[0]).id : null;
   }
 
   renderRows();
@@ -232,23 +365,23 @@ function applyFilter(resetPage=true){
 }
 
 function renderRows(){
-  const tbody = document.getElementById('rows');
-  tbody.innerHTML = '';
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = "";
   const total = state.filtered.length;
   const start = (state.page - 1) * state.pageSize;
   const end = Math.min(total, start + state.pageSize);
   const view = state.filtered.slice(start, end);
 
   for (const x of view){
-    const tr = document.createElement('tr');
-    tr.className = 'row' + (x.id === state.activeId ? ' active' : '');
+    const tr = document.createElement("tr");
+    tr.className = "row" + (x.id === state.activeId ? " active" : "");
     tr.innerHTML = `
       <td><code>${esc(x.id)}</code></td>
-      <td>${esc(x.logic_type)}</td>
+      <td>${esc(x.split)}</td>
+      <td>${esc(x.logic_subtype)}</td>
       <td>${esc(x.theory)}</td>
       <td>${badge(x.expected_answer)}</td>
-      <td>${esc(x.num_steps)}</td>
-    `;
+      <td>${esc(x.num_steps)}</td>`;
     tr.onclick = () => {
       state.activeId = x.id;
       renderRows();
@@ -258,20 +391,17 @@ function renderRows(){
   }
 
   const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
-  document.getElementById('page-info').textContent = `Page ${state.page} / ${maxPage} · rows ${fmt(start+1)}-${fmt(Math.max(start+1,end))}`;
-  document.getElementById('prev').disabled = state.page <= 1;
-  document.getElementById('next').disabled = state.page >= maxPage;
-}
-
-function shardKey(rec){
-  const safe = (x) => String(x || "unknown").replace(/[^a-zA-Z0-9_]+/g, "_");
-  return `${safe(rec.logic_type)}__${safe(rec.theory)}`;
+  const s = total ? start + 1 : 0;
+  const e = total ? end : 0;
+  document.getElementById("page-info").textContent = `Page ${state.page} / ${maxPage} - rows ${fmt(s)}-${fmt(e)}`;
+  document.getElementById("prev").disabled = state.page <= 1;
+  document.getElementById("next").disabled = state.page >= maxPage;
 }
 
 async function loadFullRecord(rec){
   const key = shardKey(rec);
   if (!state.fullShardCache.has(key)){
-    const url = `${FULL_BASE}/${key}.json?v=${FULL_VERSION}`;
+    const url = `${FULL_BASE}/${key}.json`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`full shard fetch failed: ${res.status}`);
     const payload = await res.json();
@@ -283,76 +413,86 @@ async function loadFullRecord(rec){
 }
 
 async function renderDetail(){
-  const empty = document.getElementById('empty');
-  const detail = document.getElementById('detail');
+  const empty = document.getElementById("empty");
+  const detail = document.getElementById("detail");
   const rec = state.filtered.find(x => x.id === state.activeId);
   if (!rec){
-    empty.style.display='block';
-    detail.style.display='none';
+    empty.style.display = "block";
+    detail.style.display = "none";
     return;
   }
-  empty.style.display='none';
-  detail.style.display='block';
+
+  empty.style.display = "none";
+  detail.style.display = "block";
   const token = ++state.detailToken;
-  document.getElementById('d-id').textContent = rec.id;
-  document.getElementById('d-meta').textContent = `logic_type=${rec.logic_type} | theory=${rec.theory} | theory_key=${rec.theory_key} | answer=${rec.expected_answer} | steps=${rec.num_steps} | context_chars=${rec.context_chars} | completion_chars=${rec.completion_chars}`;
-  document.getElementById('d-q').textContent = rec.question || '';
-  document.getElementById('d-c').textContent = (rec.context_preview || '') + "\n\n[Loading full context...]";
-  document.getElementById('d-comp').textContent = (rec.completion_preview || '') + "\n\n[Loading full completion...]";
+
+  document.getElementById("d-id").textContent = rec.id;
+  document.getElementById("d-meta").textContent = `split=${rec.split} | logic_type=${rec.logic_type} | logic_subtype=${rec.logic_subtype} | theory=${rec.theory} | answer=${rec.expected_answer} | steps=${rec.num_steps} | context_chars=${rec.context_chars} | completion_chars=${rec.completion_chars}`;
+  document.getElementById("d-q").textContent = rec.question || "";
+  document.getElementById("d-c").textContent = `${rec.context_preview || ""}\n\n[Loading full context...]`;
+  document.getElementById("d-comp").textContent = `${rec.completion_preview || ""}\n\n[Loading full completion...]`;
 
   try {
     const full = await loadFullRecord(rec);
     if (token !== state.detailToken) return;
     if (!full){
-      document.getElementById('d-c').textContent = rec.context_preview || '';
-      document.getElementById('d-comp').textContent = rec.completion_preview || '';
+      document.getElementById("d-c").textContent = rec.context_preview || "";
+      document.getElementById("d-comp").textContent = rec.completion_preview || "";
       return;
     }
-    document.getElementById('d-meta').textContent = `logic_type=${full.logic_type} | theory=${full.theory} | theory_key=${full.theory_key} | answer=${full.expected_answer} | steps=${full.num_steps} | context_chars=${full.context_chars} | completion_chars=${full.completion_chars}`;
-    document.getElementById('d-q').textContent = full.question || rec.question || '';
-    document.getElementById('d-c').textContent = full.context || rec.context_preview || '';
-    document.getElementById('d-comp').textContent = full.completion || rec.completion_preview || '';
+    document.getElementById("d-meta").textContent = `split=${full.split} | logic_type=${full.logic_type} | logic_subtype=${full.logic_subtype} | theory=${full.theory} | answer=${full.expected_answer} | steps=${full.num_steps} | context_chars=${full.context_chars} | completion_chars=${full.completion_chars}`;
+    document.getElementById("d-q").textContent = full.question || rec.question || "";
+    document.getElementById("d-c").textContent = full.context || rec.context_preview || "";
+    document.getElementById("d-comp").textContent = full.completion || rec.completion_preview || "";
   } catch (err) {
     if (token !== state.detailToken) return;
-    document.getElementById('d-c').textContent = rec.context_preview || '';
-    document.getElementById('d-comp').textContent =
-      (rec.completion_preview || '') + `\n\n[Failed to load full shard: ${err.message}]`;
+    document.getElementById("d-c").textContent = rec.context_preview || "";
+    document.getElementById("d-comp").textContent = `${rec.completion_preview || ""}\n\n[Failed to load full shard: ${err.message}]`;
   }
 }
 
-function bind(){
-  for (const id of ['q','logic','theory','ans']) {
-    document.getElementById(id).addEventListener('input', () => applyFilter(true));
-    document.getElementById(id).addEventListener('change', () => applyFilter(true));
-  }
-  document.getElementById('psz').addEventListener('change', (e) => {
-    state.pageSize = Number(e.target.value || 50);
-    state.page = 1;
-    renderRows();
-    renderDetail();
-  });
-  document.getElementById('prev').onclick = () => { if (state.page > 1){ state.page -= 1; renderRows(); } };
-  document.getElementById('next').onclick = () => {
-    const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
-    if (state.page < maxPage){ state.page += 1; renderRows(); }
-  };
+function pickRandom(){
+  if (!state.filtered.length) return;
+  const idx = Math.floor(Math.random() * state.filtered.length);
+  const rec = state.filtered[idx];
+  state.activeId = rec.id;
+  state.page = Math.floor(idx / state.pageSize) + 1;
+  renderRows();
+  renderDetail();
 }
 
-async function boot(){
+async function init(){
   try {
     const res = await fetch(DATA_PATH);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.data = await res.json();
     setStats(state.data);
+    renderStepTables();
     fillFilters();
-    bind();
+
+    document.getElementById("logic").addEventListener("change", () => { refreshTheoryOptions(); applyFilter(true); });
+    for (const id of ["q", "split", "subtype", "theory", "ans"]) {
+      document.getElementById(id).addEventListener("input", () => applyFilter(true));
+      document.getElementById(id).addEventListener("change", () => applyFilter(true));
+    }
+    document.getElementById("psz").addEventListener("change", (e) => {
+      state.pageSize = Number(e.target.value) || 50;
+      applyFilter(true);
+    });
+    document.getElementById("prev").onclick = () => { if (state.page > 1) { state.page--; renderRows(); renderDetail(); } };
+    document.getElementById("next").onclick = () => {
+      const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+      if (state.page < maxPage) { state.page++; renderRows(); renderDetail(); }
+    };
+    document.getElementById("pick-random").onclick = pickRandom;
+
     applyFilter(true);
-  } catch (err){
-    document.getElementById('summary').textContent = `Failed to load explorer data: ${err.message}`;
+  } catch (err) {
+    document.getElementById("summary").textContent = `Failed to load explorer data: ${err.message}`;
   }
 }
 
-boot();
+init();
 </script>
 </body>
 </html>

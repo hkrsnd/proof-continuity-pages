@@ -1,12 +1,22 @@
 {
-  "generated_at_utc": "2026-02-25T14:31:50.863684+00:00",
-  "source_file": "data/proof_bank/proof_bank_logicbench_equal25_50k.jsonl",
+  "generated_at_utc": "2026-02-25T16:50:09.650179+00:00",
+  "source_file": "/mnt/vast/home/hs40vahe/ProofContinuity/data/proof_bank/proof_bank_logicbench_equal25_50k_split_subtyped.jsonl",
   "total_records": 50000,
   "shard_count": 25,
   "logic_type_counts": {
     "first_order_logic": 18000,
-    "nm_logic": 16000,
-    "propositional_logic": 16000
+    "propositional_logic": 16000,
+    "nm_logic": 16000
+  },
+  "logic_subtype_counts": {
+    "fol": 18000,
+    "propositional": 16000,
+    "non_monotonic": 16000
+  },
+  "split_counts": {
+    "train": 45000,
+    "test": 2500,
+    "dev": 2500
   },
   "theory_key_counts": {
     "first_order_logic/bidirectional_dilemma": 2000,
@@ -39,127 +49,127 @@
     "first_order_logic__bidirectional_dilemma": {
       "file": "first_order_logic__bidirectional_dilemma.json",
       "count": 2000,
-      "size_bytes": 12239282
+      "size_bytes": 12330026
     },
     "first_order_logic__constructive_dillema": {
       "file": "first_order_logic__constructive_dillema.json",
       "count": 2000,
-      "size_bytes": 9507391
+      "size_bytes": 9619618
     },
     "first_order_logic__destructive_dillema": {
       "file": "first_order_logic__destructive_dillema.json",
       "count": 2000,
-      "size_bytes": 12193320
+      "size_bytes": 12290008
     },
     "first_order_logic__disjunctive_syllogism": {
       "file": "first_order_logic__disjunctive_syllogism.json",
       "count": 2000,
-      "size_bytes": 8647808
+      "size_bytes": 8711661
     },
     "first_order_logic__existential_instantiation": {
       "file": "first_order_logic__existential_instantiation.json",
       "count": 2000,
-      "size_bytes": 4936825
+      "size_bytes": 5030621
     },
     "first_order_logic__hypothetical_syllogism": {
       "file": "first_order_logic__hypothetical_syllogism.json",
       "count": 2000,
-      "size_bytes": 5167373
+      "size_bytes": 5258616
     },
     "first_order_logic__modus_ponens": {
       "file": "first_order_logic__modus_ponens.json",
       "count": 2000,
-      "size_bytes": 4126606
+      "size_bytes": 4223795
     },
     "first_order_logic__modus_tollens": {
       "file": "first_order_logic__modus_tollens.json",
       "count": 2000,
-      "size_bytes": 4942343
+      "size_bytes": 5023539
     },
     "first_order_logic__universal_instantiation": {
       "file": "first_order_logic__universal_instantiation.json",
       "count": 2000,
-      "size_bytes": 3749861
+      "size_bytes": 3868186
     },
     "nm_logic__default_reasoning_default": {
       "file": "nm_logic__default_reasoning_default.json",
       "count": 2000,
-      "size_bytes": 4057677
+      "size_bytes": 4173464
     },
     "nm_logic__default_reasoning_irr": {
       "file": "nm_logic__default_reasoning_irr.json",
       "count": 2000,
-      "size_bytes": 6608434
+      "size_bytes": 6739774
     },
     "nm_logic__default_reasoning_open": {
       "file": "nm_logic__default_reasoning_open.json",
       "count": 2000,
-      "size_bytes": 8518644
+      "size_bytes": 8626495
     },
     "nm_logic__default_reasoning_several": {
       "file": "nm_logic__default_reasoning_several.json",
       "count": 2000,
-      "size_bytes": 7192181
+      "size_bytes": 7301702
     },
     "nm_logic__reasoning_about_exceptions_1": {
       "file": "nm_logic__reasoning_about_exceptions_1.json",
       "count": 2000,
-      "size_bytes": 6126750
+      "size_bytes": 6233256
     },
     "nm_logic__reasoning_about_exceptions_2": {
       "file": "nm_logic__reasoning_about_exceptions_2.json",
       "count": 2000,
-      "size_bytes": 8941714
+      "size_bytes": 8982247
     },
     "nm_logic__reasoning_about_exceptions_3": {
       "file": "nm_logic__reasoning_about_exceptions_3.json",
       "count": 2000,
-      "size_bytes": 6074007
+      "size_bytes": 6205570
     },
     "nm_logic__reasoning_about_priority": {
       "file": "nm_logic__reasoning_about_priority.json",
       "count": 2000,
-      "size_bytes": 5003682
+      "size_bytes": 5140719
     },
     "propositional_logic__bidirectional_dilemma": {
       "file": "propositional_logic__bidirectional_dilemma.json",
       "count": 2000,
-      "size_bytes": 11267547
+      "size_bytes": 11340133
     },
     "propositional_logic__commutation": {
       "file": "propositional_logic__commutation.json",
       "count": 2000,
-      "size_bytes": 4619116
+      "size_bytes": 4733055
     },
     "propositional_logic__constructive_dillema": {
       "file": "propositional_logic__constructive_dillema.json",
       "count": 2000,
-      "size_bytes": 5995639
+      "size_bytes": 6090646
     },
     "propositional_logic__destructive_dillema": {
       "file": "propositional_logic__destructive_dillema.json",
       "count": 2000,
-      "size_bytes": 8666863
+      "size_bytes": 8803336
     },
     "propositional_logic__disjunctive_syllogism": {
       "file": "propositional_logic__disjunctive_syllogism.json",
       "count": 2000,
-      "size_bytes": 5124727
+      "size_bytes": 5241023
     },
     "propositional_logic__hypothetical_syllogism": {
       "file": "propositional_logic__hypothetical_syllogism.json",
       "count": 2000,
-      "size_bytes": 4379348
+      "size_bytes": 4494316
     },
     "propositional_logic__material_implication": {
       "file": "propositional_logic__material_implication.json",
       "count": 2000,
-      "size_bytes": 6021559
+      "size_bytes": 6144605
     },
     "propositional_logic__modus_tollens": {
       "file": "propositional_logic__modus_tollens.json",
       "count": 2000,
-      "size_bytes": 4197246
+      "size_bytes": 4308492
     }
   }
 }
