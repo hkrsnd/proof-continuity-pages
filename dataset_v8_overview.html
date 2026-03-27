@@ -97,7 +97,7 @@
 <body>
 <a class="back" href="index.html">&larr; Back to Hub</a>
 <h1>Training Dataset v8: Diverse GRPO</h1>
-<p class="sub">How the GRPO training data evolved from LogicBench-only (v7) to multi-benchmark (v8) to fix generalization failures on ProntoQA, ProofWriter, and FOLIO.</p>
+<p class="sub">How the GRPO training data evolved from Proof Bank-only (v7, 67K) to multi-benchmark diverse (v8, 88K) to fix generalization failures on ProntoQA, ProofWriter, and FOLIO.</p>
 
 <!-- Stats -->
 <div class="card">
@@ -114,7 +114,7 @@
 <!-- Why the update -->
 <div class="card">
   <h2>Why v8?</h2>
-  <p style="font-size:.88rem;color:#475569;">The v7 dataset contained <strong>only LogicBench</strong> examples. Models trained on v7 achieved strong LogicBench performance but failed catastrophically on other benchmarks because they never saw those formats during training:</p>
+  <p style="font-size:.88rem;color:#475569;">The v7 dataset contained <strong>only Proof Bank (LogicBench-style)</strong> examples. Models trained on v7 achieved strong LogicBench performance but failed catastrophically on other benchmarks because they never saw those formats during training:</p>
   <table class="cmp">
     <thead>
       <tr><th>Benchmark</th><th>Base Qwen</th><th>L1 (v7 data)</th><th>Gap</th><th>Root Cause</th></tr>
@@ -127,7 +127,7 @@
     </tbody>
   </table>
   <div class="callout danger">
-    <strong>Never use v7 for GRPO training.</strong> The file <code>proof_bank_v7_grpo_v3.jsonl</code> (67K) contains only LogicBench and produces models that cannot generalize. Always use <code>proof_bank_v8_diverse_grpo.jsonl</code> (88K).
+    <strong>Never use v7 for GRPO training.</strong> The file <code>proof_bank_v7_grpo_v3.jsonl</code> (67K) contains only Proof Bank (LogicBench-style) and produces models that cannot generalize. Always use <code>proof_bank_v8_diverse_grpo.jsonl</code> (88K).
   </div>
 </div>
 
@@ -135,19 +135,19 @@
 <div class="card">
   <h2>v7 vs v8: What Changed</h2>
   <div class="arrow-box">
-    <span class="from">v7: 67,449 (LogicBench only)</span>
+    <span class="from">v7: 67,449 (Proof Bank only)</span>
     <span class="arr">&rarr;</span>
     <span class="to">v8: 88,357 (5 sources)</span>
   </div>
   <div class="bar-chart">
     <div class="bar-row">
-      <div class="bar-label">LogicBench</div>
+      <div class="bar-label">Proof Bank (core)</div>
       <div class="bar-track">
         <div class="bar-fill" style="width:76.3%;background:#3b82f6;">67,449</div>
       </div>
     </div>
     <div class="bar-row">
-      <div class="bar-label">LogicBench-Aug <span class="b-new">NEW</span></div>
+      <div class="bar-label">Proof Bank Aug <span class="b-new">NEW</span></div>
       <div class="bar-track">
         <div class="bar-fill" style="width:14.6%;background:#6366f1;">12,908</div>
       </div>
@@ -196,15 +196,15 @@
   <div class="ds-grid">
 
     <div class="ds-card ds-logicbench">
-      <h3>LogicBench (Core)</h3>
+      <h3>Proof Bank Core (LogicBench-style)</h3>
       <div class="count">67,449 examples (76.3%)</div>
-      <p>Programmatic proof chains from Proof Bank v7. Balanced across propositional (8 theories), FOL (9 theories), and non-monotonic (8 theories). 100% structurally verified. This is the same data as v7.</p>
+      <p>Programmatically generated proof chains inspired by LogicBench's backbone inference types, but with original examples (not taken from LogicBench directly). Balanced across propositional (8 theories), FOL (9 theories), and non-monotonic (8 theories). 100% structurally verified.</p>
     </div>
 
     <div class="ds-card ds-logicbench-aug">
-      <h3>LogicBench-Aug <span class="b-new">NEW</span></h3>
+      <h3>Proof Bank Augmented <span class="b-new">NEW</span></h3>
       <div class="count">12,908 examples (14.6%)</div>
-      <p>Augmented LogicBench examples with varied phrasings, entity names, and rule combinations. Increases diversity within the LogicBench format to prevent overfitting to specific patterns.</p>
+      <p>Additional programmatic examples with varied phrasings, entity names, and rule combinations. Increases diversity within the LogicBench-style format to prevent overfitting to specific patterns.</p>
     </div>
 
     <div class="ds-card ds-proofwriter">
@@ -317,10 +317,10 @@ Prove: ready_to_compete(player_leon)</div>
     <p style="font-size:.8rem;color:#475569;margin-top:.3rem;">Non-monotonic chain: focused &rarr; communicative (via focused &rarr; ready_to_compete &rarr; driven, but exception: communicative blocks driven). The exception prevents the proof. The model must handle negation-as-failure correctly.</p>
   </div>
 
-  <h3>LogicBench-Aug (augmented inference rules)</h3>
+  <h3>Proof Bank Augmented (augmented inference rules)</h3>
   <div class="example">
     <div class="ex-header">
-      <span class="ex-title">LogicBench-Aug: No (disjunctive syllogism)</span>
+      <span class="ex-title">Proof Bank Aug: No (disjunctive syllogism)</span>
       <span><span class="badge b-prop">propositional</span> <span class="badge b-no">No</span></span>
     </div>
     <div class="ex-text">If Levi failed the test, then he will not get a reward. If he will get a reward,
@@ -330,7 +330,7 @@ does this imply that Levi failed the test?</div>
 
   <div class="example">
     <div class="ex-header">
-      <span class="ex-title">LogicBench (Core): True (existential reasoning)</span>
+      <span class="ex-title">Proof Bank Core: True (existential reasoning)</span>
       <span><span class="badge b-fol">FOL</span> <span class="badge b-true">True</span></span>
     </div>
     <div class="ex-text">In the ballet company, principal_neil, soloist_riley, and ballet_master_vera
@@ -338,7 +338,7 @@ are part of the group. principal_neil possesses the quality of being methodical.
 Everyone who is methodical is considered thoughtful.
 
 Question: There exists someone in the ballet company who is thoughtful.</div>
-    <p style="font-size:.8rem;color:#475569;margin-top:.3rem;">Existential quantification: principal_neil is methodical &rarr; methodical implies thoughtful &rarr; principal_neil is thoughtful &rarr; there exists someone who is thoughtful. Core FOL reasoning from the LogicBench base.</p>
+    <p style="font-size:.8rem;color:#475569;margin-top:.3rem;">Existential quantification: principal_neil is methodical &rarr; methodical implies thoughtful &rarr; principal_neil is thoughtful &rarr; there exists someone who is thoughtful. Core FOL reasoning from the Proof Bank, following LogicBench-style inference patterns.</p>
   </div>
 </div>
 
@@ -373,7 +373,7 @@ Question: There exists someone in the ballet company who is thoughtful.</div>
       <tr>
         <td>Reversed implications</td>
         <td class="old">Limited inference rule diversity</td>
-        <td class="new">12,908 LogicBench-Aug with varied rules</td>
+        <td class="new">12,908 Proof Bank Aug with varied rules</td>
       </tr>
       <tr>
         <td>Format mismatch (Yes/No vs True/False)</td>
