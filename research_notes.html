@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAILS — Research Notes</title>
+<title>L1 — Research Notes</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 960px; margin: 0 auto; }
@@ -77,7 +77,7 @@
 
 <a class="back" href="index.html">&larr; Back to Hub</a>
 <h1>Research Notes</h1>
-<p class="subtitle">Findings, analyses, and design decisions from the RAILS project</p>
+<p class="subtitle">Findings, analyses, and design decisions from the L1 project</p>
 
 <!-- Table of Contents -->
 <div class="toc">
@@ -118,7 +118,7 @@
     <div class="toc-item">
         <span class="toc-date">2026-02-20</span>
         <div>
-            <a class="toc-link" href="#real-world">Connecting RAILS to Science and Law</a>
+            <a class="toc-link" href="#real-world">Connecting L1 to Science and Law</a>
             <span class="toc-tag tag-amber">paper framing</span>
             <div class="toc-desc">Benchmarks, related work, and motivation for why formal verification matters in high-stakes domains.</div>
         </div>
@@ -188,7 +188,7 @@
         <h2>3. Comprehensive Eval Leaderboard</h2>
 
         <h3>LogicBench (Propositional) &mdash; Primary Benchmark</h3>
-        <p>Sorted by accuracy. Bold = RAILS-trained models.</p>
+        <p>Sorted by accuracy. Bold = L1-trained models.</p>
 
         <table>
             <tr><th>Model</th><th>Method</th><th>LB Acc</th><th>Consist.</th><th>Faithful.</th><th>Parse %</th><th>Avg Steps</th></tr>
@@ -210,7 +210,7 @@
         </table>
 
         <div class="finding">
-            <strong>Note:</strong> Base Llama (71.2%) and OLMo (66.6%) score far higher than any RAILS model on LogicBench &mdash; but they use free-form CoT (classic <code>Step N:</code> format), not the structured <code>&lt;step&gt;</code>+<code>&lt;logic&gt;</code> format. The format constraint is a major handicap that GRPO partially overcomes. DeepSeek GRPO 85931 achieves 90.7% faithfulness vs Llama's 76.5%.
+            <strong>Note:</strong> Base Llama (71.2%) and OLMo (66.6%) score far higher than any L1 model on LogicBench &mdash; but they use free-form CoT (classic <code>Step N:</code> format), not the structured <code>&lt;step&gt;</code>+<code>&lt;logic&gt;</code> format. The format constraint is a major handicap that GRPO partially overcomes. DeepSeek GRPO 85931 achieves 90.7% faithfulness vs Llama's 76.5%.
         </div>
 
         <h3>Transfer Benchmarks</h3>
@@ -437,7 +437,7 @@
 
         <h2>Why Beta=0 Works Here</h2>
 
-        <p>Standard RL wisdom says KL penalty prevents reward hacking and mode collapse. Why does removing it work for RAILS?</p>
+        <p>Standard RL wisdom says KL penalty prevents reward hacking and mode collapse. Why does removing it work for L1?</p>
 
         <ol>
             <li><strong>SFT warm-start provides the anchor.</strong> The LoRA weights are initialized from a 10-epoch SFT checkpoint that already produces reasonable format and structure. The model starts close to a good policy.</li>
@@ -449,7 +449,7 @@
         <h2>Implications</h2>
 
         <ul>
-            <li><strong>For RAILS:</strong> All future GRPO configs should use <code>beta=0</code>. The 14B config (v4, job 85954) already uses this.</li>
+            <li><strong>For L1:</strong> All future GRPO configs should use <code>beta=0</code>. The 14B config (v4, job 85954) already uses this.</li>
             <li><strong>For the paper:</strong> This is an interesting finding &mdash; with sufficiently rich reward signals and SFT warm-start, KL penalty is unnecessary and harmful. Could be its own ablation study.</li>
             <li><strong>For reproducibility:</strong> The "successful" 85855 run was not reproducible because it depended on a NaN KL bug. The beta=0 configuration makes the same behavior explicit and reliable.</li>
         </ul>
@@ -568,7 +568,7 @@ Hold that step, it seem <span class="garbled">problematic&#x5947;&#x7EB3;</span>
 
         <h3>2. Conflicting Semantics</h3>
         <table>
-            <tr><th>What RAILS wants</th><th>What DeepSeek-R1 learned</th></tr>
+            <tr><th>What L1 wants</th><th>What DeepSeek-R1 learned</th></tr>
             <tr><td>Structured <code>&lt;step&gt;</code> tags</td><td>Free-form monologue</td></tr>
             <tr><td>Parseable <code>&lt;logic&gt;</code> fields</td><td>Natural language brainstorming</td></tr>
             <tr><td>Consistent format throughout</td><td>Quality degrades as "thinking" continues</td></tr>
@@ -689,7 +689,7 @@ Derived:  ~weak :- ~skips.         "Doesn't skip &rarr; doesn't feel weak"  <spa
 <div class="note" id="real-world">
     <div class="note-header" onclick="this.parentElement.classList.toggle('open')">
         <span class="note-chevron">&#x25B6;</span>
-        <span class="note-title">Connecting RAILS to Science and Law</span>
+        <span class="note-title">Connecting L1 to Science and Law</span>
         <span class="note-date">2026-02-20</span>
     </div>
     <div class="note-body">
@@ -735,7 +735,7 @@ Derived:  ~weak :- ~skips.         "Doesn't skip &rarr; doesn't feel weak"  <spa
         <h3>Most Related System: LogicReward</h3>
         <p><strong>LogicReward</strong> (arXiv:2512.18196, Dec 2025): theorem provers for step-level verification during RL. 8B model surpasses GPT-4o by 11.6%.</p>
         <table>
-            <tr><th></th><th>LogicReward</th><th>RAILS</th></tr>
+            <tr><th></th><th>LogicReward</th><th>L1</th></tr>
             <tr><td>Focus</td><td>NLI tasks</td><td>Broader: propositional, FOL, non-monotonic</td></tr>
             <tr><td>Verifier</td><td>Generic theorem prover</td><td>Domain-specific (SAT, ASP, NSFR) + clean context</td></tr>
             <tr><td>Answer gating</td><td>No</td><td>Yes (no credit for right answer + wrong reasoning)</td></tr>
@@ -745,10 +745,10 @@ Derived:  ~weak :- ~skips.         "Doesn't skip &rarr; doesn't feel weak"  <spa
 
         <h3>Tier 1: Perfect Fit for Formal Verification</h3>
         <table>
-            <tr><th>Benchmark</th><th>Size</th><th>Why It Fits RAILS</th></tr>
+            <tr><th>Benchmark</th><th>Size</th><th>Why It Fits L1</th></tr>
             <tr><td><strong>SARA</strong></td><td>376 cases</td><td>Tax statutes as Horn clauses. A hand-constructed Prolog system fully solves it. NLI fails.</td></tr>
             <tr><td><strong>Catala</strong></td><td>Tax law sections</td><td>Uses <strong>prioritized default logic</strong> &mdash; same as our ASP/Clingo backend.</td></tr>
-            <tr><td><strong>LLMs + Prolog</strong></td><td>SARA-based</td><td>Neuro-symbolic: LLM generates Prolog, solver verifies. Validates RAILS paradigm.</td></tr>
+            <tr><td><strong>LLMs + Prolog</strong></td><td>SARA-based</td><td>Neuro-symbolic: LLM generates Prolog, solver verifies. Validates L1 paradigm.</td></tr>
         </table>
 
         <h3>Example: Legal Reasoning Failure</h3>
@@ -776,7 +776,7 @@ SAT: rejected (invalid inference)</div>
             <li><strong>Models reach correct answers through invalid reasoning</strong> (80% accuracy, -90% consistency)</li>
             <li><strong>Soft NLI misses the errors</strong> (+0.84 to reversed implications)</li>
             <li><strong>This matters in high-stakes domains</strong>: confusing P&rarr;Q with Q&rarr;P means confusing correlation with causation in science, misapplying statutes in law, base rate neglect in medicine</li>
-            <li><strong>RAILS solves this</strong> with symbolic verification rewards producing provably valid reasoning</li>
+            <li><strong>L1 solves this</strong> with symbolic verification rewards producing provably valid reasoning</li>
         </ol>
 
     </div>
@@ -784,7 +784,7 @@ SAT: rejected (invalid inference)</div>
 
 <div class="footer">
     Updated February 22, 2026 &middot;
-    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    L1 (Reasoning with Automatically Integrated Logical Supervision) &middot;
     <a href="index.html">Project Hub</a>
 </div>
 

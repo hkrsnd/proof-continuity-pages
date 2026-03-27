@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAILS — Evaluation Results</title>
+<title>L1 — Evaluation Results</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -103,7 +103,7 @@ tr:hover { background: #fafbff; }
 </head>
 <body>
 <a href="index.html" class="back-link">&larr; Back to Hub</a>
-<h1>RAILS &mdash; Evaluation Results</h1>
+<h1>L1 &mdash; Evaluation Results</h1>
 <p class="subtitle">Complete 8-model comparison &middot; Qwen3-8B &amp; DeepSeek-R1-7B &middot; Base / SFT / GRPO pipeline &middot; 4 benchmarks &middot; 2,624 eval samples</p>
 
 <!-- Overview Stats -->
@@ -123,7 +123,7 @@ tr:hover { background: #fafbff; }
     <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div> Base (no training)</div>
         <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> SFT (format warmup)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> GRPO (RAILS &mdash; SAT consistency reward)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> GRPO (L1 &mdash; SAT consistency reward)</div>
     </div>
 </div>
 
@@ -465,7 +465,7 @@ tr:hover { background: #fafbff; }
     <h2>Key Findings</h2>
 
     <div class="finding finding-positive">
-        <strong>RAILS pipeline produces the best in-distribution reasoning.</strong>
+        <strong>L1 pipeline produces the best in-distribution reasoning.</strong>
         Qwen GRPO achieves the highest ProofWriter (86.5%, +5.8pp over base) with graceful depth scaling (94.9% at d0 &rarr; 76.8% at d5).
         DeepSeek improves +23.2pp on LogicBench through the SFT &rarr; GRPO pipeline.
     </div>
@@ -488,7 +488,7 @@ tr:hover { background: #fafbff; }
         <strong>Qwen3-8B dominates DeepSeek-R1-7B across the board.</strong>
         Qwen outperforms DeepSeek on every benchmark in every training condition.
         The gap is largest on ProntoQA (98.7% vs 70.7% base) and ProofWriter (86.5% vs 67.5% best GRPO).
-        Qwen's stronger base capabilities amplify the benefits of the RAILS pipeline.
+        Qwen's stronger base capabilities amplify the benefits of the L1 pipeline.
     </div>
 
     <div class="finding finding-insight">
@@ -512,7 +512,7 @@ tr:hover { background: #fafbff; }
             <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Supervised fine-tuning on ~6k verified reasoning traces in <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> format. Teaches output structure before RL. QLoRA, 2 epochs, LR 1.5e-4.</p>
         </div>
         <div style="padding:0.8rem; background:#f9fafb; border-radius:8px; border-left:3px solid #22c55e;">
-            <strong style="font-size:0.85rem;">GRPO (RAILS)</strong>
+            <strong style="font-size:0.85rem;">GRPO (L1)</strong>
             <p style="font-size:0.8rem; color:#555; margin-top:0.3rem;">Group Relative Policy Optimization from SFT checkpoint. SAT consistency reward checks each derived step. Invalid chains get zero answer credit. &beta;=0.01 KL penalty prevents reward hacking.</p>
         </div>
     </div>
@@ -542,7 +542,7 @@ tr:hover { background: #fafbff; }
 </div>
 
 <div class="footer">
-    RAILS (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 23, 2026<br>
+    L1 (Reasoning with Automatically Integrated Logical Supervision) &middot; Updated Feb 23, 2026<br>
     <a href="qualitative_examples.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Qualitative Examples &rarr;</a>
     &middot;
     <a href="transfer_eval.html" style="color:#2563eb; text-decoration:none; font-weight:500;">View Transfer Evaluation &rarr;</a>

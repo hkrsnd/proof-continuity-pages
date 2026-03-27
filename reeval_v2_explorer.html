@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 — Re-Evaluation v2: Fixed Extraction + Extended Generation</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+h2 { font-size: 1.3rem; color: #16213e; margin: 1.5rem 0 0.8rem; }
+h3 { font-size: 1.05rem; color: #374151; margin-bottom: 0.5rem; }
+.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+
+/* Summary cards */
+.card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.stat { background: #f0f4ff; border-radius: 8px; padding: 0.8rem; text-align: center; }
+.stat-value { font-size: 1.4rem; font-weight: 700; color: #2563eb; }
+.stat-label { font-size: 0.72rem; color: #666; margin-top: 0.2rem; }
+.stat-green .stat-value { color: #16a34a; }
+.stat-red .stat-value { color: #dc2626; }
+.stat-amber .stat-value { color: #d97706; }
+
+/* Fix summary table */
+.fix-summary { margin-bottom: 1rem; }
+.fix-summary p { font-size: 0.9rem; margin-bottom: 0.3rem; }
+.fix-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.fix-extraction { background: #dbeafe; color: #1d4ed8; }
+.fix-truncation { background: #fef3c7; color: #92400e; }
+
+/* Results table */
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1rem; }
+th { background: #f1f5f9; padding: 0.6rem 0.8rem; text-align: left; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: #475569; border-bottom: 2px solid #e2e8f0; }
+td { padding: 0.5rem 0.8rem; border-bottom: 1px solid #f1f5f9; }
+tr:hover td { background: #fafbfd; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.delta-pos { color: #16a34a; font-weight: 600; }
+.delta-neg { color: #dc2626; font-weight: 600; }
+.delta-zero { color: #9ca3af; }
+.best { font-weight: 700; color: #1d4ed8; }
+.model-header td { background: #f8fafc; font-weight: 600; padding-top: 0.8rem; border-top: 2px solid #e2e8f0; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.badge-base { background: #f3e8ff; color: #6b21a8; }
+.badge-sft { background: #dbeafe; color: #1d4ed8; }
+.badge-grpo { background: #dcfce7; color: #166534; }
+
+/* Examples section */
+.controls { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
+select, button { padding: 0.5rem 0.8rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; background: white; cursor: pointer; }
+button { background: #2563eb; color: white; border: none; font-weight: 600; }
+button:hover { background: #1d4ed8; }
+
+.example { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.example-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; padding-bottom: 0.6rem; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 0.5rem; }
+.context { background: #fafafa; border-left: 3px solid #94a3b8; padding: 0.8rem 1rem; margin-bottom: 0.6rem; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+.context-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; margin-bottom: 0.3rem; }
+.question { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 0.6rem 1rem; margin-bottom: 0.6rem; border-radius: 0 6px 6px 0; font-size: 0.88rem; font-weight: 500; }
+.ground-truth { font-size: 0.82rem; color: #16a34a; font-weight: 600; margin-bottom: 0.8rem; }
+
+/* Model response */
+.response { margin-bottom: 1rem; }
+.response-header { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+.response-body { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; font-size: 0.82rem; white-space: pre-wrap; word-break: break-word; max-height: 500px; overflow-y: auto; font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace; }
+.response-body .step-tag { color: #7c3aed; font-weight: 600; }
+.response-body .logic-tag { color: #0891b2; }
+.response-body .text-tag { color: #059669; }
+.response-body .answer-line { background: #fef3c7; padding: 0.2rem 0.4rem; border-radius: 3px; font-weight: 700; }
+
+.result-badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+.result-correct { background: #dcfce7; color: #166534; }
+.result-wrong { background: #fee2e2; color: #991b1b; }
+.result-truncated { background: #fef3c7; color: #92400e; }
+
+/* Comparison view */
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 900px) { .comparison { grid-template-columns: 1fr; } }
+
+/* Loading */
+.loading { text-align: center; padding: 3rem; color: #9ca3af; font-size: 1.1rem; }
+.loading::after { content: '...'; animation: dots 1.5s infinite; }
+@keyframes dots { 0%,20% { content: '.'; } 40% { content: '..'; } 60%,100% { content: '...'; } }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
+.tab { padding: 0.6rem 1.2rem; cursor: pointer; font-size: 0.88rem; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+.tab:hover { color: #1e40af; }
+.tab.active { color: #1d4ed8; border-bottom-color: #2563eb; font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Re-Evaluation v2: Fixed Extraction + Extended Generation</h1>
+<p class="subtitle">Corrected answer extraction and max_new_tokens=4096 for Proof Bank SFT/GRPO models. <br>
+Generated: <span id="gen-date">loading...</span></p>
+
+<!-- Fix explanation -->
+<div class="card">
+<h3>What Changed</h3>
+<div class="fix-summary">
+<p><span class="fix-tag fix-extraction">Extraction Fix</span> Models answered "Proved", "Established", or restated conclusions (e.g., "Wren is not cold") instead of "Yes"/"No". Old extractor defaulted to "unknown" &mdash; new one handles natural language answers.</p>
+<p><span class="fix-tag fix-truncation">Truncation Fix</span> SFT/GRPO models produce 16&ndash;34 structured steps. Old limit of 2048 tokens truncated 72&ndash;96% of outputs before the answer. New limit: 4096 tokens.</p>
+</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('summary')">Summary Table</div>
+    <div class="tab" onclick="switchTab('comparison')">Old vs New</div>
+    <div class="tab" onclick="switchTab('examples')">Qualitative Examples</div>
+</div>
+
+<!-- Tab 1: Summary Table -->
+<div id="tab-summary" class="tab-content active">
+<div class="card">
+<h2>Accuracy Results</h2>
+<div id="results-table"><div class="loading">Waiting for evaluation results</div></div>
+</div>
+
+<div class="card">
+<h2>Reasoning Quality Metrics</h2>
+<div id="quality-table"><div class="loading">Waiting for evaluation results</div></div>
+</div>
+</div>
+
+<!-- Tab 2: Old vs New Comparison -->
+<div id="tab-comparison" class="tab-content">
+<div class="card">
+<h2>Old vs. New Accuracy (&Delta; from extraction fix + extended generation)</h2>
+<div id="delta-table"><div class="loading">Waiting for evaluation results</div></div>
+</div>
+</div>
+
+<!-- Tab 3: Qualitative Examples -->
+<div id="tab-examples" class="tab-content">
+<div class="card">
+<h3>Browse Model Outputs</h3>
+<div class="controls">
+    <select id="sel-bench"><option value="logicbench">LogicBench</option><option value="prontoqa_cot">ProntoQA</option><option value="folio_cot">FOLIO</option><option value="proofwriter_cot">ProofWriter</option></select>
+    <select id="sel-model"><option value="all">All Models</option></select>
+    <select id="sel-filter"><option value="all">All</option><option value="correct">Correct Only</option><option value="wrong">Wrong Only</option><option value="truncated">Truncated</option></select>
+    <button onclick="loadExamples()">Load</button>
+</div>
+<div id="examples-container"><div class="loading">Select a benchmark and click Load</div></div>
+</div>
+</div>
+
+<script>
+// ---- DATA ----
+// Will be populated by the data builder script
+let DATA = null;
+let OLD_DATA = null;
+
+// ---- TAB SWITCHING ----
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab-content#tab-${name}`).classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => {
+        if (t.textContent.toLowerCase().includes(name.substring(0,4))) t.classList.add('active');
+    });
+}
+
+// ---- RENDER TABLES ----
+function renderAccuracyTable(data) {
+    if (!data || !data.models) return '<div class="loading">No data yet</div>';
+    const benchmarks = ['logicbench', 'folio_cot', 'prontoqa_cot', 'proofwriter_cot', 'sara_cot', 'lsat_cot'];
+    const benchLabels = {'logicbench': 'LogicBench', 'folio_cot': 'FOLIO', 'prontoqa_cot': 'ProntoQA', 'proofwriter_cot': 'ProofWriter', 'sara_cot': 'SARA', 'lsat_cot': 'LSAT'};
+
+    let html = '<table><thead><tr><th>Model</th><th>Method</th>';
+    benchmarks.forEach(b => { html += `<th class="num">${benchLabels[b] || b}</th>`; });
+    html += '<th class="num">Consistency</th><th class="num">Format</th><th class="num">Avg Steps</th></tr></thead><tbody>';
+
+    for (const m of data.models) {
+        html += `<tr>`;
+        html += `<td>${m.model_name}</td>`;
+        html += `<td><span class="badge badge-${m.method}">${m.method}</span></td>`;
+        benchmarks.forEach(b => {
+            const acc = m.benchmarks[b]?.accuracy;
+            const cls = acc !== undefined && acc === Math.max(...data.models.filter(x=>x.model_family===m.model_family).map(x=>x.benchmarks[b]?.accuracy||0)) ? 'best' : '';
+            html += `<td class="num ${cls}">${acc !== undefined ? (acc*100).toFixed(1)+'%' : '&mdash;'}</td>`;
+        });
+        const lb = m.benchmarks.logicbench || {};
+        html += `<td class="num">${lb.consistency !== undefined ? (lb.consistency*100).toFixed(1)+'%' : '&mdash;'}</td>`;
+        html += `<td class="num">${lb.format_rate !== undefined ? (lb.format_rate*100).toFixed(1)+'%' : '&mdash;'}</td>`;
+        html += `<td class="num">${lb.avg_steps !== undefined ? lb.avg_steps.toFixed(1) : '&mdash;'}</td>`;
+        html += `</tr>`;
+    }
+    html += '</tbody></table>';
+    return html;
+}
+
+function renderDeltaTable(newData, oldData) {
+    if (!newData || !oldData) return '<div class="loading">Need both old and new data</div>';
+    const benchmarks = ['logicbench', 'folio_cot', 'prontoqa_cot', 'proofwriter_cot', 'sara_cot', 'lsat_cot'];
+    const benchLabels = {'logicbench': 'LB', 'folio_cot': 'FOLIO', 'prontoqa_cot': 'PQA', 'proofwriter_cot': 'PW', 'sara_cot': 'SARA', 'lsat_cot': 'LSAT'};
+
+    let html = '<table><thead><tr><th>Model</th><th>Method</th>';
+    benchmarks.forEach(b => { html += `<th class="num">${benchLabels[b]}<br><small>old &rarr; new</small></th>`; });
+    html += '</tr></thead><tbody>';
+
+    for (const m of newData.models) {
+        const oldModel = oldData.models?.find(o => o.model_name === m.model_name && o.method === m.method);
+        html += `<tr><td>${m.model_name}</td><td><span class="badge badge-${m.method}">${m.method}</span></td>`;
+        benchmarks.forEach(b => {
+            const newAcc = m.benchmarks[b]?.accuracy;
+            const oldAcc = oldModel?.benchmarks[b]?.accuracy;
+            if (newAcc !== undefined && oldAcc !== undefined) {
+                const delta = (newAcc - oldAcc) * 100;
+                const cls = delta > 1 ? 'delta-pos' : delta < -1 ? 'delta-neg' : 'delta-zero';
+                html += `<td class="num">${(oldAcc*100).toFixed(1)} &rarr; ${(newAcc*100).toFixed(1)} <span class="${cls}">(${delta>0?'+':''}${delta.toFixed(1)})</span></td>`;
+            } else if (newAcc !== undefined) {
+                html += `<td class="num">&mdash; &rarr; ${(newAcc*100).toFixed(1)}</td>`;
+            } else {
+                html += `<td class="num">&mdash;</td>`;
+            }
+        });
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    return html;
+}
+
+// ---- RENDER EXAMPLES ----
+function highlightResponse(text) {
+    if (!text) return '<em>No output</em>';
+    return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/&lt;step[^&]*?&gt;/g, m => `<span class="step-tag">${m}</span>`)
+        .replace(/&lt;\/step&gt;/g, '<span class="step-tag">&lt;/step&gt;</span>')
+        .replace(/&lt;logic&gt;(.*?)&lt;\/logic&gt;/g, '<span class="logic-tag">&lt;logic&gt;$1&lt;/logic&gt;</span>')
+        .replace(/&lt;text&gt;(.*?)&lt;\/text&gt;/g, '<span class="text-tag">&lt;text&gt;$1&lt;/text&gt;</span>')
+        .replace(/(Answer:.*)/g, '<span class="answer-line">$1</span>');
+}
+
+function renderExample(ex) {
+    const correctCls = ex.correct ? 'result-correct' : 'result-wrong';
+    const correctLabel = ex.correct ? 'Correct' : 'Wrong';
+    const truncLabel = ex.truncated ? ' <span class="result-badge result-truncated">Truncated</span>' : '';
+
+    return `<div class="example">
+        <div class="example-header">
+            <div>
+                <span class="badge badge-${ex.method}">${ex.model_name} (${ex.method})</span>
+                ${ex.theory ? `<span class="badge" style="background:#e0e7ff;color:#3730a3">${ex.theory}</span>` : ''}
+            </div>
+            <div>
+                <span class="result-badge ${correctCls}">${correctLabel}</span>${truncLabel}
+                ${ex.consistency !== undefined ? `<span style="font-size:0.75rem;color:#666;margin-left:0.5rem">consistency: ${(ex.consistency*100).toFixed(0)}%</span>` : ''}
+            </div>
+        </div>
+        ${ex.context ? `<div class="context"><div class="context-label">Context</div>${ex.context}</div>` : ''}
+        <div class="question">Q: ${ex.question || 'N/A'}</div>
+        <div class="ground-truth">Gold: ${ex.gold} &nbsp;|&nbsp; Predicted: ${ex.predicted}</div>
+        <div class="response">
+            <div class="response-header">Model Output (${ex.num_steps || 0} steps, ${ex.gen_length || 0} chars)</div>
+            <div class="response-body">${highlightResponse(ex.generated_text)}</div>
+        </div>
+    </div>`;
+}
+
+function loadExamples() {
+    const bench = document.getElementById('sel-bench').value;
+    const model = document.getElementById('sel-model').value;
+    const filter = document.getElementById('sel-filter').value;
+    const container = document.getElementById('examples-container');
+
+    if (!DATA || !DATA.examples || !DATA.examples[bench]) {
+        container.innerHTML = '<div class="loading">No example data available for this benchmark</div>';
+        return;
+    }
+
+    let examples = DATA.examples[bench];
+    if (model !== 'all') examples = examples.filter(e => e.model_key === model);
+    if (filter === 'correct') examples = examples.filter(e => e.correct);
+    if (filter === 'wrong') examples = examples.filter(e => !e.correct);
+    if (filter === 'truncated') examples = examples.filter(e => e.truncated);
+
+    if (examples.length === 0) {
+        container.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:2rem;">No examples match the filter.</p>';
+        return;
+    }
+
+    // Show up to 20 examples
+    container.innerHTML = `<p style="font-size:0.82rem;color:#666;margin-bottom:0.8rem;">Showing ${Math.min(20, examples.length)} of ${examples.length} examples</p>` +
+        examples.slice(0, 20).map(renderExample).join('');
+}
+
+// ---- LOAD DATA ----
+async function loadData() {
+    try {
+        const resp = await fetch('reeval_v2_explorer_data.json');
+        if (!resp.ok) throw new Error('Data file not found');
+        DATA = await resp.json();
+        document.getElementById('gen-date').textContent = DATA.generated || 'unknown';
+        document.getElementById('results-table').innerHTML = renderAccuracyTable(DATA);
+
+        // Populate model selector
+        const sel = document.getElementById('sel-model');
+        if (DATA.models) {
+            DATA.models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.model_key;
+                opt.textContent = `${m.model_name} (${m.method})`;
+                sel.appendChild(opt);
+            });
+        }
+
+        // Try loading old data for comparison
+        try {
+            const oldResp = await fetch('reeval_v2_old_data.json');
+            if (oldResp.ok) {
+                OLD_DATA = await oldResp.json();
+                document.getElementById('delta-table').innerHTML = renderDeltaTable(DATA, OLD_DATA);
+            }
+        } catch(e) { /* old data optional */ }
+
+    } catch(e) {
+        document.getElementById('results-table').innerHTML =
+            '<div class="loading" style="color:#dc2626">Data file not found. Run the data builder script after evaluation completes.</div>';
+    }
+}
+
+loadData();
+</script>
+</body>
+</html>
