@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 - SFT Dataset v9 Explorer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color: #0f172a; margin: 0; padding: 1.25rem;
+    max-width: 1400px; margin-inline: auto;
+  }
+  .back { display: inline-block; margin-bottom: .7rem; color: #1d4ed8; text-decoration: none; font-weight: 600; font-size: .9rem; }
+  h1 { margin: .1rem 0 .2rem 0; font-size: 1.7rem; }
+  .sub { color: #475569; margin-bottom: .9rem; font-size: .93rem; }
+  .card { background: #fff; border-radius: 12px; padding: .9rem 1rem; margin-bottom: .9rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(110px,1fr)); gap: .55rem; }
+  .stat { background: #f1f5f9; border-radius: 8px; padding: .55rem; text-align: center; }
+  .sv { font-size: 1.1rem; font-weight: 800; color: #1e40af; }
+  .sv.green { color: #16a34a; }
+  .sl { font-size: .7rem; color: #64748b; }
+
+  .source-bars { margin: .5rem 0; }
+  .sbar { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; font-size: .8rem; }
+  .sbar-label { width: 180px; text-align: right; color: #475569; font-weight: 500; }
+  .sbar-track { flex: 1; height: 20px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+  .sbar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: .4rem; font-size: .68rem; font-weight: 600; color: #fff; min-width: 30px; }
+  .sbar-count { width: 50px; font-size: .75rem; color: #64748b; font-weight: 600; }
+
+  .controls { display: grid; grid-template-columns: 1.5fr .8fr .8fr .8fr; gap: .5rem; align-items: end; }
+  .controls label { display: block; font-size: .72rem; color: #64748b; margin-bottom: .2rem; }
+  .controls input, .controls select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: .42rem .5rem; font-size: .83rem; background: #fff; }
+
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: .9rem; }
+  .panel { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: .7rem; }
+  .list-wrap { max-height: 74vh; overflow: auto; }
+  .list-item { padding: .5rem .55rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; border-left: 3px solid transparent; }
+  .list-item:hover { background: #f8fafc; }
+  .list-item.active { background: #dbeafe; border-left-color: #1e40af; }
+  .list-q { font-size: .78rem; color: #1e293b; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-meta { font-size: .68rem; color: #64748b; margin-top: .1rem; }
+  .list-badges { display: flex; gap: .2rem; flex-wrap: wrap; margin-top: .15rem; }
+
+  .badge { display: inline-block; border-radius: 999px; padding: .05rem .38rem; font-size: .65rem; font-weight: 700; }
+  .b-core { background: #dbeafe; color: #1e40af; }
+  .b-pw { background: #dcfce7; color: #166534; }
+  .b-folio { background: #fef3c7; color: #92400e; }
+  .b-pqa { background: #fce7f3; color: #9d174d; }
+  .b-prop { background: #f1f5f9; color: #334155; }
+  .b-fol { background: #ede9fe; color: #5b21b6; }
+  .b-nm { background: #fff7ed; color: #9a3412; }
+  .b-true, .b-yes { background: #dcfce7; color: #166534; }
+  .b-false, .b-no { background: #fee2e2; color: #991b1b; }
+  .b-unknown, .b-uncertain { background: #fef3c7; color: #92400e; }
+
+  .detail-title { font-size: 1rem; margin-bottom: .4rem; font-weight: 700; }
+  .block { margin-bottom: .6rem; }
+  .lbl { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: #64748b; margin-bottom: .12rem; font-weight: 700; }
+  .prompt-text {
+    background: #f8fafc; border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0;
+    padding: .6rem .7rem; white-space: pre-wrap; font-size: .8rem; color: #334155;
+    line-height: 1.55; max-height: 250px; overflow: auto;
+  }
+  .completion-text {
+    background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0;
+    padding: .6rem .7rem; white-space: pre-wrap; font-size: .78rem; color: #1e293b;
+    line-height: 1.5; max-height: 400px; overflow: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .prompt-text.full, .completion-text.full { max-height: none; }
+  .txt-toggle { font-size: .72rem; color: #1d4ed8; cursor: pointer; margin-top: .2rem; display: inline-block; }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px,1fr)); gap: .35rem; margin-bottom: .5rem; }
+  .meta-item { background: #f1f5f9; border-radius: 6px; padding: .3rem .4rem; text-align: center; }
+  .meta-item .mv { font-size: .85rem; font-weight: 700; color: #1e293b; }
+  .meta-item .ml { font-size: .6rem; color: #64748b; }
+  .empty-state { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: .9rem; }
+  .count-label { font-size: .82rem; color: #475569; margin-bottom: .4rem; }
+
+  /* Tabs for prompt/completion */
+  .tabs { display: flex; gap: .25rem; margin-bottom: .4rem; }
+  .tab { padding: .35rem .7rem; border-radius: 6px 6px 0 0; cursor: pointer; font-size: .8rem; font-weight: 600; background: #e2e8f0; color: #475569; border: none; }
+  .tab.active { background: #1e40af; color: #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 900px) {
+    .controls { grid-template-columns: 1fr 1fr; }
+    .layout { grid-template-columns: 1fr; }
+    .list-wrap { max-height: 35vh; }
+  }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">&larr; Back to Hub</a>
+<h1>SFT Dataset v9 Explorer</h1>
+<p class="sub">Browse the mixed SFT training data (21K examples). Each example has a gold <code>&lt;think&gt;</code> + <code>&lt;step&gt;</code> completion. All benchmark-inspired formats, zero test contamination.</p>
+
+<div class="card">
+  <div class="stats" id="stats-row"></div>
+</div>
+
+<div class="card">
+  <div class="source-bars" id="source-bars"></div>
+</div>
+
+<div class="card">
+  <div class="controls">
+    <div><label for="q">Search</label><input id="q" type="text" placeholder="e.g. methodical, rabbit"></div>
+    <div><label for="f-source">Source</label><select id="f-source"><option value="all">All</option></select></div>
+    <div><label for="f-logic">Logic Type</label><select id="f-logic"><option value="all">All</option></select></div>
+    <div><label for="f-answer">Answer</label><select id="f-answer"><option value="all">All</option></select></div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="count-label" id="list-count">0 examples</div>
+    <div class="list-wrap" id="list"></div>
+  </div>
+  <div class="panel" id="detail">
+    <div class="empty-state">Select an example to see its prompt and gold completion side by side.</div>
+  </div>
+</div>
+
+<script>
+const SRC_COLORS = {
+  'diverse_logicbench': '#3b82f6',
+  'proofbank_proofwriter_style': '#16a34a',
+  'proofbank_folio_style': '#f59e0b',
+  'proofbank_prontoqa_style': '#ec4899',
+};
+const SRC_LABELS = {
+  'diverse_logicbench': 'Proof Bank Core',
+  'proofbank_proofwriter_style': 'ProofWriter-style',
+  'proofbank_folio_style': 'FOLIO-style',
+  'proofbank_prontoqa_style': 'ProntoQA-style',
+};
+const SRC_BADGE = {
+  'diverse_logicbench': 'b-core',
+  'proofbank_proofwriter_style': 'b-pw',
+  'proofbank_folio_style': 'b-folio',
+  'proofbank_prontoqa_style': 'b-pqa',
+};
+
+let DATA = null;
+
+async function init() {
+  const resp = await fetch('v9_sft_explorer_data.json');
+  DATA = await resp.json();
+  renderStats();
+  renderSourceBars();
+  populateFilters();
+  renderList();
+  ['q','f-source','f-logic','f-answer'].forEach(id => {
+    document.getElementById(id).addEventListener(id === 'q' ? 'input' : 'change', renderList);
+  });
+}
+
+function renderStats() {
+  const s = DATA.stats;
+  document.getElementById('stats-row').innerHTML = [
+    {v: s.total.toLocaleString(), l: 'Total Examples'},
+    {v: Object.keys(s.sources).length, l: 'Format Styles'},
+    {v: s.avg_completion_len.toLocaleString(), l: 'Avg Completion Len'},
+    {v: s.all_have_completions ? 'Yes' : 'No', l: 'All Have Completions', cls: s.all_have_completions ? 'green' : ''},
+    {v: 'Zero', l: 'Test Contamination'},
+  ].map(x => `<div class="stat"><div class="sv ${x.cls||''}">${x.v}</div><div class="sl">${x.l}</div></div>`).join('');
+}
+
+function renderSourceBars() {
+  const s = DATA.stats.sources;
+  const max = Math.max(...Object.values(s));
+  document.getElementById('source-bars').innerHTML = Object.entries(s)
+    .sort((a,b) => b[1]-a[1])
+    .map(([src, count]) => {
+      const pct = (count / max * 100).toFixed(0);
+      const color = SRC_COLORS[src] || '#94a3b8';
+      return `<div class="sbar">
+        <div class="sbar-label">${SRC_LABELS[src]||src}</div>
+        <div class="sbar-track"><div class="sbar-fill" style="width:${pct}%;background:${color};">${count>max*0.12?count.toLocaleString():''}</div></div>
+        <div class="sbar-count">${count.toLocaleString()}</div>
+      </div>`;
+    }).join('');
+}
+
+function populateFilters() {
+  const mk = (id, vals, labels) => {
+    document.getElementById(id).innerHTML = '<option value="all">All</option>' +
+      [...new Set(vals)].sort().map(v => `<option value="${v}">${(labels&&labels[v])||v}</option>`).join('');
+  };
+  mk('f-source', DATA.examples.map(e=>e.source), SRC_LABELS);
+  mk('f-logic', DATA.examples.map(e=>e.logic_type));
+  mk('f-answer', DATA.examples.map(e=>e.answer));
+}
+
+function getFiltered() {
+  let items = DATA.examples;
+  const q = document.getElementById('q').value.toLowerCase();
+  const src = document.getElementById('f-source').value;
+  const logic = document.getElementById('f-logic').value;
+  const ans = document.getElementById('f-answer').value;
+  if (q) items = items.filter(e => e.user_prompt.toLowerCase().includes(q) || e.completion.toLowerCase().includes(q));
+  if (src !== 'all') items = items.filter(e => e.source === src);
+  if (logic !== 'all') items = items.filter(e => e.logic_type === logic);
+  if (ans !== 'all') items = items.filter(e => e.answer === ans);
+  return items;
+}
+
+function renderList() {
+  const items = getFiltered();
+  document.getElementById('list-count').textContent = items.length + ' examples';
+  document.getElementById('list').innerHTML = items.map((e, i) => {
+    const lines = e.user_prompt.split('\n').filter(l => l.trim());
+    const preview = lines[0].substring(0, 80);
+    const sb = SRC_BADGE[e.source] || 'b-core';
+    const lb = e.logic_type.includes('propositional') ? 'b-prop' : e.logic_type.includes('first') ? 'b-fol' : 'b-nm';
+    const ab = 'b-' + e.answer.toLowerCase();
+    return `<div class="list-item" onclick="selectItem(${i})">
+      <div class="list-q">${esc(preview)}</div>
+      <div class="list-badges">
+        <span class="badge ${sb}">${SRC_LABELS[e.source]||e.source}</span>
+        <span class="badge ${lb}">${e.logic_type.replace('_logic','')}</span>
+        <span class="badge ${ab}">${e.answer}</span>
+      </div>
+      <div class="list-meta">${e.completion.length} chars completion | ${e.theory}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectItem(idx) {
+  const items = getFiltered();
+  const e = items[idx];
+  document.querySelectorAll('.list-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+  const sl = SRC_LABELS[e.source] || e.source;
+  const sb = SRC_BADGE[e.source] || 'b-core';
+  const lb = e.logic_type.includes('propositional') ? 'b-prop' : e.logic_type.includes('first') ? 'b-fol' : 'b-nm';
+  const ab = 'b-' + e.answer.toLowerCase();
+
+  document.getElementById('detail').innerHTML = `
+    <div class="detail-title">${esc(sl)} Example</div>
+    <div style="margin-bottom:.5rem;">
+      <span class="badge ${sb}" style="font-size:.75rem;padding:.1rem .5rem;">${sl}</span>
+      <span class="badge ${lb}" style="font-size:.75rem;padding:.1rem .5rem;">${e.logic_type}</span>
+      <span class="badge ${ab}" style="font-size:.75rem;padding:.1rem .5rem;">Answer: ${e.answer}</span>
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="mv">${e.answer}</div><div class="ml">Answer</div></div>
+      <div class="meta-item"><div class="mv">${e.logic_type.replace('_logic','')}</div><div class="ml">Logic</div></div>
+      <div class="meta-item"><div class="mv">${e.theory}</div><div class="ml">Theory</div></div>
+      <div class="meta-item"><div class="mv">${e.user_prompt.length}</div><div class="ml">Prompt Chars</div></div>
+      <div class="meta-item"><div class="mv">${e.completion.length}</div><div class="ml">Completion Chars</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'tab-prompt')">User Prompt</button>
+      <button class="tab" onclick="switchTab(this,'tab-completion')">Gold Completion</button>
+      <button class="tab" onclick="switchTab(this,'tab-both')">Side by Side</button>
+    </div>
+    <div class="tab-content active" id="tab-prompt">
+      <div class="prompt-text" id="pt1">${highlightPrompt(e.user_prompt, e.source)}</div>
+      <span class="txt-toggle" onclick="document.getElementById('pt1').classList.toggle('full')">Expand / Collapse</span>
+    </div>
+    <div class="tab-content" id="tab-completion">
+      <div class="completion-text" id="ct1">${highlightCompletion(e.completion)}</div>
+      <span class="txt-toggle" onclick="document.getElementById('ct1').classList.toggle('full')">Expand / Collapse</span>
+    </div>
+    <div class="tab-content" id="tab-both">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+        <div>
+          <div class="lbl">Prompt</div>
+          <div class="prompt-text" style="max-height:500px;" id="pt2">${highlightPrompt(e.user_prompt, e.source)}</div>
+        </div>
+        <div>
+          <div class="lbl">Gold Completion</div>
+          <div class="completion-text" style="max-height:500px;" id="ct2">${highlightCompletion(e.completion)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function switchTab(btn, tabId) {
+  btn.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function highlightPrompt(text, source) {
+  let h = esc(text);
+  if (source.includes('folio')) {
+    h = h.replace(/^(Premises:)/m, '<span style="color:#f59e0b;font-weight:700">$1</span>');
+    h = h.replace(/^(Conclusion:.*)/m, '<span style="color:#1e40af;font-weight:700">$1</span>');
+    h = h.replace(/(Does the conclusion follow.*)/m, '<span style="color:#6b21a8;font-weight:600">$1</span>');
+  } else if (source.includes('proofwriter')) {
+    h = h.replace(/^(Question:.*)/m, '<span style="color:#16a34a;font-weight:700">$1</span>');
+  } else if (source.includes('prontoqa')) {
+    h = h.replace(/^(Prove:.*)/m, '<span style="color:#ec4899;font-weight:700">$1</span>');
+    h = h.replace(/(\w+\([^)]+\))\s+if\s+/g, '<span style="color:#1e40af">$1</span> if ');
+  }
+  h = h.replace(/(Answer by thinking.*)/s, '<span style="color:#94a3b8;font-size:.75rem">$1</span>');
+  return h;
+}
+
+function highlightCompletion(text) {
+  let h = esc(text);
+  h = h.replace(/&lt;step ([^&]*?)&gt;/g, '<span style="color:#1d4ed8;font-weight:600">&lt;step $1&gt;</span>');
+  h = h.replace(/&lt;\/step&gt;/g, '<span style="color:#1d4ed8">&lt;/step&gt;</span>');
+  h = h.replace(/&lt;text&gt;/g, '<span style="color:#7c3aed">&lt;text&gt;</span>');
+  h = h.replace(/&lt;\/text&gt;/g, '<span style="color:#7c3aed">&lt;/text&gt;</span>');
+  h = h.replace(/&lt;logic&gt;/g, '<span style="color:#059669">&lt;logic&gt;</span>');
+  h = h.replace(/&lt;\/logic&gt;/g, '<span style="color:#059669">&lt;/logic&gt;</span>');
+  h = h.replace(/&lt;think&gt;/g, '<span style="color:#6b7280">&lt;think&gt;</span>');
+  h = h.replace(/&lt;\/think&gt;/g, '<span style="color:#6b7280">&lt;/think&gt;</span>');
+  h = h.replace(/^(Answer:.*)/m, '<span style="background:#fef3c7;padding:0 .3rem;border-radius:3px;font-weight:700">$1</span>');
+  return h;
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+init();
+</script>
+</body>
+</html>
