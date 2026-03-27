@@ -147,7 +147,7 @@
       </div>
     </div>
     <div class="bar-row">
-      <div class="bar-label">Proof Bank Aug <span class="b-new">NEW</span></div>
+      <div class="bar-label">LogicBench(Aug) <span class="b-new">NEW</span></div>
       <div class="bar-track">
         <div class="bar-fill" style="width:14.6%;background:#6366f1;">12,908</div>
       </div>
@@ -202,9 +202,9 @@
     </div>
 
     <div class="ds-card ds-logicbench-aug">
-      <h3>Proof Bank Augmented <span class="b-new">NEW</span></h3>
+      <h3>LogicBench(Aug) <span class="b-new">NEW</span></h3>
       <div class="count">12,908 examples (14.6%)</div>
-      <p>Additional programmatic examples with varied phrasings, entity names, and rule combinations. Increases diversity within the LogicBench-style format to prevent overfitting to specific patterns.</p>
+      <p>Actual examples from the LogicBench augmentation split. Natural language logic problems covering modus tollens, disjunctive syllogism, constructive/destructive dilemma, and more. These are real LogicBench problems (not programmatically generated), providing the model with the exact format it will encounter during LogicBench evaluation.</p>
     </div>
 
     <div class="ds-card ds-proofwriter">
@@ -317,10 +317,10 @@ Prove: ready_to_compete(player_leon)</div>
     <p style="font-size:.8rem;color:#475569;margin-top:.3rem;">Non-monotonic chain: focused &rarr; communicative (via focused &rarr; ready_to_compete &rarr; driven, but exception: communicative blocks driven). The exception prevents the proof. The model must handle negation-as-failure correctly.</p>
   </div>
 
-  <h3>Proof Bank Augmented (augmented inference rules)</h3>
+  <h3>LogicBench(Aug) (real benchmark examples)</h3>
   <div class="example">
     <div class="ex-header">
-      <span class="ex-title">Proof Bank Aug: No (disjunctive syllogism)</span>
+      <span class="ex-title">LogicBench(Aug): No (affirming the consequent test)</span>
       <span><span class="badge b-prop">propositional</span> <span class="badge b-no">No</span></span>
     </div>
     <div class="ex-text">If Levi failed the test, then he will not get a reward. If he will get a reward,
@@ -373,7 +373,7 @@ Question: There exists someone in the ballet company who is thoughtful.</div>
       <tr>
         <td>Reversed implications</td>
         <td class="old">Limited inference rule diversity</td>
-        <td class="new">12,908 Proof Bank Aug with varied rules</td>
+        <td class="new">12,908 LogicBench(Aug) examples with real inference rules</td>
       </tr>
       <tr>
         <td>Format mismatch (Yes/No vs True/False)</td>
