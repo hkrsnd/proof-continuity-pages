@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 Test-Time Scaling: Best-of-N with ASP Verification</title>
+<style>
+  :root {
+    --bg: #0d1117; --fg: #c9d1d9; --card: #161b22; --border: #30363d;
+    --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    --purple: #bc8cff; --cyan: #39d353;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); line-height: 1.6; padding: 20px; }
+  h1 { color: var(--accent); font-size: 1.8em; margin-bottom: 5px; }
+  h2 { color: var(--purple); font-size: 1.4em; margin: 30px 0 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--cyan); font-size: 1.15em; margin: 20px 0 10px; }
+  .subtitle { color: #8b949e; font-size: 0.95em; margin-bottom: 25px; }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* Summary cards */
+  .summary-row { display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+                  padding: 15px 20px; flex: 1; min-width: 150px; }
+  .summary-card .label { color: #8b949e; font-size: 0.85em; }
+  .summary-card .value { font-size: 1.8em; font-weight: 600; }
+  .summary-card .value.green { color: var(--green); }
+  .summary-card .value.yellow { color: var(--yellow); }
+
+  /* Theory selector */
+  .theory-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; }
+  .theory-tab { background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+                padding: 6px 14px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
+  .theory-tab:hover { border-color: var(--accent); }
+  .theory-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+
+  /* Example card */
+  .example-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+                  padding: 20px; margin: 15px 0; }
+  .problem-box { background: #1c2333; border-radius: 6px; padding: 12px 16px; margin: 10px 0;
+                 font-size: 0.9em; border-left: 3px solid var(--accent); }
+  .gt-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.85em; font-weight: 600; }
+  .gt-yes { background: rgba(63,185,80,0.15); color: var(--green); }
+  .gt-no { background: rgba(248,81,73,0.15); color: var(--red); }
+
+  /* Completion grid */
+  .completions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 15px 0; }
+  .completion-card { background: #1c2333; border: 2px solid var(--border); border-radius: 8px;
+                     padding: 12px; font-size: 0.85em; cursor: pointer; transition: all 0.2s; position: relative; }
+  .completion-card:hover { border-color: var(--accent); }
+  .completion-card.selected { border-color: var(--green); box-shadow: 0 0 10px rgba(63,185,80,0.3); }
+  .completion-card.correct .comp-answer { color: var(--green); }
+  .completion-card.wrong .comp-answer { color: var(--red); }
+  .selected-badge { position: absolute; top: -8px; right: 10px; background: var(--green); color: var(--bg);
+                    padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 700; }
+  .comp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .comp-idx { font-weight: 700; color: var(--accent); }
+  .comp-answer { font-weight: 700; font-size: 1.1em; }
+  .comp-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 8px 0; font-size: 0.82em; }
+  .comp-metrics .metric-label { color: #8b949e; }
+  .asp-bar { height: 6px; border-radius: 3px; margin-top: 6px; background: #21262d; overflow: hidden; }
+  .asp-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .asp-positive { background: linear-gradient(90deg, var(--green), #2ea043); }
+  .asp-negative { background: linear-gradient(90deg, var(--red), #da3633); }
+  .asp-zero { background: var(--yellow); }
+  .loop-badge { background: rgba(248,81,73,0.2); color: var(--red); padding: 1px 6px;
+                border-radius: 3px; font-size: 0.75em; font-weight: 600; }
+
+  /* Step trace detail (shown on click) */
+  .trace-detail { display: none; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+                  padding: 15px; margin: 10px 0; max-height: 500px; overflow-y: auto; }
+  .trace-detail.visible { display: block; }
+  .step-row { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #21262d; font-size: 0.85em; }
+  .step-type { min-width: 22px; font-weight: 700; }
+  .step-type.premise { color: var(--accent); }
+  .step-type.derived { color: var(--purple); }
+  .step-logic { font-family: 'Fira Code', 'Cascadia Code', monospace; color: var(--yellow); }
+  .step-text { color: #8b949e; font-style: italic; }
+  .step-from { color: var(--cyan); font-size: 0.8em; }
+  .raw-text { white-space: pre-wrap; font-family: monospace; font-size: 0.82em; max-height: 300px;
+              overflow-y: auto; background: #0d1117; padding: 10px; border-radius: 4px; margin-top: 8px; }
+
+  /* Ranking table */
+  .ranking-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85em; }
+  .ranking-table th { text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); color: var(--accent); }
+  .ranking-table td { padding: 6px 12px; border-bottom: 1px solid #21262d; }
+  .ranking-table tr.selected-row { background: rgba(63,185,80,0.08); }
+  .ranking-table tr.selected-row td:first-child { font-weight: 700; color: var(--green); }
+
+  /* Loading */
+  .loading { text-align: center; padding: 60px; color: #8b949e; }
+  .error { color: var(--red); padding: 20px; text-align: center; }
+
+  /* Logic type tabs */
+  .logic-type-tabs { display: flex; gap: 10px; margin: 20px 0; }
+  .logic-type-tab { background: var(--card); border: 2px solid var(--border); border-radius: 8px;
+                    padding: 10px 20px; cursor: pointer; font-size: 1em; font-weight: 600; transition: all 0.2s; }
+  .logic-type-tab:hover { border-color: var(--purple); }
+  .logic-type-tab.active { background: var(--purple); color: var(--bg); border-color: var(--purple); }
+  .logic-type-tab.disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>L1 Test-Time Scaling: Best-of-N with ASP Verification</h1>
+  <p class="subtitle">
+    Generate N reasoning traces, verify each with Answer Set Programming, select the best.
+    <br>Model: Qwen3-8B &nbsp;|&nbsp; N=8 &nbsp;|&nbsp; Temperature=1.0 &nbsp;|&nbsp; Verifier: Unified ASP
+  </p>
+
+  <div class="logic-type-tabs" id="logicTypeTabs"></div>
+
+  <div class="summary-row" id="summaryCards"></div>
+
+  <h2>Inference Types</h2>
+  <div class="theory-tabs" id="theoryTabs"></div>
+
+  <div id="examplesContainer"></div>
+
+  <div class="loading" id="loadingMsg">Loading data...</div>
+  <div class="error" id="errorMsg" style="display:none;"></div>
+</div>
+
+<script>
+const DATA_FILES = {
+  'propositional_logic': 'bon_demo_propositional_logic_data.json',
+  'first_order_logic': 'bon_demo_first_order_logic_data.json',
+  'nm_logic': 'bon_demo_nm_logic_data.json',
+};
+
+let allData = {};
+let currentLogicType = null;
+let currentTheory = null;
+
+async function loadData() {
+  const loading = document.getElementById('loadingMsg');
+  const error = document.getElementById('errorMsg');
+  let anyLoaded = false;
+
+  for (const [lt, file] of Object.entries(DATA_FILES)) {
+    try {
+      const resp = await fetch(file);
+      if (resp.ok) {
+        allData[lt] = await resp.json();
+        anyLoaded = true;
+      }
+    } catch (e) {
+      console.log(`Could not load ${file}: ${e}`);
+    }
+  }
+
+  loading.style.display = 'none';
+  if (!anyLoaded) {
+    error.textContent = 'No data files found. Run the BoN demo script first.';
+    error.style.display = 'block';
+    return;
+  }
+
+  renderLogicTypeTabs();
+  // Auto-select first available
+  const first = Object.keys(allData)[0];
+  selectLogicType(first);
+}
+
+function renderLogicTypeTabs() {
+  const container = document.getElementById('logicTypeTabs');
+  const labels = {
+    'propositional_logic': 'Propositional Logic',
+    'first_order_logic': 'First-Order Logic',
+    'nm_logic': 'Non-Monotonic Reasoning',
+  };
+  container.innerHTML = '';
+  for (const lt of Object.keys(DATA_FILES)) {
+    const tab = document.createElement('div');
+    tab.className = 'logic-type-tab' + (allData[lt] ? '' : ' disabled');
+    tab.textContent = labels[lt] || lt;
+    if (allData[lt]) {
+      tab.onclick = () => selectLogicType(lt);
+    }
+    tab.dataset.lt = lt;
+    container.appendChild(tab);
+  }
+}
+
+function selectLogicType(lt) {
+  currentLogicType = lt;
+  document.querySelectorAll('.logic-type-tab').forEach(t => t.classList.toggle('active', t.dataset.lt === lt));
+
+  const data = allData[lt];
+  renderSummary(data);
+  renderTheoryTabs(data);
+
+  const firstTheory = Object.keys(data.theories)[0];
+  if (firstTheory) selectTheory(firstTheory);
+}
+
+function renderSummary(data) {
+  const s = data.summary || {};
+  const container = document.getElementById('summaryCards');
+  const bonAcc = s.total_examples ? (s.bon_correct / s.total_examples * 100).toFixed(0) : '?';
+  const greedyAcc = s.total_examples ? (s.greedy_correct / s.total_examples * 100).toFixed(0) : '?';
+  container.innerHTML = `
+    <div class="summary-card">
+      <div class="label">Examples</div>
+      <div class="value">${s.total_examples || '?'}</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Greedy (Comp #1)</div>
+      <div class="value yellow">${greedyAcc}%</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">BoN-${data.metadata?.n || 8} + ASP</div>
+      <div class="value green">${bonAcc}%</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Theories</div>
+      <div class="value">${Object.keys(data.theories).length}</div>
+    </div>
+  `;
+}
+
+function renderTheoryTabs(data) {
+  const container = document.getElementById('theoryTabs');
+  container.innerHTML = '';
+  for (const theory of Object.keys(data.theories)) {
+    const tab = document.createElement('div');
+    tab.className = 'theory-tab';
+    tab.textContent = theory.replace(/_/g, ' ');
+    tab.dataset.theory = theory;
+    tab.onclick = () => selectTheory(theory);
+    container.appendChild(tab);
+  }
+}
+
+function selectTheory(theory) {
+  currentTheory = theory;
+  document.querySelectorAll('.theory-tab').forEach(t => t.classList.toggle('active', t.dataset.theory === theory));
+  renderExamples(allData[currentLogicType].theories[theory]);
+}
+
+function renderExamples(examples) {
+  const container = document.getElementById('examplesContainer');
+  container.innerHTML = '';
+
+  examples.forEach((ex, exIdx) => {
+    const card = document.createElement('div');
+    card.className = 'example-card';
+
+    const gtClass = ex.ground_truth === 'yes' ? 'gt-yes' : 'gt-no';
+    const selectedComp = ex.completions[ex.selected_index];
+
+    card.innerHTML = `
+      <h3>Example ${exIdx + 1} &nbsp;
+        <span class="gt-badge ${gtClass}">Ground truth: ${ex.ground_truth}</span>
+        &nbsp; → &nbsp;
+        <span class="gt-badge ${ex.selected_correct ? 'gt-yes' : 'gt-no'}">
+          BoN answer: ${ex.selected_answer} ${ex.selected_correct ? '✓' : '✗'}
+        </span>
+      </h3>
+      <div class="problem-box">
+        <strong>Context:</strong> ${escapeHtml(ex.context.substring(0, 400))}${ex.context.length > 400 ? '...' : ''}<br><br>
+        <strong>Question:</strong> ${escapeHtml(ex.question)}
+      </div>
+
+      <h3>8 Reasoning Traces (click to expand)</h3>
+      <div class="completions-grid" id="compGrid_${exIdx}"></div>
+      <div id="traceDetail_${exIdx}" class="trace-detail"></div>
+
+      <h3>ASP Ranking</h3>
+      <table class="ranking-table" id="rankTable_${exIdx}"></table>
+    `;
+
+    container.appendChild(card);
+
+    // Render completion cards
+    renderCompletionGrid(exIdx, ex);
+    renderRankingTable(exIdx, ex);
+  });
+}
+
+function renderCompletionGrid(exIdx, ex) {
+  const grid = document.getElementById(`compGrid_${exIdx}`);
+  grid.innerHTML = '';
+
+  ex.completions.forEach((comp, i) => {
+    const isSelected = i === ex.selected_index;
+    const isCorrect = comp.correct;
+
+    const card = document.createElement('div');
+    card.className = `completion-card ${isCorrect ? 'correct' : 'wrong'} ${isSelected ? 'selected' : ''}`;
+    card.onclick = () => showTraceDetail(exIdx, ex, i);
+
+    const aspPct = Math.min(Math.abs(comp.asp_consistency) * 100, 100);
+    const aspClass = comp.asp_consistency > 0 ? 'asp-positive' : (comp.asp_consistency < 0 ? 'asp-negative' : 'asp-zero');
+
+    card.innerHTML = `
+      ${isSelected ? '<div class="selected-badge">✓ SELECTED</div>' : ''}
+      <div class="comp-header">
+        <span class="comp-idx">#${i + 1}</span>
+        <span class="comp-answer">${comp.answer || 'N/A'} ${isCorrect ? '✓' : '✗'}</span>
+      </div>
+      <div class="comp-metrics">
+        <span class="metric-label">ASP:</span><span>${comp.asp_consistency >= 0 ? '+' : ''}${comp.asp_consistency.toFixed(3)}</span>
+        <span class="metric-label">Steps:</span><span>${comp.num_steps} (${comp.unique_derived} unique)</span>
+        <span class="metric-label">Repeats:</span><span>${comp.max_repeats} ${comp.has_loop ? '<span class="loop-badge">LOOP</span>' : ''}</span>
+        <span class="metric-label">Answer:</span><span>${comp.has_answer ? 'yes' : 'no answer'}</span>
+      </div>
+      <div class="asp-bar"><div class="asp-fill ${aspClass}" style="width: ${aspPct}%"></div></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function showTraceDetail(exIdx, ex, compIdx) {
+  const detail = document.getElementById(`traceDetail_${exIdx}`);
+  const comp = ex.completions[compIdx];
+
+  let stepsHtml = comp.steps.map(s => {
+    const typeClass = s.type === 'premise' ? 'premise' : 'derived';
+    const typeLabel = s.type === 'premise' ? 'P' : 'D';
+    const fromStr = s.from_refs && s.from_refs.length ? `<span class="step-from">from: ${s.from_refs.join(', ')}</span>` : '';
+    return `
+      <div class="step-row">
+        <span class="step-type ${typeClass}">${typeLabel}${s.n}</span>
+        <div>
+          <div class="step-logic">${escapeHtml(s.logic || '(no logic)')}</div>
+          <div class="step-text">${escapeHtml(s.text || '')}</div>
+          ${fromStr}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (comp.num_steps > 20) {
+    stepsHtml += `<div style="color: #8b949e; padding: 8px;">... ${comp.num_steps - 20} more steps (truncated)</div>`;
+  }
+
+  detail.innerHTML = `
+    <h3>Completion #${compIdx + 1} — Full Reasoning Trace</h3>
+    <div style="margin: 8px 0;">
+      <strong>Answer:</strong> ${comp.answer} ${comp.correct ? '✓ correct' : '✗ wrong'} &nbsp;|&nbsp;
+      <strong>ASP:</strong> ${comp.asp_consistency >= 0 ? '+' : ''}${comp.asp_consistency.toFixed(3)} &nbsp;|&nbsp;
+      <strong>Steps:</strong> ${comp.num_steps} (${comp.unique_derived} unique, ${comp.max_repeats} max repeats)
+    </div>
+    ${stepsHtml}
+    <h3 style="margin-top: 15px;">Raw Output</h3>
+    <div class="raw-text">${escapeHtml(comp.text)}</div>
+  `;
+  detail.classList.add('visible');
+}
+
+function renderRankingTable(exIdx, ex) {
+  const table = document.getElementById(`rankTable_${exIdx}`);
+
+  // Sort completions by selection priority
+  const ranked = ex.completions.map((c, i) => ({...c, origIdx: i}))
+    .sort((a, b) => {
+      const aValid = a.has_answer && !a.has_loop ? 2 : (a.has_answer ? 1 : 0);
+      const bValid = b.has_answer && !b.has_loop ? 2 : (b.has_answer ? 1 : 0);
+      if (aValid !== bValid) return bValid - aValid;
+      if (a.asp_consistency !== b.asp_consistency) return b.asp_consistency - a.asp_consistency;
+      return a.num_steps - b.num_steps;
+    });
+
+  let html = `<thead><tr>
+    <th>Rank</th><th>#</th><th>Answer</th><th>Correct</th>
+    <th>ASP Consistency</th><th>Steps</th><th>Unique</th><th>Repeats</th><th>Status</th>
+  </tr></thead><tbody>`;
+
+  ranked.forEach((c, rank) => {
+    const isSelected = c.origIdx === ex.selected_index;
+    const rowClass = isSelected ? 'selected-row' : '';
+    const status = isSelected ? '→ SELECTED' : (c.has_loop ? 'loop' : (!c.has_answer ? 'no answer' : ''));
+    html += `<tr class="${rowClass}">
+      <td>${rank + 1}</td>
+      <td>#${c.origIdx + 1}</td>
+      <td>${c.answer || 'N/A'}</td>
+      <td style="color: ${c.correct ? 'var(--green)' : 'var(--red)'}">${c.correct ? '✓' : '✗'}</td>
+      <td style="color: ${c.asp_consistency > 0 ? 'var(--green)' : (c.asp_consistency < 0 ? 'var(--red)' : 'var(--yellow)')}">${c.asp_consistency >= 0 ? '+' : ''}${c.asp_consistency.toFixed(3)}</td>
+      <td>${c.num_steps}</td>
+      <td>${c.unique_derived}</td>
+      <td>${c.max_repeats}</td>
+      <td style="color: ${isSelected ? 'var(--green)' : '#8b949e'}; font-weight: ${isSelected ? '700' : '400'}">${status}</td>
+    </tr>`;
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text || '';
+  return div.innerHTML;
+}
+
+loadData();
+</script>
+</body>
+</html>
