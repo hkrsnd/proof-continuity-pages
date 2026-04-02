@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "model": "checkpoint-1500",
+    "model": "Qwen3-8B + L1 (GRPO with ASP consistency)",
     "logic_type": "propositional_logic",
     "n": 8,
     "temperature": 1.0,
