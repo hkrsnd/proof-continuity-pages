@@ -98,6 +98,9 @@ a:hover { text-decoration: underline; }
 .rank-table tr.sel td:first-child { font-weight: 700; color: var(--green); }
 .rank-table .loop-cell { color: var(--red); font-weight: 600; }
 
+/* Full trace rendering */
+.full-trace { max-height: 600px; overflow-y: auto; padding: 8px 0; font-size: 0.9em; }
+
 .loading { text-align: center; padding: 50px; color: #8b949e; }
 .none-msg { color: #8b949e; padding: 30px; text-align: center; font-style: italic; }
 </style>
@@ -236,32 +239,9 @@ function showTrace(ei, ex, ci) {
   const aspCls = comp.asp_consistency > 0 ? 'color:var(--green)' : (comp.asp_consistency < 0 ? 'color:var(--red)' : 'color:var(--yellow)');
   const ansCls = comp.correct ? 'color:var(--green)' : 'color:var(--red)';
 
-  // Track repeated logic for highlighting
-  const logicSeen = {};
-  const stepsHtml = comp.steps.map(s => {
-    const isPrem = s.type === 'premise';
-    let repeated = false;
-    if (!isPrem && s.logic) {
-      const key = s.logic.trim().toLowerCase();
-      logicSeen[key] = (logicSeen[key]||0) + 1;
-      if (logicSeen[key] > 1) repeated = true;
-    }
-    const cls = isPrem ? 'premise' : ('derived' + (repeated ? ' repeated' : ''));
-    const tagCls = isPrem ? 'premise' : 'derived';
-    const from = s.from_refs && s.from_refs.length ? `<span class="step-from">from ${s.from_refs.join(', ')}</span>` : '';
-    return `<div class="step ${cls}">
-      <div class="step-head">
-        <span class="step-tag ${tagCls}">${isPrem?'P':'D'}</span>
-        <span class="step-num">Step ${s.n}</span>
-        ${from}
-      </div>
-      ${s.logic ? `<div class="step-logic">${esc(s.logic)}</div>` : ''}
-      ${s.text ? `<div class="step-text">${esc(s.text)}</div>` : ''}
-    </div>`;
-  }).join('');
-  const moreSteps = comp.num_steps > comp.steps.length ? `<div style="color:#8b949e;padding:8px;font-size:0.85em">... ${comp.num_steps - comp.steps.length} more steps (truncated for display)</div>` : '';
+  // Render the full raw text with step tags highlighted inline
+  const rendered = renderFullTrace(comp.text);
 
-  const rawId = `raw_${ei}_${ci}`;
   tv.innerHTML = `
     <div class="trace-header">
       <div class="th-item"><span class="th-label">Completion</span> <span class="th-val">#${ci+1}</span></div>
@@ -271,16 +251,7 @@ function showTrace(ei, ex, ci) {
       <div class="th-item"><span class="th-label">Unique derived</span> <span class="th-val">${comp.unique_derived}</span></div>
       <div class="th-item"><span class="th-label">Max repeats</span> <span class="th-val" style="${comp.has_loop?'color:var(--red)':''}">${comp.max_repeats}${comp.has_loop?' (LOOP)':''}</span></div>
     </div>
-    <div style="margin-bottom:8px;font-size:0.85em;color:#8b949e">
-      <span class="step-tag premise">P</span> = Premise &nbsp;
-      <span class="step-tag derived">D</span> = Derived &nbsp;
-      <span style="color:var(--yellow)">yellow</span> = logic expression &nbsp;
-      <span style="color:var(--red);opacity:0.6">faded red</span> = repeated derivation
-    </div>
-    ${stepsHtml}
-    ${moreSteps}
-    <div class="raw-toggle" onclick="document.getElementById('${rawId}').classList.toggle('visible')">Show/hide raw output</div>
-    <div class="raw-box" id="${rawId}">${esc(comp.text)}</div>`;
+    <div class="full-trace">${rendered}</div>`;
   tv.classList.add('visible');
 }
 
@@ -308,6 +279,74 @@ function renderRank(ei, ex) {
       <td>${status}</td></tr>`;
   });
   t.innerHTML = h + '</tbody>';
+}
+
+function renderFullTrace(rawText) {
+  // Render full model output with step tags highlighted inline.
+  // Free text between steps is shown as regular reasoning prose.
+  if (!rawText) return '<span style="color:#8b949e">No output</span>';
+
+  let text = rawText;
+  // Strip outer <think> wrapper if present (keep contents)
+  text = text.replace(/^<think>\s*/i, '').replace(/\s*<\/think>\s*$/i, '');
+
+  // Track repeated logic expressions
+  const logicSeen = {};
+
+  // Replace <step ...>...</step> blocks with styled HTML
+  text = text.replace(/<step\s+([^>]*)>([\s\S]*?)<\/step>/gi, (match, attrs, body) => {
+    // Parse attributes
+    const nMatch = attrs.match(/n="(\d+)"/);
+    const typeMatch = attrs.match(/type="(\w+)"/);
+    const fromMatch = attrs.match(/from="([^"]+)"/);
+    const stepN = nMatch ? nMatch[1] : '?';
+    const stepType = typeMatch ? typeMatch[1] : 'derived';
+    const stepFrom = fromMatch ? fromMatch[1] : '';
+    const isPrem = stepType === 'premise';
+
+    // Extract <text> and <logic> sub-tags
+    const textMatch = body.match(/<text>([\s\S]*?)<\/text>/i);
+    const logicMatch = body.match(/<logic>([\s\S]*?)<\/logic>/i);
+    const stepText = textMatch ? textMatch[1].trim() : '';
+    const stepLogic = logicMatch ? logicMatch[1].trim() : '';
+
+    // Detect repetition
+    let repeated = false;
+    if (!isPrem && stepLogic) {
+      const key = stepLogic.trim().toLowerCase();
+      logicSeen[key] = (logicSeen[key] || 0) + 1;
+      if (logicSeen[key] > 1) repeated = true;
+    }
+
+    const borderColor = isPrem ? 'var(--accent)' : (repeated ? 'var(--red)' : 'var(--purple)');
+    const tagCls = isPrem ? 'premise' : 'derived';
+    const opacity = repeated ? 'opacity:0.5;' : '';
+    const fromHtml = stepFrom ? ` <span class="step-from">from ${esc(stepFrom)}</span>` : '';
+    const repBadge = repeated ? ' <span class="loop-tag">repeated</span>' : '';
+
+    return `<div class="step-block" style="border-left:3px solid ${borderColor};${opacity}margin:10px 0;padding:6px 12px;border-radius:0 6px 6px 0;background:rgba(22,27,34,0.8);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span class="step-tag ${tagCls}">${isPrem?'P':'D'}</span>
+        <span style="color:#8b949e;font-size:0.85em;">Step ${esc(stepN)}</span>
+        ${fromHtml}${repBadge}
+      </div>
+      ${stepText ? `<div style="color:var(--fg);font-size:0.9em;margin:3px 0;">${esc(stepText)}</div>` : ''}
+      ${stepLogic ? `<div class="step-logic">${esc(stepLogic)}</div>` : ''}
+    </div>`;
+  });
+
+  // Escape remaining free text (non-step content) but preserve our injected HTML
+  // Strategy: split on our injected divs, escape the gaps, rejoin
+  const parts = text.split(/(<div class="step-block"[\s\S]*?<\/div>\s*<\/div>)/);
+  const rendered = parts.map(part => {
+    if (part.startsWith('<div class="step-block"')) return part; // already HTML
+    // This is free text — escape and style it
+    const escaped = esc(part).trim();
+    if (!escaped) return '';
+    return `<div style="color:#9eaab6;font-size:0.88em;margin:6px 0;line-height:1.6;">${escaped}</div>`;
+  }).join('');
+
+  return rendered;
 }
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
