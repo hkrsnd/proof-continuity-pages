@@ -282,20 +282,19 @@ function renderRank(ei, ex) {
 }
 
 function renderFullTrace(rawText) {
-  // Render full model output with step tags highlighted inline.
-  // Free text between steps is shown as regular reasoning prose.
   if (!rawText) return '<span style="color:#8b949e">No output</span>';
 
   let text = rawText;
-  // Strip outer <think> wrapper if present (keep contents)
-  text = text.replace(/^<think>\s*/i, '').replace(/\s*<\/think>\s*$/i, '');
+  // Strip outer <think> wrapper (keep contents)
+  text = text.replace(/^<think>\s*/i, '').replace(/\s*<\/think>\s*/gi, '');
 
-  // Track repeated logic expressions
+  // Use a marker-based approach: replace step blocks with unique markers,
+  // then escape free text, then replace markers with rendered HTML.
+  const stepBlocks = [];
+  const MARKER = '\x00STEP_';
   const logicSeen = {};
 
-  // Replace <step ...>...</step> blocks with styled HTML
   text = text.replace(/<step\s+([^>]*)>([\s\S]*?)<\/step>/gi, (match, attrs, body) => {
-    // Parse attributes
     const nMatch = attrs.match(/n="(\d+)"/);
     const typeMatch = attrs.match(/type="(\w+)"/);
     const fromMatch = attrs.match(/from="([^"]+)"/);
@@ -304,13 +303,11 @@ function renderFullTrace(rawText) {
     const stepFrom = fromMatch ? fromMatch[1] : '';
     const isPrem = stepType === 'premise';
 
-    // Extract <text> and <logic> sub-tags
     const textMatch = body.match(/<text>([\s\S]*?)<\/text>/i);
     const logicMatch = body.match(/<logic>([\s\S]*?)<\/logic>/i);
     const stepText = textMatch ? textMatch[1].trim() : '';
     const stepLogic = logicMatch ? logicMatch[1].trim() : '';
 
-    // Detect repetition
     let repeated = false;
     if (!isPrem && stepLogic) {
       const key = stepLogic.trim().toLowerCase();
@@ -324,7 +321,7 @@ function renderFullTrace(rawText) {
     const fromHtml = stepFrom ? ` <span class="step-from">from ${esc(stepFrom)}</span>` : '';
     const repBadge = repeated ? ' <span class="loop-tag">repeated</span>' : '';
 
-    return `<div class="step-block" style="border-left:3px solid ${borderColor};${opacity}margin:10px 0;padding:6px 12px;border-radius:0 6px 6px 0;background:rgba(22,27,34,0.8);">
+    const html = `<div style="border-left:3px solid ${borderColor};${opacity}margin:10px 0;padding:6px 12px;border-radius:0 6px 6px 0;background:rgba(22,27,34,0.8);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
         <span class="step-tag ${tagCls}">${isPrem?'P':'D'}</span>
         <span style="color:#8b949e;font-size:0.85em;">Step ${esc(stepN)}</span>
@@ -333,20 +330,25 @@ function renderFullTrace(rawText) {
       ${stepText ? `<div style="color:var(--fg);font-size:0.9em;margin:3px 0;">${esc(stepText)}</div>` : ''}
       ${stepLogic ? `<div class="step-logic">${esc(stepLogic)}</div>` : ''}
     </div>`;
+
+    const idx = stepBlocks.length;
+    stepBlocks.push(html);
+    return MARKER + idx + '\x00';
   });
 
-  // Escape remaining free text (non-step content) but preserve our injected HTML
-  // Strategy: split on our injected divs, escape the gaps, rejoin
-  const parts = text.split(/(<div class="step-block"[\s\S]*?<\/div>\s*<\/div>)/);
-  const rendered = parts.map(part => {
-    if (part.startsWith('<div class="step-block"')) return part; // already HTML
-    // This is free text — escape and style it
-    const escaped = esc(part).trim();
-    if (!escaped) return '';
-    return `<div style="color:#9eaab6;font-size:0.88em;margin:6px 0;line-height:1.6;">${escaped}</div>`;
-  }).join('');
+  // Now text only has free text + markers. Escape free text, restore markers.
+  const escaped = esc(text);
+  const result = escaped.replace(/\x00STEP_(\d+)\x00/g, (_, idx) => stepBlocks[parseInt(idx)]);
 
-  return rendered;
+  // Wrap free text segments in styled divs
+  // Split on our rendered step divs and style the gaps
+  const finalParts = result.split(/(<div style="border-left:3px[\s\S]*?<\/div>\s*<\/div>\s*<\/div>)/);
+  return finalParts.map(part => {
+    if (part.trimStart().startsWith('<div style="border-left:3px')) return part;
+    const trimmed = part.trim();
+    if (!trimmed) return '';
+    return `<div style="color:#9eaab6;font-size:0.88em;margin:6px 0;line-height:1.6;white-space:pre-wrap;">${trimmed}</div>`;
+  }).join('');
 }
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
