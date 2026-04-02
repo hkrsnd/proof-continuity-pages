@@ -5,397 +5,314 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>L1 Test-Time Scaling: Best-of-N with ASP Verification</title>
 <style>
-  :root {
-    --bg: #0d1117; --fg: #c9d1d9; --card: #161b22; --border: #30363d;
-    --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922;
-    --purple: #bc8cff; --cyan: #39d353;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-         background: var(--bg); color: var(--fg); line-height: 1.6; padding: 20px; }
-  h1 { color: var(--accent); font-size: 1.8em; margin-bottom: 5px; }
-  h2 { color: var(--purple); font-size: 1.4em; margin: 30px 0 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-  h3 { color: var(--cyan); font-size: 1.15em; margin: 20px 0 10px; }
-  .subtitle { color: #8b949e; font-size: 0.95em; margin-bottom: 25px; }
-  .container { max-width: 1200px; margin: 0 auto; }
+:root {
+  --bg: #0d1117; --fg: #c9d1d9; --card: #161b22; --border: #30363d;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922;
+  --purple: #bc8cff; --cyan: #39d353; --orange: #db8b0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+       background: var(--bg); color: var(--fg); line-height: 1.6; padding: 20px; }
+.container { max-width: 1300px; margin: 0 auto; }
+h1 { color: var(--accent); font-size: 1.8em; margin-bottom: 4px; }
+h2 { color: var(--purple); font-size: 1.3em; margin: 28px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+h3 { color: var(--cyan); font-size: 1.05em; margin: 16px 0 8px; }
+.subtitle { color: #8b949e; font-size: 0.92em; margin-bottom: 20px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-  /* Summary cards */
-  .summary-row { display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
-  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-                  padding: 15px 20px; flex: 1; min-width: 150px; }
-  .summary-card .label { color: #8b949e; font-size: 0.85em; }
-  .summary-card .value { font-size: 1.8em; font-weight: 600; }
-  .summary-card .value.green { color: var(--green); }
-  .summary-card .value.yellow { color: var(--yellow); }
+/* Summary */
+.summary-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; flex: 1; min-width: 130px; }
+.summary-card .label { color: #8b949e; font-size: 0.82em; }
+.summary-card .value { font-size: 1.7em; font-weight: 600; }
+.value.green { color: var(--green); } .value.red { color: var(--red); } .value.yellow { color: var(--yellow); }
 
-  /* Theory selector */
-  .theory-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; }
-  .theory-tab { background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-                padding: 6px 14px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
-  .theory-tab:hover { border-color: var(--accent); }
-  .theory-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.tab { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 5px 13px; cursor: pointer; font-size: 0.88em; transition: 0.15s; }
+.tab:hover { border-color: var(--accent); }
+.tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+.tab.disabled { opacity: 0.35; cursor: default; }
+.logic-tabs .tab.active { background: var(--purple); border-color: var(--purple); }
 
-  /* Example card */
-  .example-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-                  padding: 20px; margin: 15px 0; }
-  .problem-box { background: #1c2333; border-radius: 6px; padding: 12px 16px; margin: 10px 0;
-                 font-size: 0.9em; border-left: 3px solid var(--accent); }
-  .gt-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.85em; font-weight: 600; }
-  .gt-yes { background: rgba(63,185,80,0.15); color: var(--green); }
-  .gt-no { background: rgba(248,81,73,0.15); color: var(--red); }
+/* Example card */
+.example { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin: 14px 0; }
+.problem { background: #1c2333; border-radius: 6px; padding: 11px 15px; margin: 8px 0; font-size: 0.88em; border-left: 3px solid var(--accent); }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.82em; font-weight: 600; }
+.badge-yes { background: rgba(63,185,80,0.15); color: var(--green); }
+.badge-no { background: rgba(248,81,73,0.15); color: var(--red); }
+.badge-selected { background: rgba(63,185,80,0.2); color: var(--green); border: 1px solid var(--green); }
 
-  /* Completion grid */
-  .completions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 15px 0; }
-  .completion-card { background: #1c2333; border: 2px solid var(--border); border-radius: 8px;
-                     padding: 12px; font-size: 0.85em; cursor: pointer; transition: all 0.2s; position: relative; }
-  .completion-card:hover { border-color: var(--accent); }
-  .completion-card.selected { border-color: var(--green); box-shadow: 0 0 10px rgba(63,185,80,0.3); }
-  .completion-card.correct .comp-answer { color: var(--green); }
-  .completion-card.wrong .comp-answer { color: var(--red); }
-  .selected-badge { position: absolute; top: -8px; right: 10px; background: var(--green); color: var(--bg);
-                    padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 700; }
-  .comp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .comp-idx { font-weight: 700; color: var(--accent); }
-  .comp-answer { font-weight: 700; font-size: 1.1em; }
-  .comp-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 8px 0; font-size: 0.82em; }
-  .comp-metrics .metric-label { color: #8b949e; }
-  .asp-bar { height: 6px; border-radius: 3px; margin-top: 6px; background: #21262d; overflow: hidden; }
-  .asp-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-  .asp-positive { background: linear-gradient(90deg, var(--green), #2ea043); }
-  .asp-negative { background: linear-gradient(90deg, var(--red), #da3633); }
-  .asp-zero { background: var(--yellow); }
-  .loop-badge { background: rgba(248,81,73,0.2); color: var(--red); padding: 1px 6px;
-                border-radius: 3px; font-size: 0.75em; font-weight: 600; }
+/* Completion grid */
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin: 12px 0; }
+.comp-tile { background: #1c2333; border: 2px solid var(--border); border-radius: 8px; padding: 10px; cursor: pointer; transition: 0.15s; position: relative; text-align: center; }
+.comp-tile:hover { border-color: var(--accent); transform: translateY(-1px); }
+.comp-tile.selected { border-color: var(--green); box-shadow: 0 0 12px rgba(63,185,80,0.25); }
+.comp-tile.active-view { border-color: var(--accent); background: #22293a; }
+.comp-tile .idx { font-weight: 700; color: var(--accent); font-size: 0.85em; }
+.comp-tile .ans { font-size: 1.3em; font-weight: 700; margin: 4px 0; }
+.comp-tile .ans.correct { color: var(--green); }
+.comp-tile .ans.wrong { color: var(--red); }
+.comp-tile .ans.none { color: #8b949e; }
+.comp-tile .asp { font-size: 0.95em; font-weight: 600; }
+.comp-tile .asp.pos { color: var(--green); }
+.comp-tile .asp.neg { color: var(--red); }
+.comp-tile .asp.zero { color: var(--yellow); }
+.comp-tile .meta { font-size: 0.75em; color: #8b949e; margin-top: 4px; }
+.comp-tile .loop-tag { background: rgba(248,81,73,0.2); color: var(--red); padding: 1px 5px; border-radius: 3px; font-size: 0.7em; font-weight: 600; }
+.sel-badge { position: absolute; top: -7px; right: 8px; background: var(--green); color: var(--bg); padding: 1px 7px; border-radius: 4px; font-size: 0.7em; font-weight: 700; }
 
-  /* Step trace detail (shown on click) */
-  .trace-detail { display: none; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-                  padding: 15px; margin: 10px 0; max-height: 500px; overflow-y: auto; }
-  .trace-detail.visible { display: block; }
-  .step-row { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #21262d; font-size: 0.85em; }
-  .step-type { min-width: 22px; font-weight: 700; }
-  .step-type.premise { color: var(--accent); }
-  .step-type.derived { color: var(--purple); }
-  .step-logic { font-family: 'Fira Code', 'Cascadia Code', monospace; color: var(--yellow); }
-  .step-text { color: #8b949e; font-style: italic; }
-  .step-from { color: var(--cyan); font-size: 0.8em; }
-  .raw-text { white-space: pre-wrap; font-family: monospace; font-size: 0.82em; max-height: 300px;
-              overflow-y: auto; background: #0d1117; padding: 10px; border-radius: 4px; margin-top: 8px; }
+/* Trace viewer */
+.trace-viewer { background: #0d1117; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 12px 0; display: none; }
+.trace-viewer.visible { display: block; }
+.trace-header { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px; font-size: 0.88em; }
+.trace-header .th-item { }
+.trace-header .th-label { color: #8b949e; }
+.trace-header .th-val { font-weight: 600; }
 
-  /* Ranking table */
-  .ranking-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85em; }
-  .ranking-table th { text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); color: var(--accent); }
-  .ranking-table td { padding: 6px 12px; border-bottom: 1px solid #21262d; }
-  .ranking-table tr.selected-row { background: rgba(63,185,80,0.08); }
-  .ranking-table tr.selected-row td:first-child { font-weight: 700; color: var(--green); }
+/* Step rendering */
+.step { border-left: 3px solid var(--border); margin: 6px 0; padding: 4px 0 4px 12px; font-size: 0.85em; }
+.step.premise { border-left-color: var(--accent); }
+.step.derived { border-left-color: var(--purple); }
+.step.derived.repeated { border-left-color: var(--red); opacity: 0.6; }
+.step-head { display: flex; align-items: center; gap: 8px; }
+.step-tag { font-size: 0.75em; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+.step-tag.premise { background: rgba(88,166,255,0.15); color: var(--accent); }
+.step-tag.derived { background: rgba(188,140,255,0.15); color: var(--purple); }
+.step-num { color: #8b949e; font-size: 0.85em; }
+.step-from { color: var(--cyan); font-size: 0.8em; }
+.step-logic { font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; color: var(--yellow); margin: 2px 0; padding: 3px 6px; background: rgba(210,153,34,0.08); border-radius: 3px; display: inline-block; }
+.step-text { color: #8b949e; font-style: italic; font-size: 0.92em; }
 
-  /* Loading */
-  .loading { text-align: center; padding: 60px; color: #8b949e; }
-  .error { color: var(--red); padding: 20px; text-align: center; }
+/* Raw output toggle */
+.raw-toggle { color: var(--accent); cursor: pointer; font-size: 0.85em; margin-top: 8px; }
+.raw-box { display: none; white-space: pre-wrap; font-family: monospace; font-size: 0.8em; max-height: 350px; overflow-y: auto; background: var(--card); padding: 10px; border-radius: 4px; margin-top: 6px; }
+.raw-box.visible { display: block; }
 
-  /* Logic type tabs */
-  .logic-type-tabs { display: flex; gap: 10px; margin: 20px 0; }
-  .logic-type-tab { background: var(--card); border: 2px solid var(--border); border-radius: 8px;
-                    padding: 10px 20px; cursor: pointer; font-size: 1em; font-weight: 600; transition: all 0.2s; }
-  .logic-type-tab:hover { border-color: var(--purple); }
-  .logic-type-tab.active { background: var(--purple); color: var(--bg); border-color: var(--purple); }
-  .logic-type-tab.disabled { opacity: 0.4; cursor: not-allowed; }
+/* Ranking table */
+.rank-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.83em; }
+.rank-table th { text-align: left; padding: 7px 10px; border-bottom: 2px solid var(--border); color: var(--accent); font-size: 0.9em; }
+.rank-table td { padding: 5px 10px; border-bottom: 1px solid #21262d; }
+.rank-table tr.sel { background: rgba(63,185,80,0.08); }
+.rank-table tr.sel td:first-child { font-weight: 700; color: var(--green); }
+.rank-table .loop-cell { color: var(--red); font-weight: 600; }
+
+.loading { text-align: center; padding: 50px; color: #8b949e; }
+.none-msg { color: #8b949e; padding: 30px; text-align: center; font-style: italic; }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>L1 Test-Time Scaling: Best-of-N with ASP Verification</h1>
   <p class="subtitle">
-    Generate N reasoning traces, verify each with Answer Set Programming, select the best.
-    <br>Model: Qwen3-8B &nbsp;|&nbsp; N=8 &nbsp;|&nbsp; Temperature=1.0 &nbsp;|&nbsp; Verifier: Unified ASP
+    Generate N reasoning traces per problem. Verify each step with ASP (Answer Set Programming).
+    Rank by logical validity. Select the best verified chain.
   </p>
 
-  <div class="logic-type-tabs" id="logicTypeTabs"></div>
-
-  <div class="summary-row" id="summaryCards"></div>
-
+  <div class="tabs logic-tabs" id="ltTabs"></div>
+  <div class="summary-row" id="summary"></div>
   <h2>Inference Types</h2>
-  <div class="theory-tabs" id="theoryTabs"></div>
-
-  <div id="examplesContainer"></div>
-
-  <div class="loading" id="loadingMsg">Loading data...</div>
-  <div class="error" id="errorMsg" style="display:none;"></div>
+  <div class="tabs" id="thTabs"></div>
+  <div id="examples"></div>
+  <div class="loading" id="loading">Loading data...</div>
 </div>
 
 <script>
-const DATA_FILES = {
-  'propositional_logic': 'bon_demo_propositional_logic_data.json',
-  'first_order_logic': 'bon_demo_first_order_logic_data.json',
-  'nm_logic': 'bon_demo_nm_logic_data.json',
+const FILES = {
+  propositional_logic: 'bon_demo_propositional_logic_data.json',
+  first_order_logic: 'bon_demo_first_order_logic_data.json',
+  nm_logic: 'bon_demo_nm_logic_data.json',
+};
+const LT_LABELS = {
+  propositional_logic: 'Propositional Logic',
+  first_order_logic: 'First-Order Logic',
+  nm_logic: 'Non-Monotonic',
 };
 
-let allData = {};
-let currentLogicType = null;
-let currentTheory = null;
+let DB = {}, curLT = null, curTH = null;
 
-async function loadData() {
-  const loading = document.getElementById('loadingMsg');
-  const error = document.getElementById('errorMsg');
-  let anyLoaded = false;
-
-  for (const [lt, file] of Object.entries(DATA_FILES)) {
-    try {
-      const resp = await fetch(file);
-      if (resp.ok) {
-        allData[lt] = await resp.json();
-        anyLoaded = true;
-      }
-    } catch (e) {
-      console.log(`Could not load ${file}: ${e}`);
-    }
+async function init() {
+  for (const [lt, f] of Object.entries(FILES)) {
+    try { const r = await fetch(f); if (r.ok) DB[lt] = await r.json(); } catch(e) {}
   }
-
-  loading.style.display = 'none';
-  if (!anyLoaded) {
-    error.textContent = 'No data files found. Run the BoN demo script first.';
-    error.style.display = 'block';
-    return;
-  }
-
-  renderLogicTypeTabs();
-  // Auto-select first available
-  const first = Object.keys(allData)[0];
-  selectLogicType(first);
+  document.getElementById('loading').style.display = 'none';
+  if (!Object.keys(DB).length) { document.getElementById('examples').innerHTML = '<div class="none-msg">No data files found yet. L1 demo jobs are still running.</div>'; return; }
+  renderLTTabs();
+  pickLT(Object.keys(DB)[0]);
 }
 
-function renderLogicTypeTabs() {
-  const container = document.getElementById('logicTypeTabs');
-  const labels = {
-    'propositional_logic': 'Propositional Logic',
-    'first_order_logic': 'First-Order Logic',
-    'nm_logic': 'Non-Monotonic Reasoning',
-  };
-  container.innerHTML = '';
-  for (const lt of Object.keys(DATA_FILES)) {
-    const tab = document.createElement('div');
-    tab.className = 'logic-type-tab' + (allData[lt] ? '' : ' disabled');
-    tab.textContent = labels[lt] || lt;
-    if (allData[lt]) {
-      tab.onclick = () => selectLogicType(lt);
-    }
-    tab.dataset.lt = lt;
-    container.appendChild(tab);
+function renderLTTabs() {
+  const c = document.getElementById('ltTabs'); c.innerHTML = '';
+  for (const lt of Object.keys(FILES)) {
+    const t = document.createElement('div');
+    t.className = 'tab' + (DB[lt] ? '' : ' disabled');
+    t.textContent = LT_LABELS[lt];
+    t.dataset.lt = lt;
+    if (DB[lt]) t.onclick = () => pickLT(lt);
+    c.appendChild(t);
   }
 }
 
-function selectLogicType(lt) {
-  currentLogicType = lt;
-  document.querySelectorAll('.logic-type-tab').forEach(t => t.classList.toggle('active', t.dataset.lt === lt));
-
-  const data = allData[lt];
-  renderSummary(data);
-  renderTheoryTabs(data);
-
-  const firstTheory = Object.keys(data.theories)[0];
-  if (firstTheory) selectTheory(firstTheory);
-}
-
-function renderSummary(data) {
-  const s = data.summary || {};
-  const container = document.getElementById('summaryCards');
-  const bonAcc = s.total_examples ? (s.bon_correct / s.total_examples * 100).toFixed(0) : '?';
-  const greedyAcc = s.total_examples ? (s.greedy_correct / s.total_examples * 100).toFixed(0) : '?';
-  container.innerHTML = `
-    <div class="summary-card">
-      <div class="label">Examples</div>
-      <div class="value">${s.total_examples || '?'}</div>
-    </div>
-    <div class="summary-card">
-      <div class="label">Greedy (Comp #1)</div>
-      <div class="value yellow">${greedyAcc}%</div>
-    </div>
-    <div class="summary-card">
-      <div class="label">BoN-${data.metadata?.n || 8} + ASP</div>
-      <div class="value green">${bonAcc}%</div>
-    </div>
-    <div class="summary-card">
-      <div class="label">Theories</div>
-      <div class="value">${Object.keys(data.theories).length}</div>
-    </div>
-  `;
-}
-
-function renderTheoryTabs(data) {
-  const container = document.getElementById('theoryTabs');
-  container.innerHTML = '';
-  for (const theory of Object.keys(data.theories)) {
-    const tab = document.createElement('div');
-    tab.className = 'theory-tab';
-    tab.textContent = theory.replace(/_/g, ' ');
-    tab.dataset.theory = theory;
-    tab.onclick = () => selectTheory(theory);
-    container.appendChild(tab);
+function pickLT(lt) {
+  curLT = lt;
+  document.querySelectorAll('#ltTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.lt === lt));
+  const d = DB[lt], s = d.summary || {};
+  const n = d.metadata?.n || 8;
+  const bonPct = s.total_examples ? Math.round(s.bon_correct/s.total_examples*100) : '?';
+  const grePct = s.total_examples ? Math.round(s.greedy_correct/s.total_examples*100) : '?';
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-card"><div class="label">Model</div><div class="value" style="font-size:1em;color:var(--accent)">${esc(d.metadata?.model||'?')}</div></div>
+    <div class="summary-card"><div class="label">Examples</div><div class="value">${s.total_examples||'?'}</div></div>
+    <div class="summary-card"><div class="label">Greedy (#1)</div><div class="value yellow">${grePct}%</div></div>
+    <div class="summary-card"><div class="label">BoN-${n} + ASP</div><div class="value green">${bonPct}%</div></div>`;
+  const thC = document.getElementById('thTabs'); thC.innerHTML = '';
+  for (const th of Object.keys(d.theories)) {
+    const t = document.createElement('div');
+    t.className = 'tab'; t.textContent = th.replace(/_/g, ' '); t.dataset.th = th;
+    t.onclick = () => pickTH(th); thC.appendChild(t);
   }
+  pickTH(Object.keys(d.theories)[0]);
 }
 
-function selectTheory(theory) {
-  currentTheory = theory;
-  document.querySelectorAll('.theory-tab').forEach(t => t.classList.toggle('active', t.dataset.theory === theory));
-  renderExamples(allData[currentLogicType].theories[theory]);
+function pickTH(th) {
+  curTH = th;
+  document.querySelectorAll('#thTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.th === th));
+  renderExamples(DB[curLT].theories[th]);
 }
 
-function renderExamples(examples) {
-  const container = document.getElementById('examplesContainer');
-  container.innerHTML = '';
-
-  examples.forEach((ex, exIdx) => {
-    const card = document.createElement('div');
-    card.className = 'example-card';
-
-    const gtClass = ex.ground_truth === 'yes' ? 'gt-yes' : 'gt-no';
-    const selectedComp = ex.completions[ex.selected_index];
-
-    card.innerHTML = `
-      <h3>Example ${exIdx + 1} &nbsp;
-        <span class="gt-badge ${gtClass}">Ground truth: ${ex.ground_truth}</span>
-        &nbsp; → &nbsp;
-        <span class="gt-badge ${ex.selected_correct ? 'gt-yes' : 'gt-no'}">
-          BoN answer: ${ex.selected_answer} ${ex.selected_correct ? '✓' : '✗'}
-        </span>
+function renderExamples(exs) {
+  const c = document.getElementById('examples'); c.innerHTML = '';
+  exs.forEach((ex, ei) => {
+    const gt = ex.ground_truth, sel = ex.completions[ex.selected_index];
+    const gtCls = gt === 'yes' ? 'badge-yes' : 'badge-no';
+    const selCls = ex.selected_correct ? 'badge-yes' : 'badge-no';
+    const div = document.createElement('div'); div.className = 'example';
+    div.innerHTML = `
+      <h3>Example ${ei+1}
+        <span class="badge ${gtCls}">GT: ${gt}</span>
+        <span class="badge ${selCls}">BoN: ${ex.selected_answer} ${ex.selected_correct?'&#10003;':'&#10007;'}</span>
+        <span style="color:#8b949e;font-size:0.8em;margin-left:8px">${ex.generation_time||'?'}s</span>
       </h3>
-      <div class="problem-box">
-        <strong>Context:</strong> ${escapeHtml(ex.context.substring(0, 400))}${ex.context.length > 400 ? '...' : ''}<br><br>
-        <strong>Question:</strong> ${escapeHtml(ex.question)}
-      </div>
-
-      <h3>8 Reasoning Traces (click to expand)</h3>
-      <div class="completions-grid" id="compGrid_${exIdx}"></div>
-      <div id="traceDetail_${exIdx}" class="trace-detail"></div>
-
+      <div class="problem"><b>Context:</b> ${esc(ex.context.substring(0,500))}${ex.context.length>500?'...':''}<br><br><b>Question:</b> ${esc(ex.question)}</div>
+      <h3>8 Reasoning Traces <span style="color:#8b949e;font-size:0.8em">(click to inspect)</span></h3>
+      <div class="comp-grid" id="cg_${ei}"></div>
+      <div class="trace-viewer" id="tv_${ei}"></div>
       <h3>ASP Ranking</h3>
-      <table class="ranking-table" id="rankTable_${exIdx}"></table>
-    `;
-
-    container.appendChild(card);
-
-    // Render completion cards
-    renderCompletionGrid(exIdx, ex);
-    renderRankingTable(exIdx, ex);
+      <table class="rank-table" id="rt_${ei}"></table>`;
+    c.appendChild(div);
+    renderGrid(ei, ex);
+    renderRank(ei, ex);
   });
 }
 
-function renderCompletionGrid(exIdx, ex) {
-  const grid = document.getElementById(`compGrid_${exIdx}`);
-  grid.innerHTML = '';
-
-  ex.completions.forEach((comp, i) => {
-    const isSelected = i === ex.selected_index;
-    const isCorrect = comp.correct;
-
-    const card = document.createElement('div');
-    card.className = `completion-card ${isCorrect ? 'correct' : 'wrong'} ${isSelected ? 'selected' : ''}`;
-    card.onclick = () => showTraceDetail(exIdx, ex, i);
-
-    const aspPct = Math.min(Math.abs(comp.asp_consistency) * 100, 100);
-    const aspClass = comp.asp_consistency > 0 ? 'asp-positive' : (comp.asp_consistency < 0 ? 'asp-negative' : 'asp-zero');
-
-    card.innerHTML = `
-      ${isSelected ? '<div class="selected-badge">✓ SELECTED</div>' : ''}
-      <div class="comp-header">
-        <span class="comp-idx">#${i + 1}</span>
-        <span class="comp-answer">${comp.answer || 'N/A'} ${isCorrect ? '✓' : '✗'}</span>
-      </div>
-      <div class="comp-metrics">
-        <span class="metric-label">ASP:</span><span>${comp.asp_consistency >= 0 ? '+' : ''}${comp.asp_consistency.toFixed(3)}</span>
-        <span class="metric-label">Steps:</span><span>${comp.num_steps} (${comp.unique_derived} unique)</span>
-        <span class="metric-label">Repeats:</span><span>${comp.max_repeats} ${comp.has_loop ? '<span class="loop-badge">LOOP</span>' : ''}</span>
-        <span class="metric-label">Answer:</span><span>${comp.has_answer ? 'yes' : 'no answer'}</span>
-      </div>
-      <div class="asp-bar"><div class="asp-fill ${aspClass}" style="width: ${aspPct}%"></div></div>
-    `;
-    grid.appendChild(card);
+function renderGrid(ei, ex) {
+  const g = document.getElementById('cg_'+ei); g.innerHTML = '';
+  ex.completions.forEach((comp, ci) => {
+    const isSel = ci === ex.selected_index;
+    const ans = comp.answer || 'N/A';
+    const correct = comp.correct;
+    const aspCls = comp.asp_consistency > 0 ? 'pos' : (comp.asp_consistency < 0 ? 'neg' : 'zero');
+    const ansCls = !comp.has_answer ? 'none' : (correct ? 'correct' : 'wrong');
+    const t = document.createElement('div');
+    t.className = 'comp-tile' + (isSel ? ' selected' : '');
+    t.id = `ct_${ei}_${ci}`;
+    t.onclick = () => showTrace(ei, ex, ci);
+    t.innerHTML = `${isSel ? '<div class="sel-badge">SELECTED</div>' : ''}
+      <div class="idx">#${ci+1}</div>
+      <div class="ans ${ansCls}">${ans}</div>
+      <div class="asp ${aspCls}">${comp.asp_consistency>=0?'+':''}${comp.asp_consistency.toFixed(3)}</div>
+      <div class="meta">${comp.num_steps} steps${comp.has_loop?' <span class="loop-tag">LOOP x'+comp.max_repeats+'</span>':''}</div>`;
+    g.appendChild(t);
   });
 }
 
-function showTraceDetail(exIdx, ex, compIdx) {
-  const detail = document.getElementById(`traceDetail_${exIdx}`);
-  const comp = ex.completions[compIdx];
+function showTrace(ei, ex, ci) {
+  // Highlight active tile
+  document.querySelectorAll(`#cg_${ei} .comp-tile`).forEach(t => t.classList.remove('active-view'));
+  document.getElementById(`ct_${ei}_${ci}`).classList.add('active-view');
 
-  let stepsHtml = comp.steps.map(s => {
-    const typeClass = s.type === 'premise' ? 'premise' : 'derived';
-    const typeLabel = s.type === 'premise' ? 'P' : 'D';
-    const fromStr = s.from_refs && s.from_refs.length ? `<span class="step-from">from: ${s.from_refs.join(', ')}</span>` : '';
-    return `
-      <div class="step-row">
-        <span class="step-type ${typeClass}">${typeLabel}${s.n}</span>
-        <div>
-          <div class="step-logic">${escapeHtml(s.logic || '(no logic)')}</div>
-          <div class="step-text">${escapeHtml(s.text || '')}</div>
-          ${fromStr}
-        </div>
+  const comp = ex.completions[ci], tv = document.getElementById('tv_'+ei);
+  const aspCls = comp.asp_consistency > 0 ? 'color:var(--green)' : (comp.asp_consistency < 0 ? 'color:var(--red)' : 'color:var(--yellow)');
+  const ansCls = comp.correct ? 'color:var(--green)' : 'color:var(--red)';
+
+  // Track repeated logic for highlighting
+  const logicSeen = {};
+  const stepsHtml = comp.steps.map(s => {
+    const isPrem = s.type === 'premise';
+    let repeated = false;
+    if (!isPrem && s.logic) {
+      const key = s.logic.trim().toLowerCase();
+      logicSeen[key] = (logicSeen[key]||0) + 1;
+      if (logicSeen[key] > 1) repeated = true;
+    }
+    const cls = isPrem ? 'premise' : ('derived' + (repeated ? ' repeated' : ''));
+    const tagCls = isPrem ? 'premise' : 'derived';
+    const from = s.from_refs && s.from_refs.length ? `<span class="step-from">from ${s.from_refs.join(', ')}</span>` : '';
+    return `<div class="step ${cls}">
+      <div class="step-head">
+        <span class="step-tag ${tagCls}">${isPrem?'P':'D'}</span>
+        <span class="step-num">Step ${s.n}</span>
+        ${from}
       </div>
-    `;
+      ${s.logic ? `<div class="step-logic">${esc(s.logic)}</div>` : ''}
+      ${s.text ? `<div class="step-text">${esc(s.text)}</div>` : ''}
+    </div>`;
   }).join('');
+  const moreSteps = comp.num_steps > comp.steps.length ? `<div style="color:#8b949e;padding:8px;font-size:0.85em">... ${comp.num_steps - comp.steps.length} more steps (truncated for display)</div>` : '';
 
-  if (comp.num_steps > 20) {
-    stepsHtml += `<div style="color: #8b949e; padding: 8px;">... ${comp.num_steps - 20} more steps (truncated)</div>`;
-  }
-
-  detail.innerHTML = `
-    <h3>Completion #${compIdx + 1} — Full Reasoning Trace</h3>
-    <div style="margin: 8px 0;">
-      <strong>Answer:</strong> ${comp.answer} ${comp.correct ? '✓ correct' : '✗ wrong'} &nbsp;|&nbsp;
-      <strong>ASP:</strong> ${comp.asp_consistency >= 0 ? '+' : ''}${comp.asp_consistency.toFixed(3)} &nbsp;|&nbsp;
-      <strong>Steps:</strong> ${comp.num_steps} (${comp.unique_derived} unique, ${comp.max_repeats} max repeats)
+  const rawId = `raw_${ei}_${ci}`;
+  tv.innerHTML = `
+    <div class="trace-header">
+      <div class="th-item"><span class="th-label">Completion</span> <span class="th-val">#${ci+1}</span></div>
+      <div class="th-item"><span class="th-label">Answer</span> <span class="th-val" style="${ansCls}">${comp.answer||'N/A'} ${comp.correct?'&#10003;':'&#10007;'}</span></div>
+      <div class="th-item"><span class="th-label">ASP</span> <span class="th-val" style="${aspCls}">${comp.asp_consistency>=0?'+':''}${comp.asp_consistency.toFixed(3)}</span></div>
+      <div class="th-item"><span class="th-label">Steps</span> <span class="th-val">${comp.num_steps}</span></div>
+      <div class="th-item"><span class="th-label">Unique derived</span> <span class="th-val">${comp.unique_derived}</span></div>
+      <div class="th-item"><span class="th-label">Max repeats</span> <span class="th-val" style="${comp.has_loop?'color:var(--red)':''}">${comp.max_repeats}${comp.has_loop?' (LOOP)':''}</span></div>
+    </div>
+    <div style="margin-bottom:8px;font-size:0.85em;color:#8b949e">
+      <span class="step-tag premise">P</span> = Premise &nbsp;
+      <span class="step-tag derived">D</span> = Derived &nbsp;
+      <span style="color:var(--yellow)">yellow</span> = logic expression &nbsp;
+      <span style="color:var(--red);opacity:0.6">faded red</span> = repeated derivation
     </div>
     ${stepsHtml}
-    <h3 style="margin-top: 15px;">Raw Output</h3>
-    <div class="raw-text">${escapeHtml(comp.text)}</div>
-  `;
-  detail.classList.add('visible');
+    ${moreSteps}
+    <div class="raw-toggle" onclick="document.getElementById('${rawId}').classList.toggle('visible')">Show/hide raw output</div>
+    <div class="raw-box" id="${rawId}">${esc(comp.text)}</div>`;
+  tv.classList.add('visible');
 }
 
-function renderRankingTable(exIdx, ex) {
-  const table = document.getElementById(`rankTable_${exIdx}`);
-
-  // Sort completions by selection priority
-  const ranked = ex.completions.map((c, i) => ({...c, origIdx: i}))
-    .sort((a, b) => {
-      const aValid = a.has_answer && !a.has_loop ? 2 : (a.has_answer ? 1 : 0);
-      const bValid = b.has_answer && !b.has_loop ? 2 : (b.has_answer ? 1 : 0);
-      if (aValid !== bValid) return bValid - aValid;
-      if (a.asp_consistency !== b.asp_consistency) return b.asp_consistency - a.asp_consistency;
-      return a.num_steps - b.num_steps;
-    });
-
-  let html = `<thead><tr>
-    <th>Rank</th><th>#</th><th>Answer</th><th>Correct</th>
-    <th>ASP Consistency</th><th>Steps</th><th>Unique</th><th>Repeats</th><th>Status</th>
-  </tr></thead><tbody>`;
-
-  ranked.forEach((c, rank) => {
-    const isSelected = c.origIdx === ex.selected_index;
-    const rowClass = isSelected ? 'selected-row' : '';
-    const status = isSelected ? '→ SELECTED' : (c.has_loop ? 'loop' : (!c.has_answer ? 'no answer' : ''));
-    html += `<tr class="${rowClass}">
-      <td>${rank + 1}</td>
-      <td>#${c.origIdx + 1}</td>
-      <td>${c.answer || 'N/A'}</td>
-      <td style="color: ${c.correct ? 'var(--green)' : 'var(--red)'}">${c.correct ? '✓' : '✗'}</td>
-      <td style="color: ${c.asp_consistency > 0 ? 'var(--green)' : (c.asp_consistency < 0 ? 'var(--red)' : 'var(--yellow)')}">${c.asp_consistency >= 0 ? '+' : ''}${c.asp_consistency.toFixed(3)}</td>
-      <td>${c.num_steps}</td>
-      <td>${c.unique_derived}</td>
-      <td>${c.max_repeats}</td>
-      <td style="color: ${isSelected ? 'var(--green)' : '#8b949e'}; font-weight: ${isSelected ? '700' : '400'}">${status}</td>
-    </tr>`;
+function renderRank(ei, ex) {
+  const t = document.getElementById('rt_'+ei);
+  const ranked = ex.completions.map((c,i) => ({...c, oi:i})).sort((a,b) => {
+    const av = a.has_answer&&!a.has_loop?2:(a.has_answer?1:0);
+    const bv = b.has_answer&&!b.has_loop?2:(b.has_answer?1:0);
+    if (av!==bv) return bv-av;
+    if (a.asp_consistency!==b.asp_consistency) return b.asp_consistency-a.asp_consistency;
+    return a.num_steps-b.num_steps;
   });
-
-  html += '</tbody>';
-  table.innerHTML = html;
+  let h = `<thead><tr><th>Rank</th><th>#</th><th>Answer</th><th></th><th>ASP</th><th>Steps</th><th>Unique</th><th>Repeats</th><th></th></tr></thead><tbody>`;
+  ranked.forEach((c,r) => {
+    const isSel = c.oi === ex.selected_index;
+    const aspSt = c.asp_consistency>0?'color:var(--green)':(c.asp_consistency<0?'color:var(--red)':'color:var(--yellow)');
+    const status = isSel ? '<b style="color:var(--green)">&#10140; SELECTED</b>' : (c.has_loop ? '<span class="loop-cell">loop</span>' : (!c.has_answer ? '<span style="color:#8b949e">no answer</span>' : ''));
+    h += `<tr class="${isSel?'sel':''}">
+      <td>${r+1}</td><td>#${c.oi+1}</td>
+      <td>${c.answer||'N/A'}</td>
+      <td style="color:${c.correct?'var(--green)':'var(--red)'}">${c.correct?'&#10003;':'&#10007;'}</td>
+      <td style="${aspSt};font-weight:600">${c.asp_consistency>=0?'+':''}${c.asp_consistency.toFixed(3)}</td>
+      <td>${c.num_steps}</td><td>${c.unique_derived}</td>
+      <td${c.has_loop?' class="loop-cell"':''}>${c.max_repeats}</td>
+      <td>${status}</td></tr>`;
+  });
+  t.innerHTML = h + '</tbody>';
 }
 
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text || '';
-  return div.innerHTML;
-}
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 
-loadData();
+init();
 </script>
 </body>
 </html>
