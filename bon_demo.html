@@ -321,14 +321,14 @@ function renderFullTrace(rawText) {
     const fromHtml = stepFrom ? ` <span class="step-from">from ${esc(stepFrom)}</span>` : '';
     const repBadge = repeated ? ' <span class="loop-tag">repeated</span>' : '';
 
-    const html = `<div style="border-left:3px solid ${borderColor};${opacity}margin:10px 0;padding:6px 12px;border-radius:0 6px 6px 0;background:rgba(22,27,34,0.8);">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+    const html = `<div class="step ${tagCls}${repeated?' repeated':''}" style="${opacity}">
+      <div class="step-head">
         <span class="step-tag ${tagCls}">${isPrem?'P':'D'}</span>
-        <span style="color:#8b949e;font-size:0.85em;">Step ${esc(stepN)}</span>
+        <span class="step-num">Step ${esc(stepN)}</span>
         ${fromHtml}${repBadge}
       </div>
-      ${stepText ? `<div style="color:var(--fg);font-size:0.9em;margin:3px 0;">${esc(stepText)}</div>` : ''}
       ${stepLogic ? `<div class="step-logic">${esc(stepLogic)}</div>` : ''}
+      ${stepText ? `<div class="step-text">${esc(stepText)}</div>` : ''}
     </div>`;
 
     const idx = stepBlocks.length;
@@ -342,9 +342,9 @@ function renderFullTrace(rawText) {
 
   // Wrap free text segments in styled divs
   // Split on our rendered step divs and style the gaps
-  const finalParts = result.split(/(<div style="border-left:3px[\s\S]*?<\/div>\s*<\/div>\s*<\/div>)/);
+  const finalParts = result.split(/(<div class="step [\s\S]*?<\/div>\s*<\/div>)/);
   return finalParts.map(part => {
-    if (part.trimStart().startsWith('<div style="border-left:3px')) return part;
+    if (part.trimStart().startsWith('<div class="step ')) return part;
     const trimmed = part.trim();
     if (!trimmed) return '';
     return `<div style="color:#9eaab6;font-size:0.88em;margin:6px 0;line-height:1.6;white-space:pre-wrap;">${trimmed}</div>`;
