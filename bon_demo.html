@@ -126,11 +126,19 @@ const FILES = {
   propositional_logic: 'bon_demo_propositional_logic_data.json',
   first_order_logic: 'bon_demo_first_order_logic_data.json',
   nm_logic: 'bon_demo_nm_logic_data.json',
+  folio: 'bon_demo_folio_data.json',
+  prontoqa: 'bon_demo_prontoqa_data.json',
+  proofwriter: 'bon_demo_proofwriter_data.json',
+  proof_bank: 'bon_demo_proof_bank_data.json',
 };
 const LT_LABELS = {
-  propositional_logic: 'Propositional Logic',
-  first_order_logic: 'First-Order Logic',
-  nm_logic: 'Non-Monotonic',
+  propositional_logic: 'LogicBench: Propositional',
+  first_order_logic: 'LogicBench: FOL',
+  nm_logic: 'LogicBench: Non-Monotonic',
+  folio: 'FOLIO',
+  prontoqa: 'ProntoQA',
+  proofwriter: 'ProofWriter',
+  proof_bank: 'ProofBank',
 };
 
 let DB = {}, curLT = null, curTH = null;
@@ -169,19 +177,22 @@ function pickLT(lt) {
     <div class="summary-card"><div class="label">Examples</div><div class="value">${s.total_examples||'?'}</div></div>
     <div class="summary-card"><div class="label">Greedy (#1)</div><div class="value yellow">${grePct}%</div></div>
     <div class="summary-card"><div class="label">BoN-${n} + ASP</div><div class="value green">${bonPct}%</div></div>`;
+  // Support both "theories" (LogicBench) and "categories" (other benchmarks)
+  const groups = d.theories || d.categories || {};
+  d._groups = groups;
   const thC = document.getElementById('thTabs'); thC.innerHTML = '';
-  for (const th of Object.keys(d.theories)) {
+  for (const th of Object.keys(groups)) {
     const t = document.createElement('div');
     t.className = 'tab'; t.textContent = th.replace(/_/g, ' '); t.dataset.th = th;
     t.onclick = () => pickTH(th); thC.appendChild(t);
   }
-  pickTH(Object.keys(d.theories)[0]);
+  pickTH(Object.keys(groups)[0]);
 }
 
 function pickTH(th) {
   curTH = th;
   document.querySelectorAll('#thTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.th === th));
-  renderExamples(DB[curLT].theories[th]);
+  renderExamples(DB[curLT]._groups[th]);
 }
 
 function renderExamples(exs) {
