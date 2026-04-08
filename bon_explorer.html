@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 Best-of-N Explorer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; }
+
+/* Header */
+.header { background: #161b22; border-bottom: 1px solid #30363d; padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 1.4em; color: #e6edf3; margin-bottom: 8px; }
+.header-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.header-controls select, .header-controls button { background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 6px 12px; font-size: 0.85em; cursor: pointer; }
+.header-controls select:hover, .header-controls button:hover { border-color: #58a6ff; }
+.header-controls button.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+
+/* Summary bar */
+.summary-bar { background: #161b22; border-bottom: 1px solid #30363d; padding: 10px 24px; display: flex; gap: 24px; flex-wrap: wrap; font-size: 0.85em; }
+.stat { display: flex; gap: 6px; }
+.stat-label { color: #8b949e; }
+.stat-value { font-weight: 600; }
+.stat-value.good { color: #3fb950; }
+.stat-value.bad { color: #f85149; }
+.stat-value.neutral { color: #d29922; }
+
+/* Main layout */
+.main { display: flex; height: calc(100vh - 110px); }
+.sidebar { width: 320px; min-width: 320px; border-right: 1px solid #30363d; overflow-y: auto; background: #0d1117; }
+.content { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* Example list */
+.example-item { padding: 10px 16px; border-bottom: 1px solid #21262d; cursor: pointer; transition: background 0.15s; }
+.example-item:hover { background: #161b22; }
+.example-item.selected { background: #1c2128; border-left: 3px solid #58a6ff; }
+.example-item .idx { color: #8b949e; font-size: 0.75em; }
+.example-item .preview { font-size: 0.82em; color: #c9d1d9; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.example-item .tags { display: flex; gap: 4px; margin-top: 4px; }
+.tag { font-size: 0.7em; padding: 2px 6px; border-radius: 10px; }
+.tag-correct { background: #238636; color: #fff; }
+.tag-wrong { background: #da3633; color: #fff; }
+.tag-oracle { background: #1f6feb; color: #fff; }
+.tag-category { background: #30363d; color: #8b949e; }
+
+/* Detail view */
+.detail-section { margin-bottom: 24px; }
+.detail-section h2 { font-size: 1.1em; color: #e6edf3; margin-bottom: 8px; border-bottom: 1px solid #21262d; padding-bottom: 6px; }
+.detail-section h3 { font-size: 0.95em; color: #d2a8ff; margin: 12px 0 6px; }
+
+.context-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; font-size: 0.85em; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+.ground-truth { font-size: 0.9em; margin-top: 8px; }
+.ground-truth span { font-weight: 700; color: #3fb950; }
+
+/* Completion cards */
+.completions-grid { display: flex; flex-direction: column; gap: 8px; }
+.comp-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+.comp-card.selected-card { border-color: #58a6ff; border-width: 2px; }
+.comp-card.correct-card { border-color: #3fb950; }
+.comp-card.wrong-card { border-color: #f85149; }
+
+.comp-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #21262d; cursor: pointer; }
+.comp-header:hover { background: #30363d; }
+.comp-header .comp-idx { font-weight: 600; font-size: 0.85em; }
+.comp-header .comp-scores { display: flex; gap: 12px; font-size: 0.8em; }
+.comp-header .score { display: flex; gap: 4px; }
+.comp-header .score-label { color: #8b949e; }
+.score-pos { color: #3fb950; }
+.score-neg { color: #f85149; }
+.score-zero { color: #d29922; }
+
+.comp-body { padding: 12px; display: none; }
+.comp-body.expanded { display: block; }
+
+/* Steps */
+.step { margin: 6px 0; padding: 8px; border-radius: 6px; font-size: 0.82em; }
+.step-premise { background: #1c2128; border-left: 3px solid #8b949e; }
+.step-derived { background: #0d2230; border-left: 3px solid #58a6ff; }
+.step-n { font-weight: 700; color: #d2a8ff; }
+.step-type { font-size: 0.75em; color: #8b949e; text-transform: uppercase; }
+.step-from { font-size: 0.75em; color: #58a6ff; }
+.step-text { margin-top: 4px; color: #c9d1d9; }
+.step-logic { margin-top: 2px; font-family: 'Consolas', 'Fira Code', monospace; color: #79c0ff; font-size: 0.9em; }
+
+/* Raw text */
+.raw-text { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 0.78em; line-height: 1.4; white-space: pre-wrap; max-height: 400px; overflow-y: auto; color: #8b949e; }
+
+/* Answer highlight */
+.answer-line { font-size: 0.9em; margin-top: 6px; padding: 4px 8px; border-radius: 4px; }
+.answer-correct { background: #23863622; color: #3fb950; }
+.answer-wrong { background: #da363322; color: #f85149; }
+
+/* Filter pills */
+.filter-row { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+.filter-pill { padding: 4px 10px; border-radius: 12px; font-size: 0.75em; border: 1px solid #30363d; cursor: pointer; background: #0d1117; color: #8b949e; }
+.filter-pill.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+
+.loading { text-align: center; padding: 60px; color: #8b949e; font-size: 1.1em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>L1 Best-of-N Explorer</h1>
+  <div class="header-controls">
+    <select id="benchmark-select">
+      <option value="proof_bank">Proof Bank (100% acc)</option>
+      <option value="logicbench_prop">LogicBench Propositional</option>
+      <option value="logicbench_fol">LogicBench FOL</option>
+      <option value="logicbench_nm">LogicBench Non-Monotonic</option>
+      <option value="folio">FOLIO</option>
+      <option value="prontoqa">ProntoQA</option>
+      <option value="proofwriter">ProofWriter</option>
+      <option value="acpbench">ACPBench</option>
+    </select>
+    <button id="filter-all" class="active" onclick="setFilter('all')">All</button>
+    <button id="filter-correct" onclick="setFilter('correct')">BoN Correct</button>
+    <button id="filter-wrong" onclick="setFilter('wrong')">BoN Wrong</button>
+    <button id="filter-oracle" onclick="setFilter('oracle-only')">Oracle Only (BoN missed)</button>
+  </div>
+</div>
+
+<div class="summary-bar" id="summary-bar"></div>
+
+<div class="main">
+  <div class="sidebar" id="sidebar">
+    <div class="loading">Loading data...</div>
+  </div>
+  <div class="content" id="content">
+    <div class="loading">Select an example from the sidebar</div>
+  </div>
+</div>
+
+<script>
+let DATA = null;
+let currentBenchmark = 'proof_bank';
+let currentFilter = 'all';
+let currentExampleIdx = 0;
+
+async function loadData() {
+  const resp = await fetch('bon_explorer_data.json');
+  DATA = await resp.json();
+  document.getElementById('benchmark-select').addEventListener('change', (e) => {
+    currentBenchmark = e.target.value;
+    currentExampleIdx = 0;
+    renderSidebar();
+    renderSummary();
+  });
+  renderSidebar();
+  renderSummary();
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.header-controls button').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-' + f).classList.add('active');
+  renderSidebar();
+}
+
+function getExamples() {
+  if (!DATA || !DATA[currentBenchmark]) return [];
+  let exs = DATA[currentBenchmark].examples;
+  if (currentFilter === 'correct') exs = exs.filter(e => e.selected_correct);
+  else if (currentFilter === 'wrong') exs = exs.filter(e => !e.selected_correct);
+  else if (currentFilter === 'oracle-only') exs = exs.filter(e => !e.selected_correct && e.oracle_correct);
+  return exs;
+}
+
+function renderSummary() {
+  if (!DATA || !DATA[currentBenchmark]) return;
+  const s = DATA[currentBenchmark].summary;
+  const bar = document.getElementById('summary-bar');
+  const pct = (n, d) => d ? (n/d*100).toFixed(0) + '%' : 'N/A';
+  bar.innerHTML = `
+    <div class="stat"><span class="stat-label">Greedy:</span> <span class="stat-value">${pct(s.greedy_correct, s.total_examples)}</span></div>
+    <div class="stat"><span class="stat-label">BoN:</span> <span class="stat-value ${s.bon_accuracy > 0.7 ? 'good' : s.bon_accuracy > 0.5 ? 'neutral' : 'bad'}">${pct(s.bon_correct, s.total_examples)}</span></div>
+    <div class="stat"><span class="stat-label">Oracle:</span> <span class="stat-value good">${pct(s.oracle_correct, s.total_examples)}</span></div>
+    <div class="stat"><span class="stat-label">Lift:</span> <span class="stat-value ${s.bon_lift > 0 ? 'good' : 'bad'}">${s.bon_lift > 0 ? '+' : ''}${(s.bon_lift*100).toFixed(0)}%</span></div>
+    <div class="stat"><span class="stat-label">N:</span> <span class="stat-value">${DATA[currentBenchmark].n}</span></div>
+    <div class="stat"><span class="stat-label">Examples:</span> <span class="stat-value">${s.total_examples}</span></div>
+    <div class="stat"><span class="stat-label">Avg Consistency (selected):</span> <span class="stat-value">${s.avg_bon_consistency?.toFixed(2) || '?'}</span></div>
+  `;
+}
+
+function renderSidebar() {
+  const exs = getExamples();
+  const sidebar = document.getElementById('sidebar');
+  if (!exs.length) { sidebar.innerHTML = '<div class="loading">No examples match filter</div>'; return; }
+
+  sidebar.innerHTML = exs.map((ex, i) => {
+    const correct = ex.selected_correct;
+    const oracle = ex.oracle_correct;
+    const ctx = (ex.context + ' ' + ex.question).slice(0, 100);
+    return `<div class="example-item ${i === currentExampleIdx ? 'selected' : ''}" onclick="selectExample(${i})">
+      <div class="idx">#${i+1} / ${exs.length} &mdash; ${ex.category}</div>
+      <div class="preview">${escHtml(ctx)}</div>
+      <div class="tags">
+        <span class="tag ${correct ? 'tag-correct' : 'tag-wrong'}">${correct ? 'BoN Correct' : 'BoN Wrong'}</span>
+        ${oracle && !correct ? '<span class="tag tag-oracle">Oracle has it</span>' : ''}
+        <span class="tag tag-category">${ex.ground_truth}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (exs.length > 0) renderDetail(exs[currentExampleIdx]);
+}
+
+function selectExample(idx) {
+  currentExampleIdx = idx;
+  const exs = getExamples();
+  renderSidebar();
+  if (exs[idx]) renderDetail(exs[idx]);
+}
+
+function renderDetail(ex) {
+  const content = document.getElementById('content');
+  const comps = ex.completions;
+
+  // Sort completions: selected first, then by ASP desc
+  const sorted = comps.map((c, i) => ({...c, origIdx: i}));
+  sorted.sort((a, b) => {
+    if (a.origIdx === ex.selected_index) return -1;
+    if (b.origIdx === ex.selected_index) return 1;
+    return b.asp_consistency - a.asp_consistency;
+  });
+
+  content.innerHTML = `
+    <div class="detail-section">
+      <h2>Input</h2>
+      <div class="context-box">${escHtml(ex.context)}</div>
+      ${ex.question ? `<div style="margin-top:8px;font-size:0.9em;color:#d2a8ff;"><b>Question:</b> ${escHtml(ex.question)}</div>` : ''}
+      <div class="ground-truth">Ground Truth: <span>${escHtml(ex.ground_truth)}</span></div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Completions (${ex.total_completions} generated, showing ${comps.length})</h2>
+      <div style="font-size:0.8em;color:#8b949e;margin-bottom:8px;">
+        Correct: ${comps.filter(c=>c.correct).length}/${comps.length} |
+        Has answer: ${comps.filter(c=>c.has_answer).length}/${comps.length} |
+        Looping: ${comps.filter(c=>c.has_loop).length}/${comps.length}
+      </div>
+      <div class="completions-grid">
+        ${sorted.map(c => renderCompletion(c, ex)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderCompletion(c, ex) {
+  const isSelected = c.origIdx === ex.selected_index;
+  const cls = isSelected ? 'selected-card' : (c.correct ? 'correct-card' : 'wrong-card');
+  const aspCls = c.asp_consistency > 0.5 ? 'score-pos' : c.asp_consistency < 0 ? 'score-neg' : 'score-zero';
+  const id = `comp-${c.origIdx}`;
+
+  return `<div class="comp-card ${cls}">
+    <div class="comp-header" onclick="toggleComp('${id}')">
+      <span class="comp-idx">
+        ${isSelected ? '&#9733; SELECTED' : ''} #${c.index}
+        <span class="tag ${c.correct ? 'tag-correct' : 'tag-wrong'}" style="margin-left:8px">${c.answer || 'no answer'} ${c.correct ? '&#10003;' : '&#10007;'}</span>
+      </span>
+      <span class="comp-scores">
+        <span class="score"><span class="score-label">ASP:</span> <span class="${aspCls}">${c.asp_consistency.toFixed(2)}</span></span>
+        <span class="score"><span class="score-label">Steps:</span> ${c.num_steps}</span>
+        <span class="score"><span class="score-label">Derived:</span> ${c.num_derived}</span>
+        ${c.has_loop ? '<span style="color:#f85149">LOOP</span>' : ''}
+      </span>
+    </div>
+    <div class="comp-body" id="${id}">
+      <h3>Reasoning Steps</h3>
+      ${c.steps && c.steps.length ? c.steps.map(renderStep).join('') : '<div style="color:#8b949e;font-size:0.85em;">No steps parsed</div>'}
+      <h3 style="margin-top:12px;">Raw Output</h3>
+      <div class="raw-text">${escHtml(c.text || 'No text available')}</div>
+    </div>
+  </div>`;
+}
+
+function renderStep(s) {
+  const isPremise = s.type === 'premise';
+  return `<div class="step ${isPremise ? 'step-premise' : 'step-derived'}">
+    <span class="step-n">Step ${s.n}</span>
+    <span class="step-type">${s.type}</span>
+    ${s.from_refs && s.from_refs.length ? `<span class="step-from">from ${s.from_refs.join(', ')}</span>` : ''}
+    ${s.text ? `<div class="step-text">${escHtml(s.text)}</div>` : ''}
+    ${s.logic ? `<div class="step-logic">${escHtml(s.logic)}</div>` : ''}
+  </div>`;
+}
+
+function toggleComp(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('expanded');
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+loadData();
+</script>
+</body>
+</html>
