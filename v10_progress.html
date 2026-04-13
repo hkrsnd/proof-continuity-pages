@@ -263,7 +263,7 @@ loss = per_token_loss &times; IS_ratio</div>
 </div><!-- container -->
 
 <script>
-const DATA_FILE = "v10_progress_data.json";
+const DATA_FILE = "v10_progress_data.json?v=" + Date.now();
 
 function makeBar(label, value, max, color) {
   const pct = Math.max(2, (value / max) * 100);
