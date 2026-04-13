@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 v15 Training Progress &mdash; Dataset v10 &amp; Bug Fixes</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #c9d1d9;
+    --text2: #8b949e; --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+    --yellow: #d29922; --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+  .subtitle { color: var(--text2); margin-bottom: 2rem; font-size: 0.95rem; }
+  h2 { font-size: 1.3rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; color: var(--accent); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+          padding: 1.2rem; margin-bottom: 1rem; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 700px) { .card-grid { grid-template-columns: 1fr; } }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.5rem 0; }
+  th, td { padding: 0.4rem 0.7rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--text2); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: rgba(88,166,255,0.05); }
+
+  .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-red { background: rgba(248,81,73,0.15); color: var(--red); }
+  .badge-yellow { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .badge-blue { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+
+  .bar-chart { margin: 0.5rem 0; }
+  .bar-row { display: flex; align-items: center; margin: 0.25rem 0; font-size: 0.82rem; }
+  .bar-label { width: 180px; text-align: right; padding-right: 0.8rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 4px; position: relative; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #fff; min-width: 30px; }
+  .bar-value { position: absolute; right: 6px; top: 2px; font-size: 0.72rem; color: var(--text2); }
+
+  .bug-card { border-left: 3px solid var(--red); }
+  .fix-card { border-left: 3px solid var(--green); }
+  .info-card { border-left: 3px solid var(--accent); }
+
+  .metric { text-align: center; padding: 1rem; }
+  .metric-value { font-size: 2rem; font-weight: 700; }
+  .metric-label { font-size: 0.8rem; color: var(--text2); margin-top: 0.2rem; }
+
+  .timeline { position: relative; padding-left: 1.5rem; }
+  .timeline::before { content: ''; position: absolute; left: 0.4rem; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 0.6rem; font-size: 0.85rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.15rem; top: 0.45rem; width: 10px; height: 10px; border-radius: 50%; }
+  .timeline-item.crash::before { background: var(--red); }
+  .timeline-item.ok::before { background: var(--green); }
+  .timeline-item.pending::before { background: var(--yellow); }
+  .timeline-item.cancel::before { background: var(--text2); }
+  .timeline-date { color: var(--text2); font-size: 0.78rem; }
+
+  .code { background: rgba(255,255,255,0.06); padding: 0.8rem 1rem; border-radius: 6px;
+          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; overflow-x: auto;
+          white-space: pre-wrap; word-break: break-all; color: var(--text2); margin: 0.5rem 0; }
+  .code em { color: var(--green); font-style: normal; }
+  .code .red { color: var(--red); }
+  .code .yellow { color: var(--yellow); }
+
+  .sample-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px;
+                padding: 0.8rem; margin: 0.5rem 0; font-size: 0.82rem; cursor: pointer; }
+  .sample-box summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+  .sample-box pre { white-space: pre-wrap; word-break: break-all; margin-top: 0.5rem; color: var(--text2); font-size: 0.78rem; }
+
+  .arrow { color: var(--text2); margin: 0 0.3rem; }
+  .highlight { color: var(--yellow); font-weight: 600; }
+  .strike { text-decoration: line-through; color: var(--text2); }
+
+  .nav { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .nav a { color: var(--accent); text-decoration: none; font-size: 0.85rem; padding: 0.3rem 0.8rem;
+           border: 1px solid var(--border); border-radius: 6px; }
+  .nav a:hover { background: rgba(88,166,255,0.1); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>L1 v15 Training Progress</h1>
+<p class="subtitle">Dataset v10 investigation, bug fixes, and current status &mdash; April 13, 2026</p>
+
+<nav class="nav">
+  <a href="#status">Status</a>
+  <a href="#dataset">Dataset v10</a>
+  <a href="#bugs">Bugs Found</a>
+  <a href="#fixes">Fixes Applied</a>
+  <a href="#history">Run History</a>
+  <a href="#samples">Data Samples</a>
+</nav>
+
+<!-- STATUS -->
+<h2 id="status">Current Status</h2>
+<div class="card-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="card metric">
+    <div class="metric-value" style="color:var(--red)">18</div>
+    <div class="metric-label">Failed v15 runs</div>
+  </div>
+  <div class="card metric">
+    <div class="metric-value" style="color:var(--yellow)">3</div>
+    <div class="metric-label">Bugs found</div>
+  </div>
+  <div class="card metric">
+    <div class="metric-value" style="color:var(--green)">3</div>
+    <div class="metric-label">Bugs fixed</div>
+  </div>
+  <div class="card metric">
+    <div class="metric-value" style="color:var(--accent)">1</div>
+    <div class="metric-label">Run in queue</div>
+  </div>
+</div>
+
+<div class="card info-card">
+  <strong>TL;DR:</strong> After switching from the v9 dataset (32K, working) to the v10 dataset (18.4K, new),
+  all 18 training runs failed. We identified 3 independent bugs:
+  (1) 57% of training data was missing the <code>&lt;think&gt;</code> template,
+  (2) answer-type misclassification penalized correct answers on 23% of data, and
+  (3) multi-node colocate mode had a quantization mismatch that zeroed out the loss.
+  All 3 are now fixed. Job 112397 is queued with the corrected data.
+</div>
+
+<!-- DATASET COMPARISON -->
+<h2 id="dataset">Dataset Comparison: v9 vs v10</h2>
+<div class="card-grid">
+  <div class="card">
+    <h3>v9 (used by working v14)</h3>
+    <div class="bar-chart" id="v9-sources"></div>
+    <p style="margin-top:0.5rem;font-size:0.82rem;color:var(--text2)">32,000 records &bull; 5 sources &bull; balanced 3-way logic types &bull; 100% have &lt;think&gt; template</p>
+  </div>
+  <div class="card">
+    <h3>v10 (used by failing v15)</h3>
+    <div class="bar-chart" id="v10-sources"></div>
+    <p style="margin-top:0.5rem;font-size:0.82rem;color:var(--text2)">18,440 records &bull; 7 sources &bull; 5 new datasets &bull; <span class="strike">43%</span> <span style="color:var(--green)">100%</span> have &lt;think&gt; template (after fix)</p>
+  </div>
+</div>
+
+<div class="card-grid">
+  <div class="card">
+    <h3>Logic Type Distribution</h3>
+    <div class="two-col">
+      <div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-bottom:0.3rem">v9</div>
+        <div class="bar-chart" id="v9-logic"></div>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-bottom:0.3rem">v10</div>
+        <div class="bar-chart" id="v10-logic"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Answer Distribution</h3>
+    <div class="two-col">
+      <div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-bottom:0.3rem">v9</div>
+        <div class="bar-chart" id="v9-answers"></div>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-bottom:0.3rem">v10</div>
+        <div class="bar-chart" id="v10-answers"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUGS -->
+<h2 id="bugs">Bugs Found</h2>
+
+<div class="card bug-card">
+  <h3 style="color:var(--red)">Bug 1 (Critical): 57% of data missing &lt;think&gt; template</h3>
+  <p style="font-size:0.85rem;margin:0.5rem 0">The 5 new v10 datasets (<code>nl_prontoqa</code>, <code>folio_style</code>, <code>synthetic_relational</code>, <code>owa_unknown</code>, <code>binary_no_training</code>) had user prompts ending with just the question:</p>
+  <div class="code"><span class="red">Is the following statement true or false? Quinn is heavy.</span>
+<span style="color:var(--text2)">&darr; Model doesn't know to produce &lt;step&gt; tags &rarr; format_reward = -1.0</span></div>
+  <p style="font-size:0.85rem;margin:0.5rem 0">Working v9 data always ended with:</p>
+  <div class="code"><em>Answer by thinking through the problem and recording formal steps:
+
+&lt;think&gt;
+[Your reasoning here, with &lt;step&gt; tags for each key deduction]
+&lt;/think&gt;
+
+Answer: ___________</em></div>
+  <p style="font-size:0.85rem;margin-top:0.5rem"><strong>Impact:</strong> 57% of training batches produced format_reward = -1.0. The model was pulled in opposite directions &mdash; 43% rewarding structured reasoning, 57% punishing it. This caused the format collapse seen in logs (0.88 &rarr; -1.0).</p>
+</div>
+
+<div class="card bug-card">
+  <h3 style="color:var(--red)">Bug 2 (High): Answer-type misclassification on 23% of data</h3>
+  <p style="font-size:0.85rem;margin:0.5rem 0">The 5 new dataset names were not in the <code>answer_type</code> dispatch table (<code>train_experiment.py:595-616</code>). All fell through to <code>"binary"</code>.</p>
+  <table>
+    <tr><th>Dataset</th><th>Actual Type</th><th>Assigned</th><th>Impact</th></tr>
+    <tr><td>folio_style</td><td>ternary (T/F/Uncertain)</td><td class="highlight">binary</td><td style="color:var(--red)">"Unknown" &rarr; -1.0</td></tr>
+    <tr><td>owa_unknown</td><td>ternary (T/F/Unknown)</td><td class="highlight">binary</td><td style="color:var(--red)">"Unknown" &rarr; -1.0</td></tr>
+    <tr><td>synthetic_relational</td><td>ternary (T/F/Unknown)</td><td class="highlight">binary</td><td style="color:var(--red)">"Unknown" &rarr; -1.0</td></tr>
+    <tr><td>nl_prontoqa</td><td>binary</td><td>binary</td><td style="color:var(--green)">OK</td></tr>
+    <tr><td>binary_no_training</td><td>binary</td><td>binary</td><td style="color:var(--green)">OK</td></tr>
+  </table>
+  <p style="font-size:0.85rem;margin-top:0.5rem"><strong>Impact:</strong> 4,269 records (23%) had system prompts saying "answer True, False, or Unknown" but the reward penalized "Unknown" with -1.0. Contradictory training signal.</p>
+</div>
+
+<div class="card bug-card">
+  <h3 style="color:var(--red)">Bug 3 (High): Multi-node colocate &mdash; IS ratio collapse</h3>
+  <p style="font-size:0.85rem;margin:0.5rem 0">TRL's GRPOTrainer multiplies loss by an <strong>importance sampling ratio</strong>:</p>
+  <div class="code">IS_ratio = exp(&Sigma; (old_logp - sampling_logp))
+loss = per_token_loss &times; IS_ratio</div>
+  <p style="font-size:0.85rem;margin:0.5rem 0">In colocate mode with <code>load_in_4bit: true</code>:</p>
+  <ul style="font-size:0.85rem;margin-left:1.5rem">
+    <li>Training model: HuggingFace BitsAndBytes NF4</li>
+    <li>Colocated vLLM: vLLM's own BnB implementation</li>
+    <li>Per-token logprob difference: ~0.5 nats (different quantization implementations)</li>
+    <li>Over ~1000 tokens: <code>exp(-500) &asymp; 0</code></li>
+    <li>Loss &times; 0 = 0 &rarr; <strong>no gradients, model never updates</strong></li>
+  </ul>
+  <table style="margin-top:0.8rem">
+    <tr><th>Mode</th><th>logp diff</th><th>IS ratio</th><th>loss</th><th>Result</th></tr>
+    <tr><td>Single-node server (FP16)</td><td>0.02</td><td>~0.015</td><td>0.011</td><td style="color:var(--green)">trains normally</td></tr>
+    <tr><td>Multi-node colocate (4-bit)</td><td>0.55</td><td>10<sup>-46</sup></td><td>0.0</td><td style="color:var(--red)">dead from step 1</td></tr>
+  </table>
+</div>
+
+<!-- FIXES -->
+<h2 id="fixes">Fixes Applied</h2>
+
+<div class="card fix-card">
+  <h3 style="color:var(--green)">Fix 1: Append &lt;think&gt; template to all v10 records</h3>
+  <p style="font-size:0.85rem">Rebuilt <code>proof_bank_v10_balanced_grpo.jsonl</code>: 18,440/18,440 records now have the template (was 8,000/18,440).</p>
+</div>
+
+<div class="card fix-card">
+  <h3 style="color:var(--green)">Fix 2: Add 5 new dataset names to answer_type dispatch</h3>
+  <p style="font-size:0.85rem">Updated <code>train_experiment.py</code>: <code>folio_style</code> &rarr; ternary, <code>owa_unknown</code> &rarr; ternary, <code>synthetic_relational</code> &rarr; ternary, <code>nl_prontoqa</code> &rarr; binary, <code>binary_no_training</code> &rarr; binary.</p>
+</div>
+
+<div class="card fix-card">
+  <h3 style="color:var(--green)">Fix 3: Guard against IS ratio collapse + config fix</h3>
+  <p style="font-size:0.85rem"><strong>Code guard:</strong> <code>train_experiment.py</code> now auto-disables <code>vllm_importance_sampling_correction</code> when <code>load_in_4bit + colocate</code> is detected.<br>
+  <strong>Config fix:</strong> Multi-node config changed to <code>load_in_4bit: false</code> (eliminates quantization mismatch entirely).<br>
+  <strong>Epochs:</strong> Reduced from 5 to 3 (18.4K &times; 3 &asymp; 55K effective, comparable to v14's 32K &times; 1).</p>
+</div>
+
+<!-- RUN HISTORY -->
+<h2 id="history">v15 Training Run History</h2>
+<div class="card">
+  <table>
+    <tr><th>Job ID</th><th>Date</th><th>Mode</th><th>Steps</th><th>Outcome</th></tr>
+  </table>
+  <div id="run-history-table"></div>
+</div>
+
+<!-- SAMPLES -->
+<h2 id="samples">Data Samples (v10, after fix)</h2>
+<div id="samples-container"></div>
+
+</div><!-- container -->
+
+<script>
+const DATA_FILE = "v10_progress_data.json";
+
+function makeBar(label, value, max, color) {
+  const pct = Math.max(2, (value / max) * 100);
+  return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:${pct}%;background:${color}">${value.toLocaleString()}</div>
+    </div>
+  </div>`;
+}
+
+const COLORS = ['#58a6ff','#3fb950','#d29922','#f85149','#bc8cff','#f0883e','#79c0ff'];
+
+function renderBars(containerId, data, maxVal) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const entries = Object.entries(data);
+  const mx = maxVal || Math.max(...entries.map(e => e[1]));
+  el.innerHTML = entries.map((e, i) => makeBar(e[0], e[1], mx, COLORS[i % COLORS.length])).join('');
+}
+
+function renderRunHistory(runs) {
+  const container = document.getElementById('run-history-table');
+  const table = document.createElement('table');
+  runs.forEach(r => {
+    const tr = document.createElement('tr');
+    let badgeClass = 'badge-red';
+    if (r.outcome.includes('HEALTHY')) badgeClass = 'badge-green';
+    else if (r.outcome === 'pending') badgeClass = 'badge-yellow';
+    else if (r.outcome === 'cancelled' || r.outcome === 'cancelled early') badgeClass = 'badge-purple';
+    else if (r.outcome.includes('FIXED')) badgeClass = 'badge-blue';
+    tr.innerHTML = `<td style="font-family:monospace">${r.job}</td><td>${r.date}</td><td>${r.mode}</td><td>${r.steps}</td><td><span class="badge ${badgeClass}">${r.outcome}</span></td>`;
+    table.appendChild(tr);
+  });
+  container.appendChild(table);
+}
+
+function renderSamples(samples) {
+  const container = document.getElementById('samples-container');
+  const byDs = {};
+  samples.forEach(s => { (byDs[s.dataset] = byDs[s.dataset] || []).push(s); });
+  Object.entries(byDs).forEach(([ds, samps]) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<h3>${ds} <span class="badge badge-blue">${samps.length} samples</span></h3>`;
+    samps.forEach((s, i) => {
+      const detail = document.createElement('details');
+      detail.className = 'sample-box';
+      detail.innerHTML = `<summary>Sample ${i+1} &mdash; answer: <strong>${s.answer}</strong>, logic: ${s.logic_type}, template: ${s.has_template ? '<span style="color:var(--green)">yes</span>' : '<span style="color:var(--red)">no</span>'}</summary>
+        <pre>${escapeHtml(s.user_prompt)}</pre>`;
+      card.appendChild(detail);
+    });
+    container.appendChild(card);
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+fetch(DATA_FILE).then(r => r.json()).then(data => {
+  const maxSrc = 15000;
+  renderBars('v9-sources', data.datasets.v9.sources, maxSrc);
+  renderBars('v10-sources', data.datasets.v10.sources, maxSrc);
+
+  const maxLogic = 12000;
+  renderBars('v9-logic', data.datasets.v9.logic_types, maxLogic);
+  renderBars('v10-logic', data.datasets.v10.logic_types, maxLogic);
+
+  const maxAns = 12000;
+  renderBars('v9-answers', data.datasets.v9.answer_distribution, maxAns);
+  renderBars('v10-answers', data.datasets.v10.answer_distribution, maxAns);
+
+  renderRunHistory(data.training_history);
+  renderSamples(data.samples);
+}).catch(e => {
+  console.error('Failed to load data:', e);
+  document.querySelector('.container').innerHTML += '<div class="card bug-card"><p>Failed to load data file. Make sure v10_progress_data.json is in the same directory.</p></div>';
+});
+</script>
+</body>
+</html>
