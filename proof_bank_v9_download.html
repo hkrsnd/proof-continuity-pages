@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 — Proof Bank v9 Downloads</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: #16213e; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 2rem; }
+    .back-link { display: inline-block; margin-bottom: 1.5rem; color: #2563eb; text-decoration: none; font-size: 0.9rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    .download-card { background: white; border-radius: 12px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #2563eb; }
+    .download-card h2 { font-size: 1.15rem; color: #16213e; margin-bottom: 0.5rem; }
+    .download-card p { font-size: 0.9rem; color: #555; margin-bottom: 1rem; }
+    .download-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.85rem; color: #666; }
+    .download-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .download-btn { display: inline-block; padding: 0.6rem 1.4rem; background: #2563eb; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; }
+    .download-btn:hover { background: #1d4ed8; }
+    .download-card.sft { border-left-color: #16a34a; }
+    .download-card.sft .download-btn { background: #16a34a; }
+    .download-card.sft .download-btn:hover { background: #15803d; }
+
+    .schema-section { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .schema-section h2 { font-size: 1.1rem; color: #16213e; margin-bottom: 0.8rem; }
+    .schema-section p { font-size: 0.9rem; color: #555; margin-bottom: 0.8rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 0.5rem 0.8rem; background: #f0f4ff; color: #16213e; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 0.5rem 0.8rem; border-bottom: 1px solid #f0f0f0; color: #555; }
+    td code { background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.82rem; color: #d946ef; }
+
+    .note { background: #fffbeb; border-radius: 8px; padding: 1rem 1.2rem; font-size: 0.85rem; color: #92400e; margin-bottom: 1.5rem; border: 1px solid #fde68a; }
+    .note strong { color: #78350f; }
+
+    .composition { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; margin-bottom: 1rem; }
+    .comp-item { background: #f9fafb; border-radius: 8px; padding: 0.6rem 0.8rem; text-align: center; }
+    .comp-value { font-size: 1.1rem; font-weight: 700; color: #2563eb; }
+    .comp-label { font-size: 0.72rem; color: #666; margin-top: 0.15rem; }
+
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="index.html">&larr; Back to Project Hub</a>
+
+<h1>Proof Bank v9 Downloads</h1>
+<p class="subtitle">Training datasets for L1 logic-supervised reasoning &middot; gzip-compressed JSONL</p>
+
+<div class="note">
+    <strong>Format:</strong> Files are gzip-compressed JSONL (.jsonl.gz). Decompress with <code>gunzip</code> or read directly with <code>pandas.read_json(path, lines=True, compression='gzip')</code>.
+</div>
+
+<div class="download-card">
+    <h2>Proof Bank v9 &mdash; Balanced GRPO</h2>
+    <p>Balanced training set for GRPO reinforcement learning. Contains prompts (no gold completions) from 5 sources, balanced so no single source exceeds 47% of the data. All benchmark-inspired examples use original Proof Bank content &mdash; zero test contamination.</p>
+    <div class="download-meta">
+        <span><strong>32,000</strong> examples</span>
+        <span><strong>195 MB</strong> uncompressed</span>
+        <span><strong>27 MB</strong> compressed</span>
+    </div>
+    <div class="composition">
+        <div class="comp-item"><div class="comp-value">15K</div><div class="comp-label">Proof Bank core</div></div>
+        <div class="comp-item"><div class="comp-value">6K</div><div class="comp-label">LogicBench-Aug</div></div>
+        <div class="comp-item"><div class="comp-value">5K</div><div class="comp-label">ProofWriter-style</div></div>
+        <div class="comp-item"><div class="comp-value">3K</div><div class="comp-label">FOLIO-style</div></div>
+        <div class="comp-item"><div class="comp-value">3K</div><div class="comp-label">ProntoQA-style</div></div>
+    </div>
+    <a class="download-btn" href="proof_bank_v9_balanced_grpo.jsonl.gz" download>Download GRPO (27 MB)</a>
+</div>
+
+<div class="download-card sft">
+    <h2>Proof Bank v9 &mdash; SFT</h2>
+    <p>Supervised fine-tuning dataset with gold completions (system prompt + user prompt + assistant completion). Used for SFT warmup before GRPO training. Completions are generated by a teacher model and validated through the full verification pipeline.</p>
+    <div class="download-meta">
+        <span><strong>21,000</strong> examples</span>
+        <span><strong>203 MB</strong> uncompressed</span>
+        <span><strong>31 MB</strong> compressed</span>
+    </div>
+    <div class="composition">
+        <div class="comp-item"><div class="comp-value">10K</div><div class="comp-label">Proof Bank core</div></div>
+        <div class="comp-item"><div class="comp-value">5K</div><div class="comp-label">ProofWriter-style</div></div>
+        <div class="comp-item"><div class="comp-value">3K</div><div class="comp-label">FOLIO-style</div></div>
+        <div class="comp-item"><div class="comp-value">3K</div><div class="comp-label">ProntoQA-style</div></div>
+    </div>
+    <a class="download-btn" href="proof_bank_v9_sft.jsonl.gz" download>Download SFT (31 MB)</a>
+</div>
+
+<div class="schema-section">
+    <h2>Schema</h2>
+    <p>Each line is a JSON object with the following fields:</p>
+    <table>
+        <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>id</code></td><td>string</td><td>Unique example identifier</td></tr>
+        <tr><td><code>system_prompt</code></td><td>string</td><td>System message with format instructions</td></tr>
+        <tr><td><code>user_prompt</code></td><td>string</td><td>User message with context + question</td></tr>
+        <tr><td><code>completion</code></td><td>string</td><td>Gold reasoning trace (SFT only; null in GRPO)</td></tr>
+        <tr><td><code>expected_answer</code></td><td>string</td><td>Ground-truth answer</td></tr>
+        <tr><td><code>domain</code></td><td>string</td><td>Reasoning domain (logic)</td></tr>
+        <tr><td><code>logic_type</code></td><td>string</td><td>propositional, first_order, or non_monotonic</td></tr>
+        <tr><td><code>logic_subtype</code></td><td>string</td><td>Specific inference rule (e.g., modus_ponens)</td></tr>
+        <tr><td><code>theory</code></td><td>string</td><td>Theory name for LogicBench examples</td></tr>
+        <tr><td><code>dataset</code></td><td>string</td><td>Source dataset identifier</td></tr>
+        <tr><td><code>context</code></td><td>string</td><td>Natural language premises</td></tr>
+        <tr><td><code>question</code></td><td>string</td><td>Natural language question</td></tr>
+        <tr><td><code>facts</code></td><td>list</td><td>Parsed logical facts</td></tr>
+        <tr><td><code>implications</code></td><td>list</td><td>Parsed logical rules/implications</td></tr>
+        <tr><td><code>disjunctions</code></td><td>list</td><td>Parsed disjunctions</td></tr>
+        <tr><td><code>default_rules</code></td><td>list</td><td>Default rules (non-monotonic logic)</td></tr>
+        <tr><td><code>query_literal</code></td><td>string</td><td>Formal query to prove/refute</td></tr>
+        <tr><td><code>inference_plan</code></td><td>list</td><td>Expected inference steps</td></tr>
+        <tr><td><code>source</code></td><td>string</td><td>Data source (GRPO only)</td></tr>
+    </table>
+</div>
+
+<div class="footer">
+    Updated April 14, 2026 &middot;
+    L1 (Reasoning with Automatically Integrated Logical Supervision) &middot;
+    ProofContinuity
+</div>
+
+</body>
+</html>
